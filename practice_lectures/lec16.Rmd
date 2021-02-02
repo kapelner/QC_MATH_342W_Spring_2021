@@ -1,0 +1,149 @@
+---
+title: "lec16.Rmd"
+author: "Adam Kapelner"
+date: "April 28, 2020"
+output: html_document
+---
+
+#Using AUC to Compare Probabilistic Classification Models
+
+What would the effect be of less information on the same traing set size? Imagine we didn't know the features: occupation, education, education_num, relationship, marital_status. How would we do relative to the above? Worse!
+
+```{r}
+pacman::p_load(data.table, tidyverse, magrittr)
+if (!pacman::p_isinstalled(ucidata)){
+  pacman::p_load_gh("coatless/ucidata")
+} else {
+  pacman::p_load(ucidata)
+}
+
+data(adult)
+adult = na.omit(adult) #kill any observations with missingness
+
+set.seed(1)
+train_size = 5000
+train_indices = sample(1 : nrow(adult), train_size)
+adult_train = adult[train_indices, ]
+y_train = adult_train$income
+X_train = adult_train
+X_train$income = NULL
+
+test_size = 5000
+test_indices = sample(setdiff(1 : nrow(adult), train_indices), test_size)
+adult_test = adult[test_indices, ]
+y_test = adult_test$income
+X_test = adult_test
+X_test$income = NULL
+
+logistic_mod_full = glm(income ~ ., adult_train, family = "binomial")
+p_hats_test = predict(logistic_mod_full, adult_test, type = "response")
+
+performance_metrics_oos_full_mod = compute_metrics_prob_classifier(p_hats_test, y_test) %>% data.table
+
+logistic_mod_red = glm(income ~ . - occupation - education - education_num - relationship - marital_status, adult_train, family = "binomial")
+p_hats_test = predict(logistic_mod_red, adult_test, type = "response")
+
+performance_metrics_oos_reduced_mod = compute_metrics_prob_classifier(p_hats_test, y_test) %>% data.table
+
+
+ggplot(rbind(
+  performance_metrics_oos_full_mod[, model := "full"],
+  performance_metrics_oos_reduced_mod[, model := "reduced"]
+)) +
+  geom_point(aes(x = FPR, y = recall, shape = model, col = p_th), size = 1) +
+  geom_abline(intercept = 0, slope = 1) + 
+  coord_fixed() + xlim(0, 1) + ylim(0, 1) + 
+  scale_colour_gradientn(colours = rainbow(5))
+```
+
+and we can see clearly that the AUC is worse. This means that the full model dominates the reduced model for every FPR / TPR pair.
+
+```{r}
+pacman::p_load(pracma)
+-trapz(performance_metrics_oos_reduced_mod$FPR, performance_metrics_oos_reduced_mod$recall)
+-trapz(performance_metrics_oos_full_mod$FPR, performance_metrics_oos_full_mod$recall)
+```
+
+As we lose information that is related to the true causal inputs, we lose predictive ability. Same story for this entire data science class since error due to ignorance increases! And certainly no different in probabilistic classifiers.
+
+Here's the same story with the DET curve:
+
+```{r}
+ggplot(rbind(
+  performance_metrics_oos_full_mod[, model := "full"],
+  performance_metrics_oos_reduced_mod[, model := "reduced"]
+)) +
+  geom_point(aes(x = FDR, y = miss_rate, shape = model, col = p_th), size = 1) +
+  coord_fixed() + xlim(0, 1) + ylim(0, 1) + 
+  scale_colour_gradientn(colours = rainbow(5))
+```
+
+
+# Choosing a Decision Threshold Based on Asymmetric Costs and Rewards
+
+The ROC and DET curves gave you a glimpse into all the possible classification models derived from a probability estimation model. Each point on that curve is a separate $g(x)$ with its own performance metrics. How do you pick one?
+
+Let's create rewards and costs. Imagine we are trying to predict income because we want to sell people an expensive item e.g. a car. We want to advertise our cars via a nice packet in the mail. The packet costs \$5. If we send a packet to someone who really does make $>50K$/yr then we are expected to make \$1000. So we have rewards and costs below:
+
+```{r}
+r_tp = 0
+c_fp = -5
+c_fn = -1000
+r_tn = 0
+```
+
+Let's return to the linear logistic model with all features. Let's calculate the overall oos average reward per observation (per person) for each possible $p_{th}$:
+
+```{r}
+n = nrow(adult_test)
+performance_metrics_oos_full_mod$avg_cost = 
+  (r_tp * performance_metrics_oos_full_mod$TP +
+  c_fp * performance_metrics_oos_full_mod$FP +
+  c_fn * performance_metrics_oos_full_mod$FN +
+  r_tn * performance_metrics_oos_full_mod$TN) / n
+```
+
+Let's plot average reward (reward per person) by threshold:
+
+```{r}
+ggplot(performance_metrics_oos_full_mod) +
+  geom_line(aes(x = p_th, y = avg_cost))
+```
+
+Obviously, the best decision is $p_{th} \approx 0$ which means you classifiy almost everything as a positive. This makes sense because the mailing is so cheap. What are the performance characteristics of the optimal model?
+
+```{r}
+i_star = which.max(performance_metrics_oos_full_mod$avg_cost)
+performance_metrics_oos_full_mod[i_star, ]
+```
+
+The more interesting problem is where the cost of advertising is higher:
+
+```{r}
+r_tp = 0
+c_fp = -200
+c_fn = -1000
+r_tn = 0
+performance_metrics_oos_full_mod$avg_cost = 
+  (r_tp * performance_metrics_oos_full_mod$TP +
+  c_fp * performance_metrics_oos_full_mod$FP +
+  c_fn * performance_metrics_oos_full_mod$FN +
+  r_tn * performance_metrics_oos_full_mod$TN) / n
+ggplot(performance_metrics_oos_full_mod) +
+  geom_point(aes(x = p_th, y = avg_cost), lwd = 0.01)
+```
+
+What are the performance characteristics of the optimal model?
+
+```{r}
+i_star = which.max(performance_metrics_oos_full_mod$avg_cost)
+performance_metrics_oos_full_mod[i_star, ]
+```
+
+If $g_{pr}$ is closer to $f_{pr}$, what happens? 
+
+All the threshold-derived classification models get better and you are guaranteed to make more money since you have a better discriminating eye.
+
+There is also a way to make asymmetric models with trees. We will do this later to give you time for this to sink in. But first...
+
+

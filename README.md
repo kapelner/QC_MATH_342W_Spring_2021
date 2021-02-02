@@ -75,9 +75,9 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
   - Theory Notes [(Rameasa Arna)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec03arna.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec03eng.pdf) [(Steven Grgas)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec03grgas.pdf) 
 * Lecture 2 [(audio)](https://youtu.be/cUHxlgIZ5tQ)
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec01.Rmd)
-  - Theory Notes [(Pizon Shetu)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02shetu.pdf) [(Steven Grgas)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02grgas.pdf) [(Rameasa Arna)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02arna.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02eng.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02nissanthan.pdf) 
-* Lecture 1 [(partial audio)](https://youtu.be/9cQ8NU-wKgU) 
-  - Theory Notes [(Pizon Shetu)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec01shetu.pdf) [(Steven Grgas)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec01grgas.pdf) [(Rameasa Arna)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec01arna.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec01eng.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec01nissanthan.pdf)-->
+  - Theory Notes [(Pizon Shetu)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02shetu.pdf) [(Steven Grgas)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02grgas.pdf) [(Rameasa Arna)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02arna.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02eng.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02nissanthan.pdf) -->
+* Lecture 1 video on slack
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec01kap.pdf)
 
 ## Labs
 
@@ -112,21 +112,21 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 
 ## Exams
 
-* Midterm I is Thurs, Mar 26 (in "class") 
-* Midterm II is Thurs, May 14 (in "class") 
+* Midterm I is Thurs, Mar 25 (in "class") 
+* Midterm II is Thurs, May 13 (in "class") 
 
 
 ## Practice Exams
 
 * Midterm I
 
-[(practice exam 1)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 1)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm1/midterm1_solutions.pdf)\
+[(practice exam 1)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 1)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm1/midterm1_solutions.pdf)\
 [(practice exam 2)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 2)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm1/midterm1_solutions.pdf)\
 [(practice exam 3)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm1/midterm1.pdf) [(practice exam solutions 3)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm1/midterm1_solutions.pdf)
 
-* Midterm II - omit the following problems for Midterm I
+* Midterm II - omit the problems from Midterm I
 
-[(practice exam 1)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 1)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/exams/midterm2/midterm2_solutions.pdf) \
+[(practice exam 1)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 1)](https://github.com/kapelner/QC_Math_390.4_Spring_2020/blob/master/exams/midterm2/midterm2_solutions.pdf) \
 [(practice exam 2)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 2)](https://github.com/kapelner/QC_Math_390.4_Spring_2019/blob/master/exams/midterm2/midterm2_solutions.pdf) Omit everything after 3e  \
 [(practice exam 3)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm2/midterm2.pdf) [(practice exam solutions 3)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/midterm2/midterm2_solutions.pdf) Omit 3, 4, 6a, c, d, e, f, g \
 [(practice exam 4)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/final/final.pdf) [(practice exam solutions 4)](https://github.com/kapelner/QC_Math_390.4_Spring_2018/blob/master/exams/final/final_solutions.pdf) Omit 1a, 2, anything after 3d

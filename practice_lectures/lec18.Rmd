@@ -1,0 +1,417 @@
+---
+title: "lec18.Rmd"
+author: "Adam Kapelner"
+date: "May 5, 2020"
+output: html_document
+---
+
+First load the tree package:
+
+```{r}
+options(java.parameters = "-Xmx4g")
+pacman::p_load(YARF, tidyverse, magrittr, data.table)
+```
+
+# Validation in Bagging?
+
+We are using the "bootstrap" to get the trees. Can we do model validation in the same step? 
+
+The answer is yes. For every tree, there was a bootstrap sample of the training set used to build the tree. But there are observations in $\mathbb{D}$ that are not in the bootstrap sample! About 1/3 on average are left out i.e. "out of bag (oob)". Over many trees, there are different oob subsets than become the full data set. So you actually have validation in a way on the whole dataset kind of like K-fold cross validation. Supposedly this validation is similar to K=2 in terms of performance. It is what everyone seems to use. 
+
+Let's load the data and packages from last class and plot the data:
+
+```{r}
+rm(list = ls())
+n_train = 100
+n_test = 500
+xmin = 0
+xmax = 10
+sigma = 0.09
+num_trees = 500
+x_train = runif(n_train, xmin, xmax)
+delta_train = rnorm(n_train, 0, sigma)
+y_train = sin(x_train) + delta_train
+ggplot(data.frame(x = x_train, y = y_train)) + geom_point(aes(x, y))
+```
+
+Let's look at one bagged tree model and compute OOB errors after construction. Here we just drop the `calculate_oob_error` argument as the default is `TRUE`. We save the model and print it out:
+
+```{r}
+bagged_tree_mod = YARFBAG(data.frame(x = x_train), y_train, num_trees = num_trees)
+bagged_tree_mod
+```
+
+How did this work? Let's look at the oob sets of indices:
+
+```{r}
+cat("bootstrap indices:")
+sort(bagged_tree_mod$bootstrap_indices[[1]])
+cat("oob:")
+sort(setdiff(1 : n_train, bagged_tree_mod$bootstrap_indices[[1]]))
+cat("bootstrap indices:")
+sort(bagged_tree_mod$bootstrap_indices[[2]])
+cat("oob:")
+sort(setdiff(1 : n_train, bagged_tree_mod$bootstrap_indices[[2]]))
+bagged_tree_mod$y_oob
+
+n_oob = sapply(1 : n_train, function(i){sum(unlist(lapply(bagged_tree_mod$bootstrap_indices, function(set){!(i %in% set)})))})
+round(n_oob / num_trees, 2)
+```
+
+It took predictions on each tree on the oob set, averaged by observation across trees and then averaged across observation averages.
+
+Let's compare this to training-test manual splits. Let's look at the boston housing data first.
+
+```{r}
+boston = MASS::Boston %>% data.table
+
+seed = 1
+set.seed(seed)
+prop_test = 0.2
+test_indices = sample(1 : nrow(boston), round(prop_test * nrow(boston)))
+boston_test = boston[test_indices, ]
+y_test = boston_test$medv
+X_test = boston_test
+X_test$medv = NULL
+train_indices = setdiff(1 : nrow(boston), test_indices)
+boston_train = boston[train_indices, ]
+y_train = boston_train$medv
+X_train = boston_train
+X_train$medv = NULL
+
+num_trees = 500
+
+#build on training and validate on test
+mod_bag_train = YARFBAG(X_train, y_train, num_trees = num_trees, calculate_oob_error = FALSE, seed = seed)
+y_hat_test_bag = predict(mod_bag_train, X_test)
+s_e_bag = sd(y_test - y_hat_test_bag)
+s_e_bag
+
+#build and validate on all the data at once!
+mod_bag_all = YARFBAG(boston[, !"medv"], boston$medv, num_trees = num_trees, seed = seed)
+mod_bag_all$rmse_oob
+```
+
+There is a lot of variation, but theoretically, they should be about the same. 
+
+What do we have now? We have model selection is done within training. And training and validation are done in a single step! No more costly K-fold CV with 3 splits!
+
+# Random Forests
+
+But can it get any better? YES. As you saw, the variance terms can be shrunk further the more decorrelated the trees become. We do this now by introducing randomness into the splits by choosing only a subset of the features to split on randomly. The trees are then grown as normal. Then the we model average many trees via bagging. And that's random forests!
+
+Quick demo with the diamonds and oob validation:
+
+```{r}
+rm(list = ls())
+
+seed = 1
+set.seed(seed)
+n_samp = 2000
+diamonds_samp = diamonds %>% sample_n(n_samp)
+y = diamonds_samp$price
+X = diamonds_samp %>% select(-price)
+
+num_trees = 1000
+mod_bag = YARFBAG(X, y, num_trees = num_trees, seed = seed)
+mod_bag
+mod_rf = YARF(X, y, num_trees = num_trees, seed = seed)
+mod_rf
+```
+
+Gain in decorrelation?
+
+```{r}
+cat("gain: ", (mod_bag$rmse_oob - mod_rf$rmse_oob) / mod_bag$rmse_oob * 100, "%\n")
+```
+
+For this example, not much. How about on the diamonds dataset? Here the dataset is too big to fit a regression tree. So we'll subsample train and we can subsample test because it's free.
+
+```{r}
+rm(list = ls())
+seed = 1
+
+n_train = 1000
+training_indices = sample(1 : nrow(diamonds), n_train)
+diamonds_train = diamonds[training_indices, ]
+y_train = diamonds_train$price
+X_train = diamonds_train %>% select(-price)
+
+num_trees = 500
+mod_bag = YARFBAG(X_train, y_train, num_trees = num_trees, seed = seed, calculate_oob_error = FALSE)
+mod_rf = YARF(X_train, y_train, num_trees = num_trees, seed = seed, calculate_oob_error = FALSE, mtry = 7)
+mod_bag
+mod_rf
+
+diamonds_test = diamonds[setdiff(1 : nrow(diamonds), training_indices), ]
+y_test = diamonds_test$price
+X_test = diamonds_test %>% select(-price)
+
+rmse_bag = sd(y_test - predict(mod_bag, X_test))
+rmse_rf = sd(y_test - predict(mod_rf, X_test))
+cat("gain: ", (rmse_bag - rmse_rf) / rmse_bag * 100, "%\n")
+```
+
+Not much, but real. And I had to play with `mtry` because the default of $p/3$ doesn't work.
+
+If `mtry` it small, the gain may be so small in the rho-multiple on the variance term that it doesn't outweigh the increase in bias. Thus, we underfit a little bit. Thus it's better to stay with just bagging. Here it is on the boston housing data:
+
+```{r}
+rm(list = ls())
+y = MASS::Boston$medv
+X = MASS::Boston
+X$medv = NULL
+seed = 1
+num_trees = 500
+mod_bag = YARFBAG(X, y, num_trees = num_trees, seed = seed)
+mod_bag
+mod_rf = YARF(X, y, num_trees = num_trees, seed = seed)
+mod_rf
+cat("oob rmse loss:", round((mod_bag$rmse_oob - mod_rf$rmse_oob) / mod_bag$rmse_oob * 100, 3), "%\n")
+```
+
+
+#Classification Trees and Confusion Tables
+
+Let's load up the adult dataset where the response is 1 if the person makes more than $50K per year and 0 if they make less than $50K per year.
+
+```{r}
+pacman::p_load_gh("coatless/ucidata")
+data(adult)
+adult %<>% 
+  na.omit #kill any observations with missingness
+```
+
+Let's use samples of 2,000 to run experiments:
+
+```{r}
+train_size = 2000
+train_indices = sample(1 : nrow(adult), train_size)
+adult_train = adult[train_indices, ]
+y_train = adult_train$income
+X_train = adult_train
+X_train$income = NULL
+test_indices = sample(setdiff(1 : nrow(adult), train_indices), train_size)
+adult_test = adult[test_indices, ]
+y_test = adult_test$income
+X_test = adult_test
+X_test$income = NULL
+```
+
+Make a tree:
+
+```{r}
+tree_mod = YARFCART(X_train, y_train)
+tree_mod
+```
+
+How "big" is this tree model?
+
+```{r}
+get_tree_num_nodes_leaves_max_depths(tree_mod)
+```
+
+What are the "main" splits?
+
+```{r}
+illustrate_trees(tree_mod, max_depth = 4, open_file = TRUE)
+```
+
+Compute in-sample and out of sample fits:
+
+```{r}
+y_hat_train = predict(tree_mod, X_train)
+y_hat_test = predict(tree_mod, X_test)
+```
+
+Let's look at the confusion table in-sample:
+
+```{r}
+table(y_train, y_hat_train)
+```
+
+There are no errors here! Thus, precision and recall are both 100%. This makes sense because classification trees overfit.
+
+Let's do the same oos:
+
+```{r}
+oos_conf_table = table(y_test, y_hat_test)
+oos_conf_table
+```
+
+We didn't do as well (of course). Let's calculate some performance metrics. We assume ">50k" is the "positive" category and "<=50k" is the "negative" category. Note that this choice is arbitrary and everything would just be switched if we did it the other way.
+
+```{r}
+n = sum(oos_conf_table)
+n
+fp = oos_conf_table[1, 2]
+fn = oos_conf_table[2, 1]
+tp = oos_conf_table[2, 2]
+tn = oos_conf_table[1, 1]
+num_pred_pos = sum(oos_conf_table[, 2])
+num_pred_neg = sum(oos_conf_table[, 1])
+num_pos = sum(oos_conf_table[2, ])
+num_neg = sum(oos_conf_table[1, ])
+acc = (tp + tn) / n
+acc
+misclassifcation_error = 1 - acc
+misclassifcation_error
+precision = tp / num_pred_pos
+precision
+recall = tp / num_pos
+recall
+false_discovery_rate = 1 - precision
+false_discovery_rate
+false_omission_rate = fn / num_pred_neg
+false_omission_rate
+```
+
+Let's see how this works on a dataset whose goal is classification for more than 2 levels. Note: this is only possible now with trees!
+
+```{r}
+rm(list = ls())
+pacman::p_load(mlbench, skimr)
+data(LetterRecognition)
+LetterRecognition = na.omit(LetterRecognition) #kill any observations with missingness
+skim(LetterRecognition)
+?LetterRecognition
+```
+
+Now we split the data:
+
+```{r}
+test_samp = 500
+train_indices = sample(1 : nrow(LetterRecognition), test_samp)
+ltr_train = LetterRecognition[train_indices, ]
+y_train = ltr_train$lettr
+X_train = ltr_train
+X_train$lettr = NULL
+test_indices = sample(setdiff(1 : nrow(LetterRecognition), train_indices), test_samp)
+ltr_test = LetterRecognition[test_indices, ]
+y_test = ltr_test$lettr
+X_test = ltr_test
+X_test$lettr = NULL
+```
+
+And fit a tree model and its in-sample and oos fits:
+
+```{r}
+tree_mod = YARFCART(X_train, y_train)
+y_hat_train = predict(tree_mod, X_train)
+y_hat_test = predict(tree_mod, X_test)
+```
+
+Take a look at the in-sample confusion matrix:
+
+```{r}
+table(y_train, y_hat_train)
+```
+
+Perfecto... as expected... 
+
+Now the oos confusion matrix:
+
+```{r}
+oos_confusion_table = table(y_test, y_hat_test)
+oos_confusion_table
+```
+
+Hard to read. Let's make it easier to read by blanking out the diagonal and looking at entried only >= 5:
+
+```{r}
+oos_confusion_table[oos_confusion_table < 5] = ""
+diag(oos_confusion_table) = "."
+oos_confusion_table
+mean(y_test != y_hat_test)
+```
+
+What's it using to determine letter?
+
+```{r}
+illustrate_trees(tree_mod, max_depth = 3, open_file = TRUE)
+```
+
+Where did these features comes from?? Deep learning helps to create the features from the raw pixel data. Wish I had a whole next semester to discuss this...
+
+Random Forests:
+
+```{r}
+num_trees = 500
+train_size = 2000
+
+training_indices = sample(1 : nrow(adult), train_size)
+adult_train = adult[training_indices, ]
+y_train = adult_train$income
+X_train = adult_train
+X_train$income = NULL
+
+mod_bag = YARFBAG(X_train, y_train, num_trees = num_trees, calculate_oob_error = FALSE)
+mod_rf = YARF(X_train, y_train, num_trees = num_trees, calculate_oob_error = FALSE)
+```
+
+And test:
+
+```{r}
+test_indices = sample(setdiff(1 : nrow(adult), training_indices), 25000)
+adult_test = adult[test_indices, ]
+y_test = adult_test$income
+X_test = adult_test
+X_test$income = NULL
+
+y_hat_test_bag = predict(mod_bag, X_test)
+y_hat_test_rf = predict(mod_rf, X_test)
+
+oos_conf_table_bag = table(y_test, y_hat_test_bag)
+oos_conf_table_rf = table(y_test, y_hat_test_rf)
+oos_conf_table_bag
+oos_conf_table_rf
+miscl_err_bag = mean(y_test != y_hat_test_bag)
+miscl_err_rf = mean(y_test != y_hat_test_rf)
+miscl_err_bag
+miscl_err_rf
+
+cat("gain: ", (miscl_err_bag - miscl_err_rf) / miscl_err_bag * 100, "%\n")
+```
+
+And on letters:
+
+```{r}
+test_samp = 2000
+train_indices = sample(1 : nrow(LetterRecognition), test_samp)
+ltr_train = LetterRecognition[train_indices, ]
+y_train = ltr_train$lettr
+X_train = ltr_train
+X_train$lettr = NULL
+test_indices = sample(setdiff(1 : nrow(LetterRecognition), train_indices), test_samp)
+ltr_test = LetterRecognition[test_indices, ]
+y_test = ltr_test$lettr
+X_test = ltr_test
+X_test$lettr = NULL
+```
+
+And fit a tree model and its in-sample and oos fits:
+
+```{r}
+mod_bag = YARFBAG(X_train, y_train, num_trees = num_trees, calculate_oob_error = FALSE)
+mod_rf = YARF(X_train, y_train, num_trees = num_trees, calculate_oob_error = FALSE)
+mod_bag
+mod_rf
+
+y_hat_test_bag = predict(mod_bag, X_test)
+y_hat_test_rf = predict(mod_rf, X_test)
+
+oos_conf_table_bag = table(y_test, y_hat_test_bag)
+oos_conf_table_rf = table(y_test, y_hat_test_rf)
+oos_conf_table_bag
+oos_conf_table_rf
+miscl_err_bag = mean(y_test != y_hat_test_bag)
+miscl_err_rf = mean(y_test != y_hat_test_rf)
+miscl_err_bag
+miscl_err_rf
+
+cat("gain: ", (miscl_err_bag - miscl_err_rf) / miscl_err_bag * 100, "%\n")
+```
+
+Very real gains for classification.
+
+

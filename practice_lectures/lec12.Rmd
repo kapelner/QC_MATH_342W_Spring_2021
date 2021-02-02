@@ -1,0 +1,259 @@
+---
+title: "Practice Lecture 12 MATH 390.4 Queens College"
+author: "Professor Adam Kapelner"
+date: "April 14, 2020"
+---
+
+# (3) Stepwise Model Construction
+
+There are many types of such stepwise models. Here we will look at Forward Stepwise Linear models. "Forward" meaning we start with a low complexity model and end with a high complexity model, "Stepwise" meaning we do so iteratively which each step consisting of one additional degree of freedom i.e. one incremental increase in complexity and "Linear" meaning that the model is linear. By default we use OLS.
+
+We will be using the diamonds data again as an example. Let's make sure we have unordered factors to avoid issues later:
+
+```{r}
+pacman::p_load(tidyverse, magrittr)
+diamonds %<>%
+  mutate(cut = factor(as.character(cut)), color = factor(as.character(color)), clarity = factor(as.character(clarity)))
+```
+
+What we're doing will be highly computational, so let's take a random sample of the dimaonds in $\mathbb{D}$:
+
+```{r}
+Nsamp = 1300
+train_indices = sample(1 : nrow(diamonds), Nsamp)
+diamonds_train = diamonds[train_indices, ]
+```
+
+Let's built a model with all second-order interactions e.g. all things that look like depth x table x clarity or depth^2 x color or depth^3.
+
+```{r}
+mod = lm(price ~ . * . * ., diamonds_train)
+```
+
+How many variables is this? And what does it look like?
+
+```{r}
+length(coef(mod))
+coef(mod)[1000 : 1100]
+```
+
+For features that are non-binary, it's p_non_binary^3 features. Binary features are more complicated because its each level in feature A times each level in feature B. There are no squared or cube terms for binary features (since they're all the same i.e. ${0,1}^d = {0,1}$).
+
+Remember we lkely overfit just using first order interactions? We'll certainly overfit using first-order interactions AND second order interactions
+
+```{r}
+summary(mod)$r.squared
+sd(summary(mod)$residuals)
+```
+
+Is that believable? Well... let's try it on the another 10,000 we didn't see...
+
+```{r}
+test_indices = sample(setdiff(1 : nrow(diamonds), train_indices), Nsamp)
+diamonds_test = diamonds[test_indices, ]
+y_hat_test = predict(mod, diamonds_test)
+y_test = diamonds_test$price
+e_test = y_test - y_hat_test
+1 - sum((e_test)^2) / sum((y_test - mean(y_test))^2)
+sd(e_test)
+```
+
+VERY negative oos $R^2$ --- why? What should that say about the relationship between $s_e$ and $s_y$?
+
+```{r}
+sd(y_test)
+sd(e_test) / sd(y_test)
+```
+
+This is not only "overfitting"; it is an absolute trainwreck! This means you can do better using the null model (average of y) instead of this model.
+
+So let us employ stepwise to get a "good" model. We need our basis predictors to start with. How about the linear components of `. * . * .` --- there's nothing intrinsically wrong with that - it's probably a good basis for $f(x)$. Let's create the model matrix for both train and test:
+
+```{r}
+Xmm_train = model.matrix(price ~ . * . * ., diamonds_train)
+y_train = diamonds_train$price
+p_plus_one = ncol(Xmm_train)
+p_plus_one
+
+Xmm_test = model.matrix(price ~ . * . * ., diamonds_test)
+```
+
+Now let's go through one by one and add the best one based on $s_e$ gain i.e. the best new dimension to add to project the most of the vector $y$ as possible onto the column space.
+
+```{r}
+predictor_by_iteration = c() #keep a growing list of predictors by iteration
+in_sample_ses_by_iteration = c() #keep a growing list of se's by iteration
+oos_ses_by_iteration = c() #keep a growing list of se's by iteration
+i = 1
+
+repeat {
+
+  #get all predictors left to try
+  all_ses = array(NA, p_plus_one) #record all possibilities
+  for (j_try in 1 : p_plus_one){
+    if (!(j_try %in% predictor_by_iteration)){
+      Xmm_sub = Xmm_train[, c(predictor_by_iteration, j_try), drop = FALSE]
+      all_ses[j_try] = sd(lm.fit(Xmm_sub, y_train)$residuals) #lm.fit so much faster than lm! 
+    }
+  }
+  j_star = which.min(all_ses)
+  predictor_by_iteration = c(predictor_by_iteration, j_star)
+  in_sample_ses_by_iteration = c(in_sample_ses_by_iteration, all_ses[j_star])
+  
+  #now let's look at oos
+  Xmm_sub = Xmm_train[, predictor_by_iteration, drop = FALSE]
+  mod = lm.fit(Xmm_sub, y_train)
+  y_hat_test = Xmm_test[, predictor_by_iteration, drop = FALSE] %*% mod$coefficients
+  oos_se = sd(y_test - y_hat_test)
+  oos_ses_by_iteration = c(oos_ses_by_iteration, oos_se)
+  
+  cat("i = ", i, "in sample: se = ", all_ses[j_star], "oos_se", oos_se, "\n   predictor added:", colnames(Xmm_train)[j_star], "\n")
+  
+  i = i + 1
+  
+  if (i > Nsamp || i > p_plus_one){
+    break #why??
+  }
+}
+```
+
+Now let's look at our complexity curve:
+
+```{r}
+simulation_results = data.frame(
+  iteration = 1 : length(in_sample_ses_by_iteration),
+  in_sample_ses_by_iteration = in_sample_ses_by_iteration,
+  oos_ses_by_iteration = oos_ses_by_iteration
+)
+
+pacman::p_load(latex2exp)
+ggplot(simulation_results) + 
+  geom_line(aes(x = iteration, y = in_sample_ses_by_iteration), col = "red") +
+  geom_line(aes(x = iteration, y = oos_ses_by_iteration), col = "blue") + 
+  ylab(TeX("$s_e$"))
+```
+
+
+We can kind of see what the optimal model is above. If we want an exact procedure, we'd probably fit a separate smoothing regression to the oos results and analytically find the arg-minimum, $j^*$. That number will then be fed into the model matrix to create the right feature set and the final model will be produced with all the data. Or we can just stop as soon as oos error goes up. You can also obviously do CV within each iterations to stabilize this further (lab exercise).
+
+```{r}
+p_opt = which.min(oos_ses_by_iteration)
+colnames(Xmm_train)[predictor_by_iteration[1 : p_opt]]
+```
+
+What is the "optimal model"?
+
+
+
+Can we honestly assess future performance now? No... why? Our test set was really our select set and we don't have a third test set (lab exercise). Inner and outer folding can be done too as we discussed.
+
+# R with Java
+
+Java and R can speak to each other through proper configuration of the `rJava` package. You need to have a full JDK of Java installed on your computer and have its binary executables in the proper path. This demo will be in Java JDK 8 (released in 2014 and not officially supported after 2020) since I haven't tested on the more modern Java JDK's yet. We first install `rJava` if necessary:
+
+```{r}
+if (!pacman::p_isinstalled(rJava)){
+  pacman::p_load(pkgbuild)
+  if (pkgbuild::check_build_tools()){
+    install.packages("rJava", type = "source")
+  }
+  install.packages("rJava")
+}
+```
+
+Now we load the package. Before we do, we set the JVM to have 4G of RAM. After we load it, we initialize te JVM. This should print out nothing or "0" to indicate success.
+
+```{r}
+options(java.parameters = "-Xmx4000m")
+pacman::p_load(rJava)
+.jinit() #this initializes the JVM in the background and if this runs with no issues nor output, you probably have rJava installed and connected to the JDK properly.
+```
+
+Just like the whole `Rcpp` demo, we can do a whole demo with `rJava`, but we won't. Here's just an example of creating a Java object and running a method on it:
+
+```{r}
+java_double = .jnew("java/lang/Double", 3.1415)
+java_double
+class(java_double)
+.jclass(java_double)
+#call an instance method 
+.jcall(java_double, "I", "intValue") #java_double.intValue();
+#call a static method
+J("java/lang/String", "valueOf", java_double)
+```
+
+A note on rJava vs Rcpp. 
+
+* If you're doing quick and dirty fast functions for loops and recursion, do it in Rcpp since there is lower overhead of programming. 
+* If you are programming more full-featured software, go with rJava. 
+* Also, if you need full-featured parallelized execution and threading control e.g. thread pooling and the ease of debugging, my personal opinion is that rJava is easier to get working with less dependencies. My experience is that the Rcpp threading libraries just aren't there yet and neither is openMP directives within Rcpp. 
+* Further, the JVM is fully asynchronous which means it runs completely independently of R. What this means is that you can execute something in Java, Java can "thread it off" and return you to the R prompt with a pointer to the object that houses its execution. You can then query the object. We will see dems of this.
+
+
+# Regression Trees
+
+Let's fit a regression tree. We will use the development package `YARF` which I've been hacking on now for a few years. The package internals are written in Java which we just installed above. Since `YARF` is not on CRAN, we install the package from my github including its dependency (if necessary) and then load it 
+
+```{r}
+if (!pacman::p_isinstalled(YARF)){
+  pacman::p_install_gh("kapelner/YARF/YARFJARs", ref = "dev")
+  pacman::p_install_gh("kapelner/YARF/YARF", ref = "dev")
+}
+pacman::p_load(YARF)
+```
+
+The data will be fitting with the regression tree is a sine curve plus noise:
+
+```{r}
+pacman::p_load(tidyverse, magrittr)
+n = 500
+x_max = 10
+x = runif(n, 0, x_max)
+y = sin(x) + rnorm(n, 0, 0.3)
+ggplot(data.frame(x = x, y = y), aes(x, y)) + geom_point(lwd = 0.6) 
+```
+
+Now we fit a regression tree to this model. Nevermind the `bootstrap_indices` and `calculate_oob_error` arguments. This will be clear why they are not defaults later in the semester.
+
+```{r}
+tree_mod = YARFCART(data.frame(x = x), y, 
+            bootstrap_indices = 1 : n, calculate_oob_error = FALSE)
+```
+
+How "big" is this tree model?
+
+```{r}
+get_tree_num_nodes_leaves_max_depths(tree_mod)
+```
+
+What are the "main" splits?
+
+```{r}
+illustrate_trees(tree_mod, max_depth = 4, open_file = TRUE)
+```
+
+What does $g(x)$ look like?
+
+```{r}
+Nres = 1000
+x_predict = data.frame(x = seq(0, x_max, length.out = Nres))
+g = predict(tree_mod, x_predict)
+ggplot(data.frame(x = x, y = y), aes(x, y)) + 
+  geom_point(lwd = 0.6) +
+  geom_point(aes(x, y), data.frame(x = x_predict, y = g), col = "blue")
+```
+
+Obviously overfit - but not that bad... let's try lowering the complexity by stopping the tree construction at a higher node size.
+
+```{r}
+tree_mod = YARFCART(data.frame(x = x), y, nodesize = 50, 
+            bootstrap_indices = 1 : n, calculate_oob_error = FALSE)
+g = predict(tree_mod, x_predict)
+ggplot(data.frame(x = x, y = y), aes(x, y)) + 
+  geom_point(lwd = 0.6) +
+  geom_point(aes(x, y), data.frame(x = x_predict, y = g), col = "blue")
+```
+
+Less overfitting now but now it's clearly underfit!
+
+

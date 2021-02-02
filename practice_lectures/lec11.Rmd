@@ -1,0 +1,837 @@
+---
+title: "Practice Lecture 11 MATH 390.4 Queens College"
+author: "Professor Adam Kapelner"
+date: "April 3, 2020"
+---
+
+# MLR library for CV
+
+"Machine Learning in R" (the `mlr3` package) is a very popular R library that makes it very simple to build models, do validation, etc. This package was recently rewritten (September, 2019).
+
+```{r}
+pacman::p_load(ggplot2, mlr3)
+```
+
+It splits the modeling task into conceptual pieces. The most basic pieces are:
+
+* Instantiate a "task". This consists of supplying a dataframe, identifying a variable that is the output and the type of predictions to be made.
+* Instantiate a "learner". This consists of $\mathcal{A}$ and $\mathcal{H}$. For example: OLS with all raw features.
+* Instantiate a type of validation. For example: 5-fold CV resampling.
+* Execute
+
+Here's what this would look like for our example we just did:
+
+```{r}
+modeling_task = makeRegrTask(data = diamonds, target = "price") #instantiate the task
+algorithm = makeLearner("regr.lm") #instantiate the OLS learner algorithm on the diamonds dataset and set y = price
+validation = makeResampleDesc("CV", iters = 5) #instantiate the 5-fold CV
+resample(algorithm, modeling_task, validation) #execute
+```
+
+It's squabbling about something insignificant but at least it tells me exactly what I need to do to fix! Let's correct this error and do it again:
+
+```{r}
+diamonds$cut = factor(diamonds$cut, ordered = FALSE)
+diamonds$color = factor(diamonds$color, ordered = FALSE)
+diamonds$clarity = factor(diamonds$clarity, ordered = FALSE)
+modeling_task = makeRegrTask(data = diamonds, target = "price") #instantiate the task
+res = resample(algorithm, modeling_task, validation, measures = list(rmse)) #execute
+res
+mean(res$measures.test$rmse)
+sd(res$measures.test$rmse)
+```
+
+There are a lot of learners that do regression:
+
+```{r}
+View(listLearners("regr"))
+```
+
+The warning message tells me I have access to more models if I install additional packages.
+
+We will return to `mlr` later after we finish our discussion on model selection, stepwise modeling and hyperparameter selection.
+
+## Data "Munging" with Dplyr and data.table
+
+"Data munging", sometimes referred to as "data wrangling", is the process of transforming and mapping data from one "raw" data form into another format with the intent of making it more appropriate and valuable for a variety of downstream purposes such as analytics. A data wrangler is a person who performs these transformation operations. -[Wikipedia](https://en.wikipedia.org/wiki/Data_wrangling)
+
+Half of what a data scientist does is cleaning data, visualizing data and wrangling it. In the process you learn all about your dataset and you're on a higher level when it comes time to build prediction models.
+
+The packages `dplyr` and `data.table` offer many conveninent functions to manipulate, clean, and otherwise wrangle data. Note: all the wrangling we're going to see *can* be done with base R (see previous notes on the `data.frame` object) but it would be *very very very very* annoying and *very very very very* slow.
+
+I will quickly compare and contrast `dplyr` and `data.table` before you see it inside actual code.
+
+* `dplyr` works really nicely with the piping chain as you "begin" the manipulation with the dataset and then iteratively pipe in step 1, step 2, etc until you wind up with what end product you would like. This makes `dplyr` very readable but very verbose - lots of lines of code. 
+* On the flip side, `data.table` essentially wrote a new data wrangling language so it's a harder learning curve but it's very compact - very few lines of code.
+* `data.table` is blazing fast and kills `dplyr` in performance and I'm pretty sure it even beats Python in performance (someone please check this). So in the era of "big data", I think this is the winner even though it is much harder to learn.
+* I believe `dplyr` is more popular in the real world and thus has more cache to put on your CV. But this is constantly in flux!
+
+For all labs and the final project, you are recommended to pick one you want to use and go with it. For the exams, I will write code in both (if need be) to not penalize / reward a student who picked one over the other.
+
+Here is a nice [translation guide](https://atrebas.github.io/post/2019-03-03-datatable-dplyr/) between `dplyr` and `data.table`. We will be learning them in tandem. I could've split this into two units but I decided against it because (1) it is good to see the same functionality side-by-side and (2) this is really just one concept.
+
+```{r}
+pacman::p_load(tidyverse, magrittr) #tidyverse is shorthard for dplyr, ggplot2, tidyr, readr and a bunch of other packages recommended for the "full" dplyr experience. I'm using magrittr for special pipe operations later.
+pacman::p_load(data.table)
+```
+
+Note that `data.table` is automatically multithreaded. Read [here](https://www.rdocumentation.org/packages/data.table/versions/1.12.8/topics/setDTthreads).
+
+```{r}
+getDTthreads()
+```
+
+
+We first instantiate the upgraded data.frame objects in both libraries:
+
+```{r}
+diamonds_tbl = tbl_df(diamonds) #not necessary to cast because dplyr does the conversion automatically after using any dplyr function
+diamonds_dt = data.table(diamonds) #absolutely necessary
+```
+
+What happens during the data frame conversion?
+
+```{r}
+class(diamonds_tbl)
+class(diamonds_dt)
+```
+
+Note how these are implemented as class extensions of R's `data.frame` as to allow for background compatibility and not break the API. They have nicer ways of showing the data:
+
+```{r}
+diamonds_tbl #run this in the console, not inside the chunk
+diamonds_dt #run this in the console, not inside the chunk
+```
+
+Beginning with the simplest munging tasks, subsetting rows:
+
+```{r}
+diamonds_tbl %>% 
+  slice(1 : 5)
+
+diamonds_dt[1 : 5]
+```
+
+And subsetting columns:
+
+```{r}
+diamonds_tbl %>% 
+  select(cut, carat, price) #these three only in this order
+
+diamonds_dt[, .(cut, carat, price)]
+
+diamonds_tbl %>% 
+  select(carat, price, cut) #these three only in another order
+
+diamonds_dt[, .(carat, price, cut)]
+
+diamonds_tbl %>% 
+  select(-x) #drop this feature
+
+diamonds_dt[, !"x"]
+#diamonds_dt[, x := NULL] #mutating function (overwrites the data frame)
+
+diamonds_tbl %>% 
+  select(-c(x, y, z)) #drop these features
+diamonds_tbl %>% 
+  select(-x, -y, -z) #drop these features
+
+diamonds_dt[, !c("x", "y", "z")]
+```
+
+How about will rename a column
+
+```{r}
+diamonds_tbl %>% 
+  rename(weight = carat, price_USD = price)
+
+diamonds_dt_copy = copy(diamonds_dt)
+setnames(diamonds_dt_copy, old = c("carat", "price"), new = c("weight", "price_USD")) #the `setnames` function is mutating, i.e. it modifies the data.table object, so I made a copy as to not alter the table for the rest of the demo
+diamonds_dt_copy
+rm(diamonds_dt_copy)
+```
+
+If you want to rearrange the columns...
+
+```{r}
+#In dplyr you pretend to select a subset and then ask for everything else:
+diamonds_tbl %>% 
+  select(carat, price, cut, everything()) #these three in this order first then everything else
+# diamonds_tbl %>% 
+#   select(-carat, everything()) #move carat last (first drop it, and then add it back in with everything)
+
+diamonds_dt_copy = copy(diamonds_dt)
+setcolorder(diamonds_dt_copy, c("carat", "price", "cut")) #as before, the `setcolorder` function is mutating, i.e. it modifies the data.table object, so I made a copy as to not alter the table for the rest of the demo
+diamonds_dt_copy
+rm(diamonds_dt_copy)
+```
+
+Sorting the rows by column(s):
+
+```{r}
+diamonds_tbl %>%
+  arrange(carat) #default is ascending i.e. lowest first
+
+diamonds_dt[order(carat)]
+diamonds_dt_copy = copy(diamonds_dt)
+setorder(diamonds_dt_copy, carat) #as before, the `setorder` function is mutating, i.e. it modifies the data.table object, so I made a copy as to not alter the table for the rest of the demo
+diamonds_dt_copy
+rm(diamonds_dt_copy)
+
+diamonds_tbl %>%
+  arrange(desc(carat)) #switch to descending, i.e. highest first
+
+diamonds_dt[order(-carat)] #and you can do this with `setorder` too
+
+diamonds_tbl %>%
+  arrange(desc(color), clarity, cut, desc(carat)) #multiple sorts - very powerful
+
+diamonds_dt[order(-color, clarity, cut, -carat)] #and you can do this with `setorder` too
+```
+
+The filter method subsets the data based on conditions:
+
+```{r}
+diamonds_tbl %>%
+  filter(cut == "Ideal")
+
+diamonds_dt[cut == "Ideal"]
+
+diamonds_tbl %>%
+  filter(cut == "Ideal") %>%
+  filter(depth < 65) %>%
+  filter(x * y * z > 20)
+diamonds_tbl %>%
+  filter(cut == "Ideal" & depth < 65 & x * y * z > 20)
+
+diamonds_dt[cut == "Ideal" & depth < 65 & x * y * z > 20]
+
+diamonds_tbl %>%
+  filter((cut == "Ideal" | cut == "Premium") & depth < 65 & x * y * z > 20)
+
+diamonds_dt[(cut == "Ideal" | cut == "Premium") & depth < 65 & x * y * z > 20]
+
+diamonds_tbl %>%
+  filter(cut %in% c("Ideal", "Premium") & depth < 65 & x * y * z > 20)
+
+diamonds_dt[cut %in% c("Ideal", "Premium") & depth < 65 & x * y * z > 20]
+```
+
+How about removing all rows that are the same?
+
+```{r}
+diamonds_tbl
+diamonds_tbl %>%
+  distinct
+
+unique(diamonds_dt)
+
+#nice function from data.table:
+uniqueN(diamonds$carat) 
+#273 < 53940 i.e. there's only a few weight measurements that are possible... let's only keep one from each unique carat value
+
+diamonds_tbl %>%
+  distinct(carat, .keep_all = TRUE) #keeps the first row for each unique weight measurement
+
+unique(diamonds_dt, by = "carat")
+```
+
+Sampling is easy
+
+```{r}
+diamonds_tbl %>%
+  sample_n(7)
+
+diamonds_dt[sample(.N, 7)] #.N is a cool function: it is short for `nrow(dt object)`
+
+diamonds_tbl %>%
+  sample_frac(1e-3)
+
+diamonds_dt[sample(.N, .N * 1e-3)] #.N is a cool function: it is short for `nrow(dt object)
+```
+
+
+Now for some real fun stuff. Let's create new features with the `mutate` function.
+
+```{r}
+diamonds_tbl %>%
+  mutate(volume = x * y * z) #adds a new column keeping the old ones (this was an exam problem in a previous year)
+
+diamonds_dt2 = copy(diamonds_dt)
+diamonds_dt2[, volume := x * y * z]
+diamonds_dt2
+
+diamonds_tbl %>%
+  mutate(price_per_carat = price / carat) %>%
+  arrange(desc(price_per_carat))
+
+diamonds_dt2[, price_per_carat := price / carat]
+diamonds_dt2[order(-price_per_carat)]
+rm(diamonds_dt2)
+```
+
+Or rewrite old ones.
+
+```{r}
+diamonds_tbl %>%
+  mutate(cut = substr(cut, 1, 1))
+
+diamonds_dt2 = copy(diamonds_dt)
+diamonds_dt2[, cut := substr(cut, 1, 1)]
+diamonds_dt2
+
+diamonds_tbl %>%
+  mutate(carat = factor(carat))
+
+diamonds_dt2[, carat := factor(carat)]
+diamonds_dt2
+rm(diamonds_dt2)
+```
+
+Here are some more ways to create new variables. Translating to `data.table` is trivial:
+
+```{r}
+diamonds_tbl %>%
+  mutate(carat = factor(ntile(carat, 5)))
+diamonds_tbl %>%
+  mutate(carat = percent_rank(carat))
+diamonds_tbl %>%
+  mutate(lag_price = lag(price)) #if this data was a time series
+diamonds_tbl %>%
+  mutate(cumul_price = cumsum(price)) #%>% tail
+```
+
+How about if you want to create a column and drop all other columns in the process?
+
+```{r}
+diamonds_tbl %>%
+  transmute(volume = x * y * z) #adds a new column dropping the old ones
+
+diamonds_dt[, .(volume = x * y * z)]
+```
+
+There are many ways to reshape a dataset. We will see two now and a few functions later when it becomes important. For instance: we can collapse columns together using the `unite` function from package `tidyr` (which should be loaded when you load `dplyr`). We will have a short unit on more exciting and useful reshapings later ("long" to "short" and vice-versa). As far as I know `data.table` has a less elegant... unless someone has a better idea?
+
+```{r}
+diamonds_tbl2 = diamonds_tbl %>%
+  unite(dimensions, x, y, z, sep = " x ")
+diamonds_tbl2
+
+diamonds_dt2 = copy(diamonds_dt)
+diamonds_dt2[, dimensions := paste(x, y, z, sep = " x ")] #mutating
+diamonds_dt2 = diamonds_dt2[, !c("x", "y", "z")]
+diamonds_dt2
+```
+
+We can reverse this operation:
+
+```{r}
+diamonds_tbl2 %>%
+  separate(dimensions, c("x", "y", "z"), sep = " x ")
+rm(diamonds_tbl2)
+
+diamonds_dt2[, c("x", "y", "z") := strsplit(dimensions, "x")]
+diamonds_dt2[, -"dimensions"]
+rm(diamonds_dt2)
+```
+
+There are tons of other packages to do clever things. For instance, here's one that does dummies. Let's convert the color feature to dummies. Again slightly less readable or elegant in `data.table`:
+
+```{r}
+pacman::p_load(sjmisc, snakecase)
+diamonds_tbl %>%
+  to_dummy(color, suffix = "label") %>% #this creates all the dummies
+  bind_cols(diamonds_tbl) %>% #now we have to add all the original data back in
+  select(-matches("_"), everything()) %>% #this puts the dummies last
+  select(-color) #finally we can drop color
+
+cbind(
+  diamonds_dt[, -"color"], 
+  to_dummy(diamonds_dt[, .(color)], suffix = "label")
+)
+```
+
+
+What if you want to create a new variable based on functions only run on subsets of the data. This is called "grouping". Grouping only makes sense for categorical variables. (If you group on a continuous variable, then chances are you'll have $n$ different groups because you'll have $n$ unique values).
+
+For instance:
+
+```{r}
+diamonds_tbl %>%
+  group_by(color)
+
+diamonds_dt[,, by = color]
+```
+
+Nothing happened... these were directives to do things a bit differently with the addition of other logic. So after you group, you can now run operations on each group like they're their own sub-data frame. Usually, you want to *summarize* data by group. This means you take the entire sub-data frame and run one metric on it and return only those metrics (i.e. shrink $n$ rows to $L$ rows). This sounds more complicated than it is and it is where data wrangling really gets fun. 
+
+Here are a few examples:
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  summarize(avg_price = mean(price))
+
+diamonds_dt[, .(avg_price = mean(price)), by = color][order(color)] #chaining / piping [...][...][...] etc
+#where did all the other rows and columns go???
+
+diamonds_tbl %>%
+  group_by(color) %>%
+  summarize(avg_price = mean(price), sd_price = sd(price), count = n())
+
+diamonds_dt[, .(avg_price = mean(price), sd_price = sd(price), count = .N), by = color][order(color)]
+
+diamonds_tbl %>%
+  group_by(color) %>%
+  summarize(min_price = min(price), med_price = median(price), max_price = max(price))
+
+diamonds_dt[, .(min_price = min(price), med_price = median(price), max_price = max(price)), by = color][order(color)]
+```
+
+Sometimes you want to do fancier things like actually run operations on the whole sub-data frame using `mutate`. If the function is a single metric, then that metric is then duplicated across the whole sub data frame.
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  mutate(avg_price_for_color = mean(price)) 
+#creates a new feature based on running the feature only within group
+
+diamonds_dt2 = copy(diamonds_dt)
+diamonds_dt2[, avg_price_for_color := mean(price), by = color]
+diamonds_dt2
+rm(diamonds_dt2)
+```
+
+So that's kind of like duplicating a summary stat. Here's something more fun: actually creating a new vector:
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  mutate(price_rank_within_color = dense_rank(price)) #creates a new feature based on running the feature only within group
+
+diamonds_dt2 = copy(diamonds_dt)
+diamonds_dt2[, price_rank_within_color := frankv(price, ties.method = "dense"), by = color]
+diamonds_dt2
+rm(diamonds_dt2)
+```
+
+What if we want to get the first row in each category?
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  slice(1)
+
+diamonds_dt[, .SD[1], by = color][order(color)]
+```
+
+The `.SD` variable is short for "sub dataframe" and it's a stand-in for the pieces of the dataframe for each color as it loops over the colors. So `.SD[1]` will be first row in the sub dataframe. The reason why the matrices come out different is that the order of the rows in data.table changes based on optimizations. We'll see some of this later. I'm also unsure why it moved the `color` column to the front.
+
+What about first and last?
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  slice(1, n())
+
+diamonds_dt[, .SD[c(1, .N)], by = color]
+```
+
+How about the diamond with the highest price by color?
+
+```{r}
+diamonds_tbl %>%
+  group_by(color) %>%
+  arrange(price) %>%
+  slice(n())
+
+diamonds_dt[, .SD[which.max(price)], by = color]
+```
+
+We've seen `data.table`'s preference for mutating functions. Here is a pipe command from package `magrittr` that makes the functions mutating. 
+
+```{r}
+diamonds_tbl2 = diamonds_tbl
+diamonds_tbl2 = diamonds_tbl2 %>%
+  select(-x, -y, -z) %>%
+  filter(carat < 0.5) %>%
+  arrange(carat, cut, color)
+diamonds_tbl2
+
+diamonds_tbl2 = diamonds_tbl
+diamonds_tbl2 %<>% #pipe and overwrite (short for what's above)
+  select(-x, -y, -z) %>%
+  filter(carat < 0.5) %>%
+  arrange(carat, cut, color)
+diamonds_tbl2
+rm(diamonds_tbl2)
+```
+
+This is as far we will go with data wrangling right now.
+
+Let's benchmark a few core features of both packages. To do so, let's create a dataframe that's very big:
+
+```{r}
+pacman::p_load(microbenchmark)
+
+Nbig = 2e6
+diamonds_tbl_big = diamonds_tbl %>%
+  sample_n(Nbig, replace = TRUE)
+diamonds_dt_big = data.table(diamonds_tbl_big) #just to make sure we have the same data
+diamonds_big = data.frame(diamonds_tbl_big) #ensure that it is a base R object
+```
+
+How about we write this dataframe to the hard drive as a CSV?
+
+```{r}
+microbenchmark(
+  base_R = write.csv(diamonds_big, "diamonds_big.csv"),
+  tidyverse = write_csv(diamonds_tbl_big, "diamonds_big.csv"),
+  data.table = fwrite(diamonds_dt_big, "diamonds_big.csv"),
+    times = 1
+)
+```
+
+How about we read this dataframe from the hard drive as a CSV?
+
+```{r}
+microbenchmark(
+  base_R = read.csv("diamonds_big.csv"),
+  tidyverse = read_csv("diamonds_big.csv"),
+  data.table = fread("diamonds_big.csv"),
+    times = 1
+)
+```
+
+What about for creating new variables?
+
+```{r}
+microbenchmark(
+  base_R = {diamonds_big$log_price = log(diamonds_big$price)},
+  tidyverse = {diamonds_tbl_big %<>% mutate(log_price = log(price))},
+  data.table = diamonds_dt_big[, log_price := log(price)],
+    times = 100
+)
+```
+
+About the same. How about grouping and summarizing? No easy one-liner in base R. So we just compare the two packages:
+
+
+```{r}
+microbenchmark(
+  tidyverse = {diamonds_tbl_big %>% group_by(color) %>% summarize(avg_price = mean(price))},
+  data.table = diamonds_dt_big[, .(avg_price = mean(price), by = color)],
+    times = 10
+)
+```
+
+How about sorting?
+
+```{r}
+microbenchmark(
+  base_R = diamonds_big[order(diamonds_big$price), ],
+  tidyverse = {diamonds_tbl_big %>% arrange(price)},
+  data.table = diamonds_dt_big[order(price)],
+    times = 10
+)
+```
+How about filtering?
+
+```{r}
+microbenchmark(
+  base_R = diamonds_big[diamonds_big$price < 1000, ],
+  tidyverse = {diamonds_tbl_big %>% filter(price < 1000)},
+  data.table = diamonds_dt_big[price < 1000],
+    times = 10
+)
+```
+
+Let's do this again but first "key" the price column which is what you would do if you are doing lots of searches.
+
+```{r}
+setkey(diamonds_dt_big, price)
+
+microbenchmark(
+  base_R = diamonds_big[diamonds_big$price < 1000, ],
+  tidyverse = {diamonds_tbl_big %>% filter(price < 1000)},
+  data.table = diamonds_dt_big[price < 1000],
+    times = 30
+)
+```
+
+We still have to learn how to reshape tables and join multiple tables together. We will do that later.
+
+# Model Selection and Three Data Splits
+
+This unit is split into three use cases (1) Selection among M explicit models (2) Hyperparameter Selection within one algorithm (3) Stepwise Model Construction
+
+## Selecting one of M Models
+
+We have now covered non-linearities (e.g. polynomial terms) and interactions. A new complication now clearly emerges. If I have $p$ predictors, there are many linear least squares models I can build (considering non-linear least squares models makes the space of models even larger!!)
+
+For instance, here are a bunch of models:
+
+```{r}
+mod1 = lm(price ~ carat + depth, diamonds) #using a subset of the features
+mod2 = lm(price ~ ., diamonds) #using a subset of the features
+mod3 = lm(price ~ poly(carat, 2) + poly(depth, 2), diamonds) #using some polynomial terms
+mod4 = lm(price ~ . * ., diamonds) #using all interactions
+coef(mod1)
+coef(mod2)
+coef(mod3)
+coef(mod4) %>% length
+```
+
+Which model is "best"? 
+
+This is one of the most fundamental problems in statistics, and possibly all of science! 
+
+In class, we discussed validation via dividing $\mathbb{D}$ into (a) a training set and a (b) testing set. Now, we will further divide the training set into (a) a sub-training set and a (b) selection set and we still have the (c) test set. 
+
+The total training set together will fit a model and testing will estimate future performance. But within the total training set, we'll use an elaborate algorithim: we'll fit many models and take the best one. That's the "master algorithm".
+
+We'll make the selection set and the test set the same size but we don't have to. First split up the data:
+
+```{r}
+n = nrow(diamonds)
+K = 5
+test_indices = sample(1 : n, size = n * 1 / K)
+master_train_indices = setdiff(1 : n, test_indices)
+select_indices = sample(master_train_indices, size = n * 1 / K)
+train_indices = setdiff(master_train_indices, select_indices)
+rm(master_train_indices)
+
+#make sure we did this right:
+pacman::p_load(testthat)
+expect_equal(1 : n, sort(c(train_indices, select_indices, test_indices)))
+
+diamonds_train = diamonds[train_indices, ]
+diamonds_select = diamonds[select_indices, ]
+diamonds_test = diamonds[test_indices, ]
+
+rm(test_indices, select_indices, train_indices)
+```
+
+Now, fit all models and select the best one:
+
+```{r}
+mod1 = lm(price ~ carat + depth, diamonds_train) #using a subset of the features
+mod2 = lm(price ~ ., diamonds_train) #using a subset of the features
+mod3 = lm(price ~ poly(carat, 2) + poly(depth, 2), diamonds_train) #using some polynomial terms
+mod4 = lm(price ~ . * ., diamonds_train) #using all interactions
+```
+
+Now predict on the selection set and look at the oos $s_e$, and select the "best" model
+
+```{r}
+yhat_select_mod1 = predict(mod1, diamonds_select)
+yhat_select_mod2 = predict(mod2, diamonds_select)
+yhat_select_mod3 = predict(mod3, diamonds_select)
+yhat_select_mod4 = predict(mod4, diamonds_select)
+y_select = diamonds_select$price #the true prices
+
+s_e_s = c(
+  sd(yhat_select_mod1 - y_select), 
+  sd(yhat_select_mod2 - y_select), 
+  sd(yhat_select_mod3 - y_select), 
+  sd(yhat_select_mod4 - y_select)
+)
+names(s_e_s) = paste("mod", 1 : 4, sep = "")
+s_e_s
+#find the minimum
+names(which.min(s_e_s))
+```
+
+Which are overfit? Which are underfit? Were these models "poor choices"?
+
+Can we go back and fit some more models? 
+
+Yes - as long as we don't open the "lockbox" of the test set. Let's look at one more model. An expansion of the best of the previous 4 models now with a couple interactions we are convinced are real plus a couple of non-linear terms:
+
+```{r}
+mod5 = lm(price ~ 
+            . + 
+            carat * color + 
+            carat * depth + 
+            I(carat^2) +
+            I(depth^2),
+          diamonds_train) 
+
+yhat_select_mod5 = predict(mod5, diamonds_select)
+
+s_e_s = c(s_e_s, sd(yhat_select_mod5 - y_select))
+names(s_e_s)[5] = "mod5"
+s_e_s
+#find the minimum
+names(which.min(s_e_s))
+```
+
+We can go further and fit more and more models but we should always be careful that we don't fit too many as we may optimize to the selection set. Here, we are lucky since the selection set is large (~11,000 observations) so this is not too much of a fear.
+
+But you can see the problem - how can we build a good model??
+
+The answer to this is non-parametric regression. But first, we will cover two other important topics before we get there.
+
+Let us return and complete the exercise by now declaring we are done modeling and we are going to ship model 5. Let us get a conservative estimate of its performance:
+
+```{r}
+yhat_test_mod4 = predict(mod4, diamonds_test)
+y_test = diamonds_test$price #the true prices
+sd(yhat_test_mod4 - y_test)
+```
+
+About the same as the selection estimate --- we did not overfit too much to the selection set.
+
+At this point the lockbox is open and we can never return (if we are honest, of course - many people in this business lie so beware).
+
+Now we can build production model 4 with all data to ship:
+
+```{r}
+mod_final = lm(price ~ . * ., diamonds)
+```
+
+No evaluation is done on the final model. It is only used to predict future diamonds' prices.
+
+Two improvements using CV to the above:
+
+* To reduce variance in the selection process, you make a CV of the selection set. 
+* To reduce variance in the testing process, you make an outer CV of the test set. This is a lot more coding!
+
+Can we use MLR for Linear Model Selection?
+
+Yes, but it is not as nice as I would've liked but it sure beats doing it yourself. I've figured it out by creating my own custom code.
+
+First, we create the task:
+
+```{r}
+modeling_task = makeRegrTask(data = diamonds, target = "price") #instantiate the task
+```
+
+We now pick the linear models we wish to investigate. Each entry is the r.h.s of the formula that is passed to lm.
+
+```{r}
+ALL_LINEAR_MODELS = c(
+  ".", 
+  "carat * .", 
+  ". * ."
+  )
+```
+
+Now we create a new learner which is a wrapper for the linear model with a custom formula. We need to specify learning parameters, a training function (build g) and a predict function. Then we need to add theese functions to the namespace in a way mlr understands.
+
+```{r}
+makeRLearner.regr.custom_ols = function() {
+  makeRLearnerRegr(
+    cl = "regr.custom_ols",
+    package = "base",
+    par.set = makeParamSet(
+      makeDiscreteLearnerParam(id = "formula_rhs", default = ".", values = ALL_LINEAR_MODELS)
+    ),
+    properties = c("numerics", "factors", "ordered"),
+    name = "Custom OLS with a Formula",
+    short.name = "custom_ols"
+  )
+}
+
+trainLearner.regr.custom_ols = function(.learner, .task, .subset, .weights = NULL, ...){
+  formula = as.formula(paste(
+    getTaskDesc(.task)$target,
+    "~",
+    list(...)$formula_rhs #this is passed in the ... as an extra argment
+  ))
+  
+  lm(formula, data = getTaskData(.task, .subset))
+}
+
+predictLearner.regr.custom_ols = function (.learner, .model, .newdata, ...){
+    predict(.model$learner.model, newdata = .newdata, ...)
+}
+
+registerS3method("makeRLearner", "regr.custom_ols", makeRLearner.regr.custom_ols)
+registerS3method("trainLearner", "regr.custom_ols", trainLearner.regr.custom_ols)
+registerS3method("predictLearner", "regr.custom_ols", predictLearner.regr.custom_ols)
+```
+
+Now we create the "inner loop". Here, we cross validate over the different models. We do this by specifying a "tune wrapper" since technically each formula is considered a tuning paramter / hyperparameter the linear model on this task.
+
+```{r}
+all_models = makeParamSet(
+  makeDiscreteParam(id = "formula_rhs", default = ".", values = ALL_LINEAR_MODELS)
+)
+inner_loop = makeResampleDesc("CV", iters = 3)
+lrn = makeTuneWrapper("regr.custom_ols", #instantiate the OLS learner algorithm
+        resampling = inner_loop, 
+        par.set = all_models, 
+        control = makeTuneControlGrid(), 
+        measures = list(rmse))
+```
+
+We now create the outer loop and execute:
+
+```{r}
+outer_loop = makeResampleDesc("CV", iters = 5)
+r = resample(lrn, modeling_task, resampling = outer_loop, extract = getTuneResult, measures = list(rmse))
+```
+
+Now we look at the results a bunch of different ways:
+
+```{r}
+r #overall estimate of oos error of the whole procedure if it were used on all of $\mathbb{D}$
+print(getNestedTuneResultsOptPathDf(r)) #results of each inner validation over all outer iterations
+r$extract #"winning" model for each outer iteration
+```
+
+See https://mlr.mlr-org.com/articles/tutorial/nested_resampling.html? for info on inner and outer loop CV.
+
+## (2) Hyperparameter Selection
+
+We load the breast cancer dataset from earlier in the class.
+
+```{r}
+cancer = MASS::biopsy %>%
+  select(-ID) %>% #drop the useless ID column
+  na.omit #drop all rows that are missing
+modeling_task = makeClassifTask(data = cancer, target = "class") #instantiate the task
+```
+
+We now create the SVM using package `e1071` which plugs nicely into `mlr`.
+
+```{r}
+pacman::p_load(e1071)
+algorithm = makeLearner("classif.svm", kernel = "linear")
+```
+
+Now we create the inner loop where we try many different values of the hyperparameter.
+
+```{r}
+all_lambdas = 2^(seq(-10, 10, by = 0.5))
+all_hyperparams = makeParamSet(
+  makeDiscreteParam(id = "cost", default = 1, values = all_lambdas)
+)
+inner = makeResampleDesc("CV", iters = 3)
+lrn = makeTuneWrapper("classif.svm", 
+                      resampling = inner, 
+                      par.set = all_hyperparams, 
+                      control = makeTuneControlGrid(),
+                      measures = list(mmce))
+length(all_lambdas)
+```
+
+Now we create the outer loop and execute
+
+```{r}
+outer = makeResampleDesc("CV", iters = 5)
+r = resample(lrn, modeling_task, 
+            resampling = outer, 
+            extract = getTuneResult,
+            measures = list(mmce))
+```
+
+Now we look at the results a bunch of different ways:
+
+```{r}
+r #overall estimate of oos error of the whole procedure if it were used on all of $\mathbb{D}$
+print(getNestedTuneResultsOptPathDf(r)) #results of each inner validation over all outer iterations
+r$extract #"winning" model for each outer iteration
+```
+

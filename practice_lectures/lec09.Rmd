@@ -1,0 +1,500 @@
+---
+title: "Practice Lecture 9 MATH 390.4 Queens College"
+author: "Professor Adam Kapelner"
+date: "March 24, 2020"
+---
+
+# Log transformations
+
+We will be examining the diamonds dataset.
+
+```{r}
+pacman::p_load(ggplot2) #this loads the diamonds data set too
+?diamonds
+dim(diamonds)
+```
+
+That's a huge $n$. So, let's expect things to take a bit longer when processing.
+
+A natural increasing relationship will likely be found between weight and price. Let's see it visually:
+
+```{r}
+ggplot(diamonds, aes(x = carat, y = price)) + 
+  geom_point()
+```
+
+
+How good does a best guess linear relationship do?
+
+```{r}
+mod = lm(price ~ carat, diamonds)
+b = coef(mod)
+b
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+What does the intercept say about extrapolation?
+
+Let's see the best fit line $g(x)$ visually:
+
+```{r}
+ggplot(diamonds, aes(x = carat, y = price)) + geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green")
+```
+
+Maybe the relationship between weight and price is not linear - but exponential? E.g. if the weight of a diamond doubles, maybe the price quadruples? Or linear increases in weight yield percentage increases in price. This seems plausible. Let's give it a whirl. Maybe we'll even learn something about diamonds.
+
+The way to create such a model is to simply fit an OLS model to log y. This is called a log-linear model.
+
+Since this is a pretty standard thing to do so R's formula notation has it built-in as follows:
+
+```{r}
+log_linear_mod = lm(log(price) ~ carat, diamonds)
+b = coef(log_linear_mod)
+b
+```
+
+Let's see what this looks like.
+
+```{r}
+ggplot(diamonds, aes(x = carat, y = log(price))) + 
+  geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green")
+```
+
+It looks very bad if carat is large. That means our little theory about carats getting larger yielding multiples of price doesn't correspond to reality.
+
+How did we do?
+
+```{r}
+summary(log_linear_mod)$r.squared
+summary(log_linear_mod)$sigma
+```
+
+This doesn't seem to help $R^2$ too much. We will discuss what this means in a later class. But look at that RMSE! That dropped like a rock! Is that real?
+
+Let's attempt to compare apples-apples.
+
+```{r}
+log_y_hat = log_linear_mod$fitted.values
+y_hat = exp(log_y_hat)
+e = diamonds$price - y_hat
+SSE = sum(e^2)
+SST = sum((diamonds$price - mean(diamonds$price))^2)
+Rsq = 1 - sum(e^2) / SST
+Rsq
+RMSE = sqrt(SSE / (nrow(diamonds) - 2))
+RMSE
+```
+
+What does this mean? It means this was a bad idea. Those residuals for carat large are insanely large. They're wrong on a log scale! Which means they're off by orders of magnitude. Working with logged y is dangerous business if you're wrong! Before you were off by a few thousand dollars; now you're off by millions. For example. Let's look at a large diamond:
+
+```{r}
+xstar = diamonds[diamonds$carat > 5, ][1, ]
+xstar$price
+predict(mod, xstar)
+exp(predict(log_linear_mod, xstar))
+```
+
+That's a pretty bad residual!
+
+How about log-log model? 
+
+```{r}
+log_log_linear_mod = lm(log(price) ~ log(carat), diamonds)
+b = coef(log_log_linear_mod)
+b
+```
+
+Let's see what it looks like:
+
+```{r}
+ggplot(diamonds, aes(x = log(carat), y = log(price))) + 
+  geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green")
+```
+
+Well look at that! That's a nice looking model.
+
+How are our metrics?
+
+```{r}
+summary(log_log_linear_mod)$r.squared
+summary(log_log_linear_mod)$sigma
+```
+
+Better $R^2$. Not that this mattered! Let's see apples-to-apples.
+
+```{r}
+log_y_hat = log_log_linear_mod$fitted.values
+y_hat = exp(log_y_hat)
+e = diamonds$price - y_hat
+SSE = sum(e^2)
+Rsq = 1 - sum(e^2) / SST
+Rsq
+RMSE = sqrt(SSE / (nrow(diamonds) - 2))
+RMSE
+```
+
+This is on-par with the OLS model, but still doesn't "beat it". There are reasons why you would use this model, but they are beyond the scope of this class - they belong in Econ 382.
+
+Let's go a bit deeper. When we looked at `log(price)`, we left out a critical first step - examine the univariate data!
+
+
+```{r}
+summary(diamonds$price)
+sd(diamonds$price)
+```
+
+```{r}
+ggplot(diamonds) + geom_histogram(aes(price), binwidth = 200)
+```
+
+Look at the long tail here. Popular wisdom says to log this type of distribution as a log transform on the y variable would possibly make the model more linear in x. It would be easier to catch the long tail. It would also prevent observations with large y's becoming "leverage points" i.e. points that influence the model. If we have time later in the semester, we can learn about leverage points, but not now. This is a "trick of the trade". Let's take a look at the distributiona after logging:
+
+```{r}
+ggplot(diamonds) + geom_histogram(aes(log(price)), binwidth = 0.01)
+```
+
+Some strange artifacts appear. Why the gap? Why is it "cut" at a maximum. These are questions to ask the one who collected the data.
+
+Let's see if we get anywhere with this:
+
+```{r}
+lm_y = lm(price ~ ., diamonds)
+lm_ln_y = lm(log(price) ~ ., diamonds)
+summary(lm_y)$r.squared
+summary(lm_ln_y)$r.squared
+summary(lm_y)$sigma
+summary(lm_ln_y)$sigma
+``` 
+
+Again, we should be careful when you use $g$ after logging, you will have to exponentiate the result. This is known to create bias because $E[Y]$ is different from $exp(E[ln(y)])$ (for those who took 368 - remember Jensen's inequality?), but don't worry too much about this "bias" as it hardly matters practically speaking since it is only "biased" if the linear model is correct in an absolute sense. And when on Earth is any model absolutely correct?
+
+```{r}
+predict(lm_y, diamonds[12345, ])
+predict(lm_ln_y, diamonds[12345, ])
+exp(predict(lm_ln_y, diamonds[12345, ]))
+```
+
+
+If you like this stuff, there are a whole bunch of transformations out there that are even cooler than the natural log. Some of this may be covered in 369 / 633. Let us use the log going forward:
+
+```{r}
+diamonds$ln_price = log(diamondsprice)
+```
+
+Let's look at price by length of diamond.
+
+```{r}
+ggplot(diamonds, aes(x = x, y = ln_price)) + 
+  geom_point()
+```
+
+Besides the non-linear relationship, what else do you see? Mistakes in the dataset! Can a real diamond have zero length?? Yes. This is the real world. There are mistakes all the time.
+
+Let's kill it! How many are we dealing with here?
+
+```{r}
+nrow(diamonds[diamonds$x == 0, ]) 
+```
+
+
+```{r}
+diamonds = diamonds[diamonds$x == 0, ]
+```
+
+What's the deal with the x variable now?
+
+```{r}
+summary(diamonds$x)
+```
+
+How good does a best guess linear relationship do?
+
+```{r}
+mod = lm(ln_price ~ x, diamonds)
+b = coef(mod)
+b
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+Again we got some bad extrapolation going on. Let's see the best fit line $g(x)$ visually:
+
+```{r}
+ggplot(diamonds, aes(x = x, y = ln_price)) + geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green")
+```
+
+Let's log-linearize it and see how we do.
+
+```{r}
+log_linear_mod = lm(ln_price ~ x, diamonds)
+b = coef(log_linear_mod)
+b
+ggplot(diamonds, aes(x = x, y = ln_price)) + 
+  geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green")
+```
+
+How did we do? Ensure it's apples-apples.
+
+```{r}
+log_y_hat = log_linear_mod$fitted.values
+y_hat = exp(log_y_hat)
+e = diamonds$price - y_hat
+SSE = sum(e^2)
+SST = sum((diamonds$price - mean(diamonds$price))^2)
+Rsq = 1 - sum(e^2) / SST
+Rsq
+RMSE = sqrt(SSE / (nrow(diamonds) - 2))
+RMSE
+```
+
+Still not better. Log-log?
+
+```{r}
+log_log_linear_mod = lm(ln_price ~ log(x), diamonds)
+b = coef(log_log_linear_mod)
+b
+ggplot(diamonds, aes(x = log(x), y = ln_price)) + 
+  geom_point() + 
+  geom_abline(intercept = b[1], slope = b[2], col = "green")
+```
+
+Let's see.
+
+```{r}
+log_y_hat = log_log_linear_mod$fitted.values
+y_hat = exp(log_y_hat)
+e = diamonds$price - y_hat
+SSE = sum(e^2)
+SST = sum((diamonds$price - mean(diamonds$price))^2)
+Rsq = 1 - sum(e^2) / SST
+Rsq
+RMSE = sqrt(SSE / (nrow(diamonds) - 2))
+RMSE
+```
+
+We did it.
+
+
+# Linear Models with Feature Interactions
+
+Let's go back to modeling price with weight. Let us add a third variable to this plot, color, a metric about the "yellowness" of the diamond. This is an ordinal categorical variable ranging from D (most clear i.e. best) to J (most yellow in this dataset i.e. worst).
+
+
+```{r}
+base = ggplot(diamonds, aes(x = carat, y = price)) 
+base +
+  geom_point(aes(col = color)) + scale_color_brewer(type = "div")
+```
+
+We can look at this with faceting too:
+
+```{r}
+base +
+  geom_point() +
+  facet_wrap(~ color, ncol = 3)
+```
+
+
+What do we see here? It looks like the slope of the price vs. carat linear model is affected by color. For instance, the "D" color diamonds' price increases much faster as weight increases than the "E" color diamonds' price increases in weight, etc. Why do you think this is?
+
+We can picture two of these linear models below by fitting two submodels, one for D and one for J:
+
+```{r}
+mod_D = lm(price ~ carat, subset(diamonds, color == "D"))
+b_D = coef(mod_D)
+mod_J = lm(price ~ carat, subset(diamonds, color == "J"))
+b_J = coef(mod_J)
+
+base +
+  geom_point(aes(col = color)) + scale_color_brewer(type = "div") +
+  geom_abline(intercept = b_D[1], slope = b_D[2]) +
+  geom_abline(intercept = b_J[1], slope = b_J[2])
+```
+
+This indicates a separate intercept and carat-slope for each color. How is this done? Interacting carat and slope. The formula notation has the `*` operator for this. It is multiplication in formula land after all!
+
+```{r}
+mod = lm(price ~ carat * color, diamonds)
+coef(mod) #beware: sometimes strange naming conventions on the interaction terms but seems to work here fine
+b_D
+b_J ####FIX that!!
+```
+
+The reference category is color D. This means every other color should start lower and have a lower slope. This is about what we see above.
+
+How much of a better model is this than a straight linear model?
+
+```{r}
+mod_vanilla = lm(price ~ carat + color, diamonds)
+summary(mod_vanilla)$r.squared
+summary(mod_vanilla)$sigma
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+You can get more predictive accuracy out of this. We added a degree of freedom? Is this gain real? Yes. With one more feature and $n = 54,000$ there is no chance this gain came from overfit. Add 20,000 features, yes.
+
+Let's take a look at carat with another variable, depth, a continuous predictor. High depth indicates diamonds are skinny and tall; low depth indicates diamonds are flat like a pancake.
+
+```{r}
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point(aes(col = depth), lwd = 0.5) + scale_colour_gradientn(colours = rainbow(5))
+```
+
+It seems people like flatter diamonds and are willing to pay more per carat. Let's see this in the regression:
+
+```{r}
+mod = lm(price ~ carat * depth, diamonds)
+coef(mod)
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+If carat increases by one unit, how much does price increase by?
+
+Is this better than the model without the interaction?
+
+```{r}
+mod = lm(price ~ carat + depth, diamonds)
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+A tiny amount of increase.
+
+How about cut?
+
+
+```{r}
+ggplot(diamonds, aes(x = carat, y = price)) +
+  geom_point(aes(col = cut), lwd = 0.5) + scale_color_brewer(type = "div")
+```
+
+Likely something here.
+
+```{r}
+mod = lm(price ~ carat * cut, diamonds)
+coef(mod)
+summary(mod)$r.squared
+summary(mod)$sigma
+mod = lm(price ~ carat + cut, diamonds)
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+Yes.
+
+Can we include all these interactions?
+
+```{r}
+mod = lm(price ~ carat * (color + depth + cut), diamonds)
+coef(mod)
+summary(mod)$r.squared
+summary(mod)$sigma
+mod = lm(price ~ carat + color + depth + cut, diamonds)
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+A decent gain once again.
+
+What does the design matrix look like there? What is $p$?
+
+```{r}
+Xmm = model.matrix(price ~ carat * (color + depth + cut), diamonds)
+head(Xmm) #you can see the strange naming convention here on cut for some reasons ... can't quite figure this out
+```
+
+
+Can we take a look at interactions of two categorical variables? BTW ... this is an answer to a lab question...
+
+
+```{r}
+plot1 = ggplot(diamonds, aes(x = cut, y = color)) +
+  geom_jitter(aes(col = price), lwd = 0.5) + scale_colour_gradientn(colours = rainbow(5))
+plot1
+```
+
+Cool animation possible. May not work because it needs a ton of packages...
+
+```{r}
+pacman:::p_load_gh("dgrtwo/gganimate")
+plot1 + transition_time(price)
+```
+
+Not so clear what's going on here. Let's see what the regressions say:
+
+
+```{r}
+mod = lm(price ~ color * cut, diamonds)
+coef(mod)
+summary(mod)$r.squared
+summary(mod)$sigma
+mod = lm(price ~ color + cut, diamonds)
+summary(mod)$r.squared
+summary(mod)$sigma
+```
+
+
+## Piping
+
+Take a look at this one-liner:
+
+```{r}
+set.seed(1984)
+mean(head(round(sample(rnorm(1000)), digits = 2)))
+```
+
+This is hard to read. Of course we can make it easier by using breaklines e.g.
+
+```{r}
+mean(
+  head(
+    round(
+      sample(
+        rnorm(1000)
+      ), digits = 2)
+    )
+)
+```
+
+But it doesn't make it much easier to read. And it probably makes it harder to write.
+
+Enter an idea taken from unix / linux. Output of one function is input to next function. It is the inverse of the usual "order of operations". Let's see how this works.
+
+We first load the piping library:
+
+```{r}
+pacman::p_load(magrittr) #the package is named after Rene Magritte, the artist
+```
+
+In pipe format this would look like:
+
+```{r}
+set.seed(1984)
+rnorm(1000) %>% #the pipe operator
+  sample %>% 
+  round(digits = 2) %>% #the first argument is passed in automatically.
+  head %>%
+  mean
+```
+
+That's it! There's nothing more to it other than a gain in readability.
+
+What if we wanted to do something like `mean(rnorm(1000) + 1)`? This `rnorm(1000) %>% +1 %>% mean` doesn't work because I imagine because the basic arithmetic operators couldn't be parsed like normal while there was a pipe. So they invented special pipe functions for this:
+
+```{r}
+rnorm(1000) %>% add(1) %>% mean
+```
+
+There are other exceptions to the rule too which you'll figure out if you adopt the pipe.
+
+Unfortunately... the world at large hasn't completely accepted this as a way to write R. So feel free to use for yourself. But be carefuly when using this style with others. 
+
+Also note the code you write with pipes will be slower than the normal syntax.
