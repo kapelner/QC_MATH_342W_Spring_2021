@@ -1,6 +1,6 @@
 # MATH 342W Intro to Data Science Spring 2021
 
-This is the course homepage for Math 342W (and Masters level ...) at Queens College, City University of New York taught by Professor Adam Kapelner. The course syllabus can be found [here](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/syllabus/syllabus.pdf). We are now using [slack](https://.....slack.com/) for class discussions and vidoes.
+This is the course homepage for Math 342W (and Masters level 650.4) at Queens College, City University of New York taught by Professor Adam Kapelner. The course syllabus can be found [here](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/syllabus/syllabus.pdf). We are now using [slack](https://slack.com/) for class discussions and vidoes.
 
 ## Lectures
 
@@ -73,8 +73,8 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 * Lecture 3 [(audio)](https://youtu.be/TvdV8SLcICs)
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec02.Rmd)
   - Theory Notes [(Rameasa Arna)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec03arna.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec03eng.pdf) [(Steven Grgas)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec03grgas.pdf)  -->
-* Lecture 2 [(audio)](https://youtu.be/cUHxlgIZ5tQ)
- - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02kap.pdf)
+* Lecture 2 video on slack
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02kap.pdf)
 * Lecture 1 video on slack
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec01kap.pdf)
 
