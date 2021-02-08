@@ -1,7 +1,6 @@
 # MATH 342W Intro to Data Science Spring 2021
 =======
 This is the course homepage for Math 342W (and Masters level ...) at Queens College, City University of New York taught by Professor Adam Kapelner. The course syllabus can be found [here](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/syllabus/syllabus.pdf). We are now using [slack](https://.....slack.com/) for class discussions and videos.
->>>>>>> Update README.md
 
 ## Lectures
 
