@@ -100,7 +100,7 @@ my_function = function(x = 1, y, z = 3, p = 4, q = 5, r = 6){
 }
 my_function() #no dice
 my_function(1, 0) #required argument specified
-my_function(0, q = 7) #required argument specified and one optional argument
+my_function(y = 0, q = 7) #required argument specified and one optional argument
 rm(my_function) #can be deleted since it's an object
 ```
 
@@ -117,8 +117,8 @@ If you like this, there are many packages that extend this and organize it nicel
 x = c(1, 2, 3, 4, 5)
 Reduce(sum, x)
 Filter(function(x){x <= 3}, x)
-Find(function(x){x <= 3}, x)
-Map(function(x){x + 100}, x) #what happened here?? Map will return a list (for flexibility)
+Find(function(x){x > 4}, x)
+unlist(Map(function(x){x + 100}, x)) #what happened here?? Map will return a list (for flexibility)
 ```
 
 ## First modeling exercise
