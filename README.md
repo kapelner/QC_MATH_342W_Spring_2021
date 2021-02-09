@@ -77,6 +77,9 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02kap.pdf) [(Elizabeth McHugh)](https://github.com/ejmchugh/QC_MATH_342W_Spring_2021/blob/master/lectures/lec02mchugh.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec02gubbins.pdf)
 * Lecture 1 video on slack
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec01kap.pdf) [(Elizabeth McHugh)](https://github.com/ejmchugh/QC_MATH_342W_Spring_2021/blob/master/lectures/lec01mchugh.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec01gubbins.pdf)
+  https://github.com/Hanlin-Wang/QC_MATH_342W_Spring_2021/blob/master/lec01wang.pdf
+  https://github.com/Hanlin-Wang/QC_MATH_342W_Spring_2021/blob/master/lec02wang.pdf
+  https://github.com/Hanlin-Wang/QC_MATH_342W_Spring_2021/blob/master/lec03wang.pdf
 
 ## Labs
 
