@@ -72,11 +72,16 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
   - Theory Notes [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec05nissanthan.pdf) [(Shakif Shadman)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec05shadman.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec05eng.pdf)-->
 * Lecture 4 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec02.Rmd)
-  - Theory Notes [(Rameasa Arna)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec03arna.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec03eng.pdf) [(Steven Grgas)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec03grgas.pdf)  -->
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec04kap.pdf)[(Hanlin Wang)](https://github.com/Hanlin-Wang/QC_MATH_342W_Spring_2021/blob/master/lectures/lec04wang.pdf)
+* Lecture 3 video on slack
+  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec01.Rmd)
 * Lecture 2 video on slack
-  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02kap.pdf) [(Elizabeth McHugh)](https://github.com/ejmchugh/QC_MATH_342W_Spring_2021/blob/master/lectures/lec02mchugh.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec02gubbins.pdf)
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec02kap.pdf) [(Elizabeth McHugh)](https://github.com/ejmchugh/QC_MATH_342W_Spring_2021/blob/master/lectures/lec02mchugh.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec02gubbins.pdf)[(Hanlin Wang)](https://github.com/Hanlin-Wang/QC_MATH_342W_Spring_2021/blob/master/lectures/lec02wang.pdf)
 * Lecture 1 video on slack
-  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec01kap.pdf) [(Elizabeth McHugh)](https://github.com/ejmchugh/QC_MATH_342W_Spring_2021/blob/master/lectures/lec01mchugh.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec01gubbins.pdf) [(Alexis Montes)](https://github.com/AlexNYC25/QC_MATH_342W_Spring_2021/blob/master/lectures/lec01montes.pdf)
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec01kap.pdf) [(Elizabeth McHugh)](https://github.com/ejmchugh/QC_MATH_342W_Spring_2021/blob/master/lectures/lec01mchugh.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec01gubbins.pdf)[(Hanlin Wang)](https://github.com/Hanlin-Wang/QC_MATH_342W_Spring_2021/blob/master/lectures/lec01wang.pdf)
+ 
+
+  
 
 ## Labs
 
