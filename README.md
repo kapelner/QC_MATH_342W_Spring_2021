@@ -93,8 +93,8 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 * [(Lab 5, due 3/7)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab05.Rmd)
 * [(Lab 4, due 2/29)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab04.Rmd)
 * [(Lab 3, due 2/22)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab03.Rmd)
-* [(Lab 2, due 2/17)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab02.Rmd)
-* [(Lab 1, due 2/8)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab01.Rmd)-->
+* [(Lab 2, due 2/17)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab02.Rmd)-->
+* [(Lab 1, due 2/18)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab01.Rmd)
 
 ## Theory Homeworks
 
