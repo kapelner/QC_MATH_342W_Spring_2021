@@ -147,8 +147,8 @@ Let's talk about basic data types:
 ```{r}
 TRUE #logical
 FALSE
-T
-F
+T #please don't use this constant in your programs; use TRUE.
+F #please don't use this constant in your programs; use FALSE
 class(TRUE)
 1 #numeric, think of double type in C++ or Java
 class(1)

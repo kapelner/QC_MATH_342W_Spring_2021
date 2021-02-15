@@ -1,7 +1,7 @@
 ---
 title: "Practice Lecture 3 MATH 390.4 Queens College"
 author: "Professor Adam Kapelner"
-date: "February 14, 2019"
+date: "February 10, 2021"
 ---
 
 
@@ -50,11 +50,15 @@ The first line is doing the special sample function and the second is using base
 
 ```{r}
 library(kapelner)
+#...
+#...
 ###10,000 lines of code in which you forget about the fact that the kapelner library is loaded
+#...
+#...
 sample(v)
 ```
 
-You may think you're getting base R sample function, but you're not and it's bug-city. You would have to do the following to be explicit:
+You may think you're getting base R sample function, but you're not and now you're in  bug-city! You would have to do the following to be explicit:
 
 ```{r}
 library(kapelner)
@@ -137,7 +141,7 @@ pacman::p_load(devtools)
 pacman::p_load_gh("hadley/ggplot2")
 ```
 
-# Convenient Functions for Lists with the purrr package
+# Convenient Mapping Function for Lists with the purrr package
 
 We first load the library.
 
@@ -176,6 +180,7 @@ for (key in names(my_matrix_list)){ #iterate over all list by key
   .x = my_matrix_list[[key]] #get value at the key for this iteration
   my_dims_list[[key]] = dim(.x) #run function on value and save it to new list
 }
+my_dims_list
 ```
 
 The above which takes 5 lines and is repeated again and again and again in code all takes one line using the `modify` function. 
@@ -191,15 +196,25 @@ Since R is a language built for data and statistics, it has a ton of interesting
 
 ```{r}
 rm(list = ls())
-data(iris) #load the iris dataset (as a data frame)
+data(iris) #load the iris dataset (as a data frame). This dataset is included in the package "datasets" which is autoloaded by default
 class(iris)
+?iris
 #3 things I always do immediately upon getting a dataset
 head(iris)
 str(iris)
 summary(iris)
 ```
 
-R has so many datasets. Here they all are by package installed:
+Here is another very famous dataset
+
+```{r}
+MASS::Boston #this just references the object but does not load it into the environment
+data(Boston) #error since package MASS is not loaded by default
+data(Boston, package = "MASS") #package argument not needed if package loaded 
+head(Boston)
+```
+
+Most data sets are names some descriptive name like "loandata" or "cars". R has so many datasets. Here they all are by package installed:
 
 ```{r}
 data(package = .packages(all.available = TRUE))
@@ -269,15 +284,6 @@ summary(Xy) #much better now!
 
 I prefer calling the full training set ${X, y}$ a data frame called $Xy$. 
 
-Most data sets are names some descriptive name like "loandata" or "cars". Here are undoubtedly some of the most famous datasets:
-
-```{r}
-data(Boston, package = "MASS") #package argument not needed if package loaded 
-head(Boston)
-data(iris)
-head(iris)
-```
-
 
 The object $X$ is now extraneous, so we should clean up our workspace now.
 
@@ -289,11 +295,25 @@ rm(list = setdiff(ls(), "Xy"))
 ## The Null Model
 
 ```{r}
-g = function(x){
-  #return mode regardless of x
+#There's no standard R function for sample mode!!!
+sample_mode = function(data){
+  mode_name = names(sort(-table(data)))[1]
+  if (class(data) == "factor"){
+    factor(mode_name, levels = levels(data))
+  } else if (class(data) == "numeric"){
+    as.numeric(mode_name)
+  } else if (class(data) == "integer"){
+    as.integer(mode_name)
+  } else {
+    mode_name
+  }
+}
+
+g0 = function(){
+  sample_mode(Xy$y) #return mode regardless of x
 } 
 
-g(5000)
+g0()
 ```
 
 
@@ -313,6 +333,9 @@ for (i in 1 : n){
 }
 num_errors_by_parameter
 
+#look at all thresholds in order
+num_errors_by_parameter[order(num_errors_by_parameter[, "num_errors"]), ]
+
 #now grab the smallest num errors
 best_row = order(num_errors_by_parameter[, "num_errors"])[1]
 x_star = c(num_errors_by_parameter[best_row, "threshold_param"], use.names = FALSE)
@@ -326,7 +349,7 @@ g = function(x){
   ifelse(x > x_star, 1, 0)
 } 
 
-g(5000)
+g(15000)
 ```
 
 
@@ -335,6 +358,7 @@ g(5000)
 Time for some new data first... we are bored of the fabricated creditworthiness data.
 
 ```{r}
+rm(list = ls())
 Xy = na.omit(MASS::biopsy) #The "breast cancer" data
 ?MASS::biopsy
 head(Xy)
@@ -351,6 +375,12 @@ First question. Let $\mathcal{H}$ be the set $\{0, 1\}$ meaning $g = 0$ or $g = 
 239 / (444 + 239)
 #If always 1, all the 0's are errors
 444 / (444 + 239)
+
+g0 = function(){
+  sample_mode(y_binary) #return mode regardless of x's
+} 
+
+g0()
 ```
 
 If your $g$ can't beat that, either your features $x_1, \ldots, x_p$ are terrible, and/or $\mathcal{H}$ was a terrible choice and/or $\mathcal{A}$ can't pull its weight.
@@ -360,7 +390,7 @@ Okay... back to the "perceptron learning algorithm".
 Let's do so for one dimension - just "V1" in the breast cancer data. You will do an example with more features for the lab.
 
 ```{r}
-y_binary = ifelse(y_binary == 1, 0, 1)
+# y_binary = ifelse(y_binary == 1, 0, 1)
 MAX_ITER = 1000
 w_vec = rep(0, 2) #intialize a 2-dim vector
 
@@ -387,301 +417,3 @@ sum(y_binary != yhat) / length(y_binary)
 
 Looks like the perceptron fit to just the first feature beat the null model (at least on the data in $\mathbb{D}$). Is this expected? Yes if the first feature is at all predictive of `y`.
 
-
-## Matrix operations in R
-
-R can do all the standard matrix operations. Let's go through them quickly. First initialize two example matrices:
-
-```{r}
-A = matrix(rep(1, 4), nrow = 2)
-A
-B = array(seq(1, 4), dim = c(2, 2))
-B
-I = diag(2) #create an identity matrix of size 2x2
-I
-```
-
-Now we show off some operations:
-
-```{r}
-A * B #element-wise multiplication
-A %*% B #matrix multiplication
-B %*% I
-t(B) #transpose
-solve(B)
-solve(A) #BOOM - why?
-solve(I)
-#rank(A) = 1 #no such function... but... there are tons of add-on libraries for matrix computations e.g.
-pacman::p_load(Matrix) #load the Matrix library
-rankMatrix(B)
-rankMatrix(A)
-rankMatrix(I)
-```
-
-Note that vectors and matrices are not the same:
-
-```{r}
-v = c(1, 2, 3) #3-d vector
-t(v) #converts to 1x3 vector... unsure why
-t(t(v))
-v %*% v #seems to default to dot product
-t(v) %*% t(t(v)) #dot product
-I = diag(3)
-I %*% v #seems to default correctly!
-I %*% t(v) #actually uncomformable
-```
-
-## The linear threshold model
-
-Using the algorithm $\mathcal{A}$ discussed previously, this model was dubbed the "perceptron". However, there are other algorithms $\mathcal{A}$ we can use to fit the "best" model in $\mathcal{H}$.
-
-We spoke about how the `w` vector is in a large space, $R^p$. A course in optimization will describe methods how to find optimal and approximately optimal solutions for `w` based on an "objective function" or "fitness function" or "cost function". Here that target is the number of total errors of the `n` examples in the training data set.
-
-```{r}
-SAE = function(w_vec){
-  yhat = ifelse(X1 %*% w_vec > 0, 1, 0)
-  sum(y_binary != yhat)
-}
-```
-
-
-Here are some off-the-shelf solvers in R in action. Note: this is not the classic "perceptron learning algorithm". Also: this is complete junk made-up data so it's only an illustration. You will see real data for your homework.
-
-Let's an optimization algorithm called Nelder-Mead developed by John Nelder and Roger Mead (both were famous statisticians) in 1965.
-
-```{r}
-pacman::p_load(optimx)
-?optimx
-optim_output = optimx(c(50, -10), SAE, method = "Nelder-Mead")
-optim_output
-w_vec = t(as.matrix(optim_output[1:2]))
-
-```
-
-What is our error rate using the Nelder-Mead local optimum?
-
-```{r}
-yhat = ifelse(X1 %*% w_vec > 0, 1, 0)
-sum(y_binary != yhat) / length(y_binary)
-```
-
-Not good. Let's try again with the perceptron input as a starting point.
-
-Lesson: perceptron learning algorithm maybe not so great. Also - different $\mathcal{A}$'s give you wildly different models $g$ even with the same allowable functions provided in $\mathcal{H}$. 
-
-Most of the really creative work in modeling is within $\mathcal{A}$ although specifying $\mathcal{H}$ suitably flexible is very important too.
-
-## Nearest Neighbor algorithm
-
-Load up the breast cancer data set again.
-
-```{r}
-Xy = na.omit(MASS::biopsy) #The "breast cancer" data with all observations with missing values dropped
-X = Xy[, 2 : 10] #V1, V2, ..., V9
-y_binary = as.numeric(Xy$class == "malignant")
-```
-
-In one dimension, we are looking for the closest x. Here is a simple function that does it:
-
-```{r}
-nn_function = function(x_star){
-  best_sqd_distance = Inf #good place to begin
-  i_star = NA
-  for (i in 1 : nrow(X)){
-    dsqd = (X[i, 1] - x_star)^2
-    if (dsqd < best_sqd_distance){
-      best_sqd_distance = dsqd
-      i_star = i
-    }
-  }
-  y_binary[i_star]
-}
-nn_function(7.8)
-nn_function(5.2)
-```
-
-Why is this silly for this dataset?
-
-```{r}
-str(X)
-```
-
-The features are not truly continuous. Would it make sense in higher dimensions? Your homework...
-
-Has this been coded before? Definitely...
-
-```{r}
-pacman::p_load(class)
-?knn
-```
-
-We can fit a knn model *and* predict in one shot via:
-
-```{r}
-y_hat = knn(X, c(4, 2, 1, 1, 2, 1, 2, 1, 1), y_binary, k = 1)
-y_hat
-```
-
-Why is build model and predict in one shot natural in knn?
-
-Now for an interesting exercise that will setup future classes:
-
-```{r}
-y_hat = knn(X, X, y_binary, k = 1)
-y_hat
-all.equal(y_hat, factor(y_binary))
-```
-
-No errors! Can this be a good model? No... "something" must be wrong! It is too good to be true.
-
-Something is wrong. This is the first example of "overfitting". We will explore this in depth.
-
-```{r}
-rm(list = ls())
-```
-
-
-## Support Vector Machines (SVM)
-
-You will code a basic SVM for homework. Here we use the `e1071` library.
-
-```{r}
-pacman::p_load(e1071)
-```
-
-We make a simple dataset first.
-
-```{r}
-Xy_simple = data.frame(
- response = factor(c(0, 0, 0, 1, 1, 1)), #nominal
- first_feature = c(1, 1, 2, 3, 3, 4),    #continuous
- second_feature = c(1, 2, 1, 3, 4, 3)    #continuous
-)
-```
-
-We haven't spoken about visualization yet, but it is important we do some of it now. First we load the visualization library we're going to use:
-
-```{r}
-pacman::p_load(ggplot2)
-```
-
-And let's plot the data:
-
-```{r}
-simple_viz_obj = ggplot(Xy_simple, aes(x = first_feature, y = second_feature, color = response)) + 
-  geom_point(size = 5)
-simple_viz_obj
-```
-
-Now we fit a linear SVM. Since it is linearly separable, we can make $\lambda = 0$. Since the package doesn't allow zero, we make it trivially small. 
-
-```{r}
-Xy_simple_feature_matrix = as.matrix(Xy_simple[, 2 : 3])
-lambda = 1e-9
-n = nrow(Xy_simple_feature_matrix)
-svm_model = svm(Xy_simple_feature_matrix, Xy_simple$response, kernel = "linear", cost = (2 * n * lambda)^-1, scale = FALSE)
-```
-
-Now we calculate the weight vector. This is technical and not covered in the class yet (or maybe never):
-
-```{r}
-w_vec_simple_svm = c(
-  svm_model$rho, #the b term
-  -t(svm_model$coefs) %*% Xy_simple_feature_matrix[svm_model$index, ] # the other terms
-)
-w_vec_simple_svm
-```
-
-and plot it:
-
-```{r}
-simple_svm_line = geom_abline(
-    intercept = -w_vec_simple_svm[1] / w_vec_simple_svm[3], 
-    slope = -w_vec_simple_svm[2] / w_vec_simple_svm[3], 
-    color = "purple")
-simple_viz_obj + simple_svm_line
-```
-
-To understand the hyperparameter, let's introduce another data point so the training data is no longer linearly separable.
-
-```{r}
-Xy_simple = rbind(Xy_simple, c(0, 3.2, 3.2))
-```
-
-and plot it:
-
-```{r}
-simple_viz_obj = ggplot(Xy_simple, aes(x = first_feature, y = second_feature, color = response)) + 
-  geom_point(size = 5)
-simple_viz_obj
-```
-
-Let's try SVM at different $\lambda$ values.
-
-```{r}
-Xy_simple_feature_matrix = as.matrix(Xy_simple[, 2 : 3])
-lambda = 1.3
-n = nrow(Xy_simple_feature_matrix)
-svm_model = svm(Xy_simple_feature_matrix, Xy_simple$response, kernel = "linear", cost = (2 * n * lambda)^-1, scale = FALSE)
-w_vec_simple_svm = c(
-  svm_model$rho, #the b term
-  -t(svm_model$coefs) %*% Xy_simple_feature_matrix[svm_model$index, ] # the other terms
-)
-
-simple_svm_line = geom_abline(
-    intercept = -w_vec_simple_svm[1] / w_vec_simple_svm[3], 
-    slope = -w_vec_simple_svm[2] / w_vec_simple_svm[3], 
-    color = "purple")
-simple_viz_obj + simple_svm_line
-```
-
-What lesson did we learn here? This hyperparameter really matters! We need to figure out a way to deal with this later. So far neither the perceptron nor the SVM is an algorithm without flaws.
-
-
-## Errors and Warnings
-
-You can write better functions if you make use of errors and warnings. Java forces you to catch likely errors via the "throws" designation for a method but there is no such requirement in R.
-
-* Errors are unrecoverable, they halt execution i.e. red lights
-* Warnings (under usual execution) do not halt execution, but they display a message, i.e. yellow lights
-
-Here's how they work:
-
-```{r}
-my_vector_sum = function(xs){
-  
-  if (!(class(xs) %in% c("numeric", "integer"))){ #short for class(xs) == "numeric" | class(xs) == "integer"
-    stop("You need to pass in a vector of numbers not a vector of type \"", class(xs), "\".\n") #throw error!
-    #warning("Your vector of type \"", class(xs), "\" will be coerced to numbers.\n") #throw warning!
-    xs = as.numeric(as.factor(xs))
-  }
-  
-  tot = 0
-  for (x in xs){
-    tot = tot + x
-  }
-  tot
-}
-my_vector_sum(c(1, 2, 3))
-my_vector_sum(c("a", "b", "c"))
-```
-
-There is a try-catch as well:
-
-```{r}
-xs = c("a", "b", "c")
-tot = my_vector_sum(xs)
-
-tot = tryCatch(
-  {
-    my_vector_sum(xs)
-  },
-  error = function(e){
-    print("xs was non-numeric... coercing xs to numeric...")
-    my_vector_sum(as.numeric(as.factor(xs)))
-  }
-)
-tot
-```
-
-The recommended thing to do of course is to query if it is non-numeric within the function `my_vector_sum` and cast it then. Possibly create an argument toggling this behavior on/off with a default of off.
