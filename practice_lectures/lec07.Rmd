@@ -1,413 +1,524 @@
 ---
 title: "Practice Lecture 7 MATH 390.4 Queens College"
 author: "Professor Adam Kapelner"
-date: "March 19, 2020"
+date: "February 22, 2021"
 ---
 
 
-# Review of Overfitting
 
-Because overfitting is so important and since we had a long break since last class, it is worth reviewing it even though it may be boring by this time. We'll try to see it from another angle here.
 
-Let's generate a linear model ($f = h^* \in \mathcal{H}$) and let $\epsilon$ be random noise (the error due to ignorance) for $\mathbb{D}$ featuring $n = 2$.
 
-This simulation is random, but to ensure it looks the same to me right now as it does in class (and to you at home), let's "set the seed" so it is deterministic.
+## Simple Linear Regression (p = 1)
+
+To understand what the algorithm is doing - best linear fit by minimizing the squared errors, we can draw a picture. First let's make up some very simple training data $\mathbb{D}$.
 
 ```{r}
-set.seed(1003)
+n = 20
+x = runif(n)
+beta_0 = 3
+beta_1 = -2
+h_star = beta_0 + beta_1 * x
+epsilons = rnorm(n, mean = 0, sd = 0.33)
+y = h_star + epsilons 
 ```
 
-Now let's "randomly generate" the data:
+And let's plot the data:
+
 
 ```{r}
-n = 2
-beta_0 = 1
-beta_1 = 1
-x = rnorm(n)
-#best possible model
-h_star_x = beta_0 + beta_1 * x
-
-#actual data differs due to information we don't have
-epsilon = rnorm(n)
-y = h_star_x + epsilon
-
-#scatterplot it
 pacman::p_load(ggplot2)
-basic = ggplot(data.frame(x = x, y = y, h_star_x = h_star_x), aes(x, y)) +
-  geom_point() +
-  xlim(-4, 4) + ylim(-5, 5)
-basic
+simple_df = data.frame(x = x, y = y)
+simple_viz_obj = ggplot(simple_df, aes(x, y)) + 
+  geom_point(size = 2)
+simple_viz_obj
 ```
 
-Let's now fit a linear model to this and plot:
+And its true $h^*$ line:
 
 ```{r}
-mod = lm(y ~ x)
-b_0 = coef(mod)[1]
-b_1 = coef(mod)[2]
-basic + geom_abline(intercept = b_0, slope = b_1, col = "blue")
+true_hstar_line = geom_abline(intercept = beta_0, slope = beta_1, color = "green")
+simple_viz_obj + true_hstar_line
 ```
 
-Note that obviously:
+Now let's calculate the simple least squares coefficients:
 
 ```{r}
-summary(mod)$r.squared
-summary(mod)$sigma #RMSE - technically cannot divide by zero so cannot estimate the RMSE so we use s_e instead
-sd(mod$residuals) #s_e
+r = cor(x, y)
+s_x = sd(x)
+s_y = sd(y)
+ybar = mean(y)
+xbar = mean(x)
+
+b_1 = r * s_y / s_x
+b_0 = ybar - b_1 * xbar
+b_0
+b_1
 ```
 
-And let's plot the true function $h^*$ below as well in green:
+Note how $b_0$ and $b_1$ are not exactly the same as $\beta_0$ and $\beta_1$. Why?
+
+And we can plot it:
+
 
 ```{r}
-basic_and_lines = basic + 
-  geom_abline(intercept = b_0, slope = b_1, col = "blue") +
-  geom_abline(intercept = beta_0, slope = beta_1, col = "green") + 
-  geom_segment(aes(x = x, y = h_star_x, xend = x, yend = y), col = "red")
-basic_and_lines
+simple_ls_regression_line = geom_abline(intercept = b_0, slope = b_1, color = "red")
+simple_viz_obj + simple_ls_regression_line + true_hstar_line
 ```
 
-The red lines are the epsilons:
+Review of the modeling framework:
+
+The difference between the green line and red line is the "estimation error". The difference between the green line and the points is a combination of error due to ignorance and error due to misspecification of $f$ as a straight line. In most real-world applications, estimation error is usually small relative to the other two. In the era of "big data", $n$ is usually big so estimation error is pretty small.
+
+Recall that the noise (epsilons) are the difference between the data and the green line:
 
 ```{r}
-epsilon
+simple_df$hstar = beta_0 + beta_1 * simple_df$x
+simple_viz_obj = ggplot(simple_df, aes(x, y)) + 
+  geom_point(size = 2)
+epsilon_line_segments = geom_segment(aes(xend = x, yend = hstar), position = position_nudge(x = 0.002))
+simple_viz_obj + epsilon_line_segments + true_hstar_line
 ```
 
-Now let's envision some new data not in $\mathbb{D}$. We will call this "out of sample" (oos) since $\mathbb{D}$ defined our "sample" we used to build the model. For the oos data, we predict on it using our linear model $g$ which is far from the best linear model $h^*$ and we look at its residuals $e$:
+And that the residuals (e's) are the difference between the measurements of the response in the actual data and the green line:
 
 ```{r}
-n_new = 50
-x_new = rnorm(n_new)
-h_star_x_new = beta_0 + beta_1 * x_new
-epsilon_new = rnorm(n_new)
-y_new = h_star_x_new + epsilon_new
-y_hat_new = b_0 + b_1 * x_new
-
-df_new = data.frame(x = x_new, y = y_new, h_star_x = h_star_x_new, y_hat = y_hat_new, e = y - y_hat_new)
-
-basic_and_lines + 
-  geom_point(data = df_new) + 
-  geom_segment(data = df_new, aes(x = x, y = y_hat_new, xend = x, yend = y), col = "purple")
+simple_df$gs = b_0 + b_1 * simple_df$x
+simple_viz_obj = ggplot(simple_df, aes(x, y)) + 
+  geom_point(size = 2)
+e_line_segments = geom_segment(aes(xend = x, yend = gs), color = "purple")
+simple_viz_obj + simple_ls_regression_line + e_line_segments
 ```
 
-Instead of the residuals let's look at its true errors, epsilon, the distance from $h^*$:
+Examining both at the same time:
 
 ```{r}
-basic_and_lines + 
-  geom_point(data = df_new) + 
-  geom_segment(data = df_new, aes(x = x, y = h_star_x, xend = x, yend = y), col = "darkgrey")
+simple_viz_obj + simple_ls_regression_line + true_hstar_line + e_line_segments + epsilon_line_segments
 ```
 
-The errors that the overfit model are worse than the errors made by the best model. In other words, the residual standard error on the new "out of sample" data is much larger than the actual epsilon standard error:
+## Assessing quality of a simple linear regression
+
+Note: our $\mathcal{A}$ was ordinary least squares. What follows below is a method of assessing model fit quality not only for the least squares line, or any linear fit, but any regression fit.
 
 ```{r}
-sd(df_new$e)
-sd(epsilon_new)
+simple_df$gs = b_0 + b_1 * simple_df$x
+simple_df$residuals = y - simple_df$gs
+
+sse = sum(simple_df$residuals^2)
+mse = sse / (n - 2)
+rmse = sqrt(mse)
+sse
+mse
+rmse
+
+s_sq_y = var(y)
+s_sq_e = var(simple_df$residuals)
+rsq = (s_sq_y - s_sq_e) / s_sq_y
+rsq
+
+#calculated in a different, but equivalent way
+sse_0 = (n - 1) * s_sq_y
+(sse_0 - sse) / sse_0
 ```
 
-How did we get in this mess? We can see from the picture we are using the grey line as $g$ but we should be using the green line $h^*$. We are using the grey line because we used the original $\epsilon$ to fit. BAD idea - won't generalize to the future.
+Let's take a look at $R^2$ visually. We compute null residuals and model residuals and plot a them.
 
 ```{r}
-rm(list = ls()) #same as broom icon
+simple_df$null_residuals = y - mean(y)
+
+ggplot(simple_df) + 
+  geom_histogram(aes(x = residuals), fill = "darkgreen", alpha = 0.3) + 
+  geom_histogram(aes(x = null_residuals, fill = "red", alpha = 0.3)) +
+  theme(legend.position = "none")
+
+ggplot(simple_df) + 
+  stat_density(aes(x = residuals), fill = "darkgreen", alpha = 0.3) + 
+  stat_density(aes(x = null_residuals, fill = "red", alpha = 0.3)) +
+  theme(legend.position = "none")
 ```
 
-The problem is bad for $n = 2$. But is it always bad? Let's take a look at $n = 100$ with a strong linear relationship with one predictor. 
+Note residuals always have sample average = 0 (modulo numeric error):
 
 ```{r}
-set.seed(1003)
-n = 100
-beta_0 = 1
-beta_1 = 5
-xmin = 0
-xmax = 1
-x = runif(n, xmin, xmax)
-#best possible model
-h_star_x = beta_0 + beta_1 * x
-
-#actual data differs due to information we don't have
-epsilon = rnorm(n)
-y = h_star_x + epsilon
+mean(simple_df$null_residuals)
+mean(simple_df$residuals)
 ```
 
-The true relationship is plotted below in green.
+Let's take a look at predictions by truth:
+
 
 ```{r}
-df = data.frame(x = x, y = y, h_star_x = h_star_x)
-basic = ggplot(df, aes(x, y)) +
-  geom_point() +
-  geom_abline(intercept = beta_0, slope = beta_1, col = "darkgreen")
-basic
+ggplot(simple_df, aes(x = gs, y = y)) + 
+  geom_point() + 
+  xlim(0, max(simple_df$gs, y)) + 
+  ylim(0, max(simple_df$gs, y)) + 
+  xlab("yhat") + 
+  coord_fixed() + 
+  geom_abline(intercept = 0, slope = 1, color = "orange")
 ```
 
-And the estimated line $g$ (in blue) is pretty close:
+Linear regression is pretty popular so there's obviously support for this in R. Before we talk about this, we need to discuss another object type in R. It is called the "formula" object. Here's an example:
 
 ```{r}
-mod = lm(y ~ x)
-b = coef(mod)
-basic +
-  geom_abline(intercept = b[1], slope = b[2], col = "blue")
+simple_linear_model_formula = as.formula("y ~ x")
+simple_linear_model_formula
 ```
 
-They're basically right on top of each other: estimation error near zero.
+You can use a convenience:
 
 ```{r}
+simple_linear_model_formula = y ~ x
+simple_linear_model_formula
+```
+
+How did this work? R interprets this as a formula because it sees the tilde inside (you have to dig pretty deep into the R language to understand the tilde operator but feel free to ignore it now).
+
+By default the formula object when executed prints out the string you supplied. But obviously it is not just a string. This object contains instructions to model `y` with `x`. This may seem opaque now but you'll see how this works soon.
+
+Getting back to support for the default linear model. The popular function for that implements least squares linear regression is loaded into R automatically in the package `stats`. Here is a list of packages that are loaded into R by default (save the `ggplot2` and RStudio's addition):
+
+```{r}
+search()
+```
+
+The function `lm` runs least squares. Let's see it:
+
+```{r}
+simple_linear_model = lm(simple_linear_model_formula)
+simple_linear_model
+```
+
+You can skip a step by putting the formula in-line (this is how it's usually done):
+
+
+```{r}
+simple_linear_model = lm(y ~ x)
+simple_linear_model
+```
+
+What did this do? By specifying the formula that $y$ should be modeled with $x$ sing the simple linear model $y = w_0 + w_1 x$
+By default it prints out $b_0$ and $b_1$. You can store the vector via:
+
+```{r}
+b = coef(simple_linear_model)
 b
-c(beta_0, beta_1)
+names(b)
+class(b) #i.e. a vector of numbers dimension 2 where each entry is named
 ```
 
-And the $R^2$ is:
+You can query the linear model about its fit as well:
 
 ```{r}
-summary(mod)$r.squared
+names(summary(simple_linear_model))
+summary(simple_linear_model)$r.squared #the R^2
+summary(simple_linear_model)$sigma #the RMSE
 ```
 
-Not great... plenty of room for overfitting the nonsense epsilons.
-
-Now what happens if we add a random predictor? 
-
-* We know that $R^2$ will go up. 
-* But since this predictor is random, it is independent of the best model $h^*(x)$, hence it will constitute *overfitting*. 
-* Overfitting is bad because it induces estimation error and $g$ will diverge from $h*$ (previous demo)
-* This divergence leads to bad oos error (generalization error) meaning subpar predictions when we actually use the model in the future
-
-Okay - but how bad? It only depends on how much $g$ diverges from $h^*$. Let's look at this divergence slowly. We create a new oos data set made from evenly spaced $x$ values across its range and random values of the nonsense predictors. We use this to calculated oos $s_e$.
+Cleanup...
 
 ```{r}
-p_fake = 98
-set.seed(1984)
-X = data.frame(matrix(c(x, rnorm(n * p_fake)), ncol = 1 + p_fake, nrow = n))
-mod = lm(y ~ ., X)
+rm(list = ls())
+```
+
+
+## Simple Linear Regression with an example data set
+
+Load up the famous Boston Housing data
+
+```{r}
+?MASS::Boston
+Xy = MASS::Boston
+head(Xy)
+```
+
+We would like to see how each feature relates to the response, `medv`. This is a quick and dirty way to do it:
+
+```{r}
+for (feature in setdiff(colnames(Xy), "medv")){
+  plot(ggplot(Xy, aes(x = Xy[, feature], y = medv)) + geom_point() + xlab(feature))
+}
+```
+
+Let's try to explain `medv` using the feature `rm` in a simple linear regression (least squares) model.
+
+```{r}
+x = Xy$rm
+y = Xy$medv
+
+r = cor(x, y)
+s_x = sd(x)
+s_y = sd(y)
+ybar = mean(y)
+xbar = mean(x)
+
+b_1 = r * s_y / s_x
+b_0 = ybar - b_1 * xbar
+b_0
+b_1
+```
+
+and we can plot this line atop the data:
+
+```{r}
+simple_viz_obj = ggplot(Xy, aes(x = rm, y = medv)) + geom_point()
+simple_ls_regression_line = geom_abline(intercept = b_0, slope = b_1, color = "red")
+simple_viz_obj + simple_ls_regression_line
+```
+
+And how well did we do?
+
+```{r}
+yhat = b_0 + b_1 * x #this is the g(x^*) function!
+e = y - yhat
+sse = sum(e^2)
+mse = sse / length(y)
+rmse = sqrt(mse)
+sse
+mse
+rmse
+
+s_sq_y = var(y)
+s_sq_e = var(e)
+rsq = (s_sq_y - s_sq_e) / s_sq_y
+rsq
+```
+
+SSE is not a super useful number alone. MSE is not super useful alone. RMSE is... what does it mean? What does $R^2$ mean?
+
+
+```{r}
+Xy$null_residuals = y - mean(y)
+Xy$residuals = e
+
+ggplot(Xy) + 
+  stat_density(aes(x = residuals), fill = "darkgreen", alpha = 0.6, adjust = 0.5) + 
+  stat_density(aes(x = null_residuals, fill = "red", alpha = 0.6, adjust = 0.5)) +
+  theme(legend.position = "none")
+```
+
+This is not a great model. Why? Three sources of error... what do you think are the biggest sources of error?
+
+```{r}
+rm(list = ls())
+```
+
+Let's do this again using R's `lm` function. Here we can leverage the data frame object by using the names of the variables in our model formula:
+
+```{r}
+mod = lm(medv ~ rm, data = MASS::Boston)
+```
+
+I read this as "build a linear model where we explain median household value using the average number of rooms in the Boston housing dataset". One line! We can of course ping the model for everything we've been talking about:
+
+```{r}
 coef(mod)
-y_hat = predict(mod, X)
-s_e_in_sample = sd(y - y_hat)
-
-nstar = 1000
-set.seed(1984)
-Xstar = matrix(c(seq(xmin, xmax, length.out = nstar), rnorm(nstar * p_fake)), ncol = 1 + p_fake)
-y_stars = beta_0 + beta_1 * Xstar[, 1] + rnorm(nstar)
-y_hat_stars = cbind(1, Xstar) %*% as.matrix(coef(mod))
-s_e_oos = sd(y_stars - y_hat_stars)
-basic_with_yhat = basic +
-  geom_point(data = data.frame(x = x, y = y_hat), aes(x = x, y = y), col = "purple") + 
-  xlim(0, 1) + ylim(-3, 8) +
-  ggtitle(
-    paste("Linear Model with", p_fake, "fake predictors"), 
-    paste("Rsq =", round(summary(mod)$r.squared * 100, 2), "percent, in-sample s_e =", round(s_e_in_sample, 2), "and oos s_e =", round(s_e_oos, 2)))
-basic_with_yhat
-
-basic_with_yhat +
-  geom_line(data = data.frame(x = Xstar[, 1], y = y_hat_stars), aes(x = x, y = y), col = "orange")
-```
-
-Lesson: it takes a bit of time to overfit badly. Don't worry about a few extra degrees of freedom if you have $n$ much larger than $p$. But it will eventually be corrosive!
-
-
-# Assessing overfitting in practice
-
-Let's examine this again. This time we use one data set which is split between training and testing.
-
-```{r}
-set.seed(1003)
-n = 100
-beta_0 = 1
-beta_1 = 5
-xmin = 0
-xmax = 1
-p = 50
-X = matrix(runif(n * p, xmin, xmax), ncol = p)
-
-#best possible model - only one predictor matters!
-h_star_x = beta_0 + beta_1 * X[,1 ]
-
-#actual data differs due to information we don't have
-epsilon = rnorm(n)
-y = h_star_x + epsilon
-```
-
-Now we split $\mathbb{D}$ into training and testing. We define $K$ first, the inverse proportion of the test size.
-
-```{r}
-K = 5 #i.e. the test set is 1/5th of the entire historical dataset
-
-#a simple algorithm to do this is to sample indices directly
-test_indices = sample(1 : n, 1 / K * n)
-train_indices = setdiff(1 : n, test_indices)
-
-#now pull out the matrices and vectors based on the indices
-X_train = X[train_indices, ]
-y_train = y[train_indices]
-X_test = X[test_indices, ]
-y_test = y[test_indices]
-
-#let's ensure these are all correct
-dim(X_train)
-dim(X_test)
-length(y_train)
-length(y_test)
-```
-
-Now let's fit the model $g$ to the training data and compute in-sample error metrics:
-
-```{r}
-mod = lm(y_train ~ ., data.frame(X_train))
 summary(mod)$r.squared
-sd(mod$residuals)
+summary(mod)$sigma
 ```
 
-Now let's see how we do on the test data. We compute $R^2$ and $s_e$ out of sample:
+And ggplot has amazing integration. Here it runs the model internally and gives smoothed confidence bands (we did not discuss this):
 
 ```{r}
-y_hat_oos = predict(mod, data.frame(X_test))
-oos_residuals = y_test - y_hat_oos
-1 - sum(oos_residuals^2) / sum((y_test - mean(y_test))^2)
-sd(oos_residuals)
+ggplot(MASS::Boston, aes(rm, medv)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
 ```
-
-MUCH worse!! Why? We overfit big time...
-
-Can we go back now and fit a new model and see how we did? NO...
-
-So how are we supposed to fix a "bad" model? We can't unless we do something smarter. We'll get there.
-
-# Nonlinear Linear Regression: Polynomial Regression
-
-Let's generate a polynomial model of degree 2 ($f = h^* \in \mathcal{H}$) and let $\epsilon$ be random noise (the error due to ignorance) for $\mathbb{D}$ featuring $n = 2$.
 
 ```{r}
-set.seed(1003)
-n = 25
-beta_0 = 1
-beta_1 = 0
-beta_2 = 1
-x = runif(n, -2, 5)
-#best possible model
-h_star_x = beta_0 + beta_1 * x + beta_2 * x^2
-
-#actual data differs due to information we don't have
-epsilon = rnorm(n)
-y = h_star_x + epsilon
-
-#scatterplot it
-df = data.frame(x = x, y = y, h_star_x = h_star_x)
-basic = ggplot(df, aes(x, y)) +
-  geom_point()
-basic
+rm(list = ls())
 ```
 
-Let's try to estimate with a line:
+
+Let's take a look at another dataset.
 
 ```{r}
-linear_mod = lm(y ~ x)
-b_linear = summary(linear_mod)$coef
-basic + geom_abline(intercept = b_linear[1], slope = b_linear[2], col = "red")
+?MASS::Cars93
+cars = MASS::Cars93
+(cars)
+dim(cars)
 ```
 
-The relationship is "underfit". $\mathcal{H}$ is not rich enough right now to express something close to $f(x)$. But it is better than the null model!
-
-Now let's do a polynomial regression of degree two. Let's do so manually:
+Usually, we are trying to build a model for `Price`. Let's see how `Horsepower` is related to price:
 
 ```{r}
-X = as.matrix(cbind(1, x, x^2))
-b = solve(t(X) %*% X) %*% t(X) %*% y
-b
-c(beta_0, beta_1, beta_2)
+ggplot(cars, aes(Horsepower, Price)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
 ```
 
-These are about the same as the $\beta_0, \beta_1$ and $\beta_2$ as defined in $f(x)$ the true model. In order to graph this, we can no longer use the routine `geom_abline`, we need to use `stat_function`.
 
 ```{r}
-plot_function_degree_2 = function(x, b){
-  b[1] + b[2] * x + b[3] * x^2
-}
-
-basic + stat_function(fun = plot_function_degree_2, args = list(b = b), col= "darkgreen")
+simple_linear_model = lm(Price ~ Horsepower, data = cars)
+coef(simple_linear_model)
+summary(simple_linear_model)$r.squared
+summary(simple_linear_model)$sigma
 ```
 
-Now let's try polynomial of degree 3:
+62\% is pretty good $R^2$! But the RMSE is about \$6,000. Using the empirical rule heuristic, that means you can only predict within $\pm \$12,000$ around 95\% of the time. Not so good!
+
+# Predictions with linear models in R
+
+After the model is fit, you may want to predict with it using the $g$ function. Of course R can do this:
 
 ```{r}
-X = as.matrix(cbind(1, x, x^2, x^3))
-b = solve(t(X) %*% X) %*% t(X) %*% y
-b
-
-plot_function_degree_3 = function(x, b){
-  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3
-}
-
-basic + stat_function(fun = plot_function_degree_3, args = list(b = b), col= "darkgreen")
+predict(simple_linear_model, data.frame(Horsepower = 400)) #i.e. g(400)
+predict(simple_linear_model, data.frame(Horsepower = c(400, 450, 500))) #i.e. g(400), g(450), g(500)
 ```
-Still the same. Why? The $x^3$ term is like adding one "nonsense" predictor. One nonsense predictor marginally affects $R^2$ but it doesn't matter too much.
 
-Now let's try polynomial of degree 8:
+##Simple regression with nominal variables
+
+Let's load up the cars data again.
 
 ```{r}
-X = as.matrix(cbind(1, x, x^2, x^3, x^4, x^5, x^6, x^7, x^8))
-b = solve(t(X) %*% X) %*% t(X) %*% y
-b
-
-plot_function_degree_8 = function(x, b){
-  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 
-}
-
-basic + stat_function(fun = plot_function_degree_8, args = list(b = b), col= "darkgreen")
+?MASS::Cars93
+cars = MASS::Cars93
+(cars)
+dim(cars)
 ```
 
-We are seeing now a little bit of "overfitting" in the edge(s). We now have $p=11$ and $n=100$. We can do a lot worse!
-
-Let's learn how to do this in R first without having to resort to manual linear algebra. R has a function called "poly" that can be used *inside* formula declarations.
-
-Let's first fit the degree 2 model:
+Let's take a look at the factor variable as the predictor. We'll use `Origin` in this example:
 
 ```{r}
-degree_2_poly_mod = lm(y ~ poly(x, 2, raw = TRUE))
-head(model.matrix(~ poly(x, 2, raw = TRUE))) #the model matrix for this regression - just to check
-b_poly_2 = coef(degree_2_poly_mod)
-b_poly_2
-summary(degree_2_poly_mod)$r.squared
+table(cars$Origin)
 ```
 
-Let's go on a slight tangent. And look at this regression without using the raw polynomial.
+We can plot how this looks:
 
 ```{r}
-Xmm = model.matrix(~ poly(x, 10))
-head(Xmm) #the model matrix for this regression - just to check
-Xmm[, 1] %*% Xmm[, 2]
-Xmm[, 2] %*% Xmm[, 2]
-Xmm[, 2] %*% Xmm[, 3]
-Xmm[, 3] %*% Xmm[, 3]
+pacman::p_load(ggplot2)
+ggplot(cars, aes(Origin, Price)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
 ```
 
-Are thse orthogonal polynomials? How is the `poly` function without `raw = TRUE` working to generate a model matrix?
+Note that ggplot cannot handle fitting a line with a factor variable.
+
+However...
 
 ```{r}
-degree_2_orthog_poly_mod = lm(y ~ poly(x, 2))
-b_poly_2 = coef(degree_2_orthog_poly_mod)
-b_poly_2
-summary(degree_2_orthog_poly_mod)$r.squared
+simple_linear_model = lm(Price ~ Origin, data = cars)
+coef(simple_linear_model)
+summary(simple_linear_model)$r.squared
+summary(simple_linear_model)$sigma
 ```
 
-Why is this a good idea to use orthogonal polynomials?
+What happened here? The `lm` function can handle factors. It picks a level to be the reference category (in this case, it's origin = USA) and the fitted slope $b_1$ would be the difference between non-USA and USA. Does it make sense that the slope is positive? Yes - foreign cars charge transport fees and there are a lot of luxury foreign cars.
 
-Same as we got before! We use "raw" polynomials to keep them interpretable and on the same scale as the manual models we were fitting.
+Why is $R^2$ so low?? Remember the null model is one $\bar{y}$, this model is just two $\bar{y}$'s. How much variance can you possible expect to explain with just two possible prediction values?? Now take a look at RMSE. It's about \$10,000. Before, it was about \$6,000 and the $R^2$ = 62\%. Yes the RMSE has gone up in this case. $R^2$ is not proportion standard error explained, it's proportion variance and that squared error is very different than its square root.
 
-Now let's do polynomial of degree 13:
+Let's cast this predict as numeric and run it again just to make sure it will be the same. We first code a new dummy variable:
 
 ```{r}
-degree_13_poly_mod = lm(y ~ poly(x, 13, raw = TRUE))
-b_poly_13 = coef(degree_13_poly_mod)
-
-plot_function_degree_13 = function(x, b){
-  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 + b[10] * x^9  + b[11] * x^10 + b[12] * x^11 + b[13] * x^12 + b[14] * x^13
-}
-
-basic + stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "purple")# + ylim(c(0, 25)) #+ xlim(c(-2, 5.2))
+cars$origin_is_not_usa = ifelse(cars$Origin == "non-USA", 1, 0)
 ```
 
-What's happening for small values of $x$ (and a bit for large values)? This is called [Runge's Phenomenon](https://en.wikipedia.org/wiki/Runge%27s_phenomenon) meaning that the boundary activity of high-order polynomials has very large derivatives. Let's go back to the same scale as before and see what's happening:
+and then we model using this new dummy variable:
 
 ```{r}
-basic + 
-  coord_cartesian(xlim = c(-2, 5), ylim = c(-3, 25)) + 
-  stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "purple")
+simple_linear_model = lm(Price ~ origin_is_not_usa, data = cars)
+coef(simple_linear_model)
+summary(simple_linear_model)$r.squared
+summary(simple_linear_model)$sigma
 ```
+
+Note the reference category is USA and the "non-USA" coefficient indicates the difference in sample averages.
+
+Note that now ggplot can handle the line:
+
+```{r}
+ggplot(cars, aes(origin_is_not_usa, Price)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+```
+
+Let's code the dummy variable differently to take a look at the equivalent regression but this time with the reference category as non-USA
+
+```{r}
+cars$origin_is_usa = ifelse(cars$Origin == "USA", 1, 0)
+```
+
+```{r}
+simple_linear_model = lm(Price ~ origin_is_usa, data = cars)
+coef(simple_linear_model)
+summary(simple_linear_model)$r.squared
+summary(simple_linear_model)$sigma
+```
+
+The coefficients here are like "the opposite" in some sense of what we just saw. 
+
+And of course $R^2$ and RMSE are equivalent - it's the same linear model with the same information, just coded differently.
+
+The following is not covered right now. We may return to it later. I will leave out the intercept:
+
+```{r}
+simple_linear_model = lm(Price ~ 0 + Origin, data = cars)
+coef(simple_linear_model)
+summary(simple_linear_model)$r.squared
+summary(simple_linear_model)$sigma
+```
+
+I think the `lm` method is calculating $R^2$ differently here if there is no intercept. I think the null model it is comparing to is $g = 0$ not $\bar{y}$.
+
+Let's do an example of a categorical nominal variable with L>2 levels.
+
+```{r}
+summary(cars)
+table(cars$Type)
+mean(cars[cars$Type == "Compact", "Price"])
+mean(cars[cars$Type == "Large",   "Price"])
+mean(cars[cars$Type == "Midsize", "Price"])
+mean(cars[cars$Type == "Small",   "Price"])
+mean(cars[cars$Type == "Sporty",  "Price"])
+mean(cars[cars$Type == "Van",     "Price"])
+lm(Price ~ 0 + Type, cars)
+lm(Price ~ Type, cars)
+```
+What is the reference level in this variable? Can we change it?
+
+```{r}
+levels(cars$Type)
+cars$Type = relevel(cars$Type, ref = "Van")
+lm(Price ~ Type, cars)
+lm(Price ~ 0 + Type, cars)
+```
+
+
+## Correlation and Covariance
+
+Let's load up the Boston Housing data again.
+
+```{r}
+boston = MASS::Boston
+str(boston)
+```
+
+Let us take a look at some covariances and correlations with the response, the median home value.
+
+```{r}
+pacman::p_load(ggplot2)
+cov(boston$rm, boston$medv)
+cor(boston$rm, boston$medv)
+ggplot(boston, aes(rm, medv)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+cov(boston$indus, boston$medv)
+cor(boston$indus, boston$medv)
+ggplot(boston, aes(indus, medv)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+```
+
+Ever wonder why it's called $R^2$?
+
+```{r}
+summary(lm(medv ~ rm, boston))$r.squared
+cor(boston$rm, boston$medv)^2
+summary(lm(medv ~ indus, boston))$r.squared
+cor(boston$indus, boston$medv)^2
+```
+
+
+
+
+
 
 

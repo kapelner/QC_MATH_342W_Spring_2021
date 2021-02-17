@@ -1,459 +1,419 @@
 ---
 title: "Practice Lecture 5 MATH 390.4 Queens College"
 author: "Professor Adam Kapelner"
-date: "February 27, 2020"
+date: "February 10, 2021"
 ---
 
-## Eigendecomposition in R
+
+## Libraries in R
+
+So far we've only made use of "base R". This is the funcionality included from a vanilla installation of R. 
+
+R has a huge worldwide community of contributors. Some contribute to newer version of base R, but most create open-source "R packages" or "libraries". Many libraries come preinstalled. For instance, the MASS library which stands for "Modern Applied Statistics with S" (a famous textbook of R). We can call a function from the MASS library via the following:
 
 ```{r}
-B = array(seq(1, 4), dim = c(2, 2))
-B
-eigen_decomp = eigen(B)
-V = eigen_decomp$vectors
-V
-v1 = V[, 1, drop = FALSE]
-v2 = V[, 2, drop = FALSE]
-lambdas = eigen_decomp$values
-lambdas
-lambda1 = lambdas[1]
-lambda2 = lambdas[2]
-B %*% v1
-lambda1 * v1
-B %*% v2 
-lambda2 * v2
-B %*% v2 == lambda2 * v2 #why not?
-#diagonolization
-V %*% diag(lambdas) %*% solve(V)
+MASS::as.fractions(0.99)
+MASS::as.fractions(pi)
 ```
 
-## OLS using categorical predictors
-
-Note that historically this is called "Analysis of Variance" or "ANOVA" for short. But there is no difference to the computer, it still crunches the same matrices.
-
-Let's get the cars data again:
+Note we cannot just
 
 ```{r}
-cars = MASS::Cars93
-str(cars)
+as.fractions(pi)
 ```
 
-Let's try to model `Type`, a factor with 6 levels.
+We made use of the scope operator "::" to access a namespace beyond the usual "global namespace" which we've been used to. Parenthetically, you can use the ":::" to access the private / internal functions and variables. Anyone who understands object-oriented programming with public interfaces / APIs would cringe at this!!!
+
+If we are using the MASS library a lot, using the scope operator may get annoying. So similar to the "with" command, we can call
 
 ```{r}
-table(cars$Type)
+library(MASS)
 ```
 
-What will $\hay{y}$ look like? Should be the $\bar{y}$'s for each level. What is $p$? 6. Let' see:
+which loads all public methods (aka "exported" functions) into the public namespace. 
+
+Now, after the library invocation we can do the following and treat it as a normal function:
 
 ```{r}
-anova_mod = lm(Price ~ Type, cars)
-coef(anova_mod)
-summary(anova_mod)$r.squared
+as.fractions(pi)
 ```
 
-What's going on here? This one categorical variable got blown up into 5 features! How to interpret?? First need reference category. Which one is missing? `Compact`. So what is prediction for the compact type? The intercept. What is prediction of Large type? Intercept + Large, etc. How does this regression look. Let's see the model matrix:
+Is this always a good idea? No... everytime you call `library` it "dirties" the namespace by putting all the functions there and rewriting over functions there previously. This is bad because you are more likely to get namespace conflicts. For instance. Let's say package `kapelner` had a weird `sample` function. This would be clear:
 
 ```{r}
-Xmm = model.matrix(Price ~ Type, cars)
-head(Xmm, 20)
+v = rnorm(100)
+kapelner::sample(v)
+sample(v)
 ```
 
-The predictor `Type` got "dummified". (Remember we spoke about this in lecture 2)? There are now 5 dummy variables each representing one of the levels and the reference level is omitted because it is accounted for in the intercept. Let's make sure this is exactly what's going on.
+The first line is doing the special sample function and the second is using base R's sample. But if I do this:
 
 ```{r}
-y = cars$Price
-Xt = t(Xmm) 
-XtX = Xt %*% Xmm
-XtXinv = solve(XtX)
-b = XtXinv %*% Xt %*% y
-b
-yhat = Xmm %*% b
-e = y - yhat
-Rsq = (var(y) - var(e)) / var(y)
-Rsq
+library(kapelner)
+#...
+#...
+###10,000 lines of code in which you forget about the fact that the kapelner library is loaded
+#...
+#...
+sample(v)
 ```
 
-And of course the coefficients and $R^2$ are identical to the output from `lm`.
-
-If we want to do a more "pure ANOVA", we can get rid of the intercept and see the $\bar{y}$'s immediately. This is handled in R's formula designation by adding a zero:
+You may think you're getting base R sample function, but you're not and now you're in  bug-city! You would have to do the following to be explicit:
 
 ```{r}
-anova_mod = lm(Price ~ 0 + Type, cars)
-coef(anova_mod)
+library(kapelner)
+sample(v)
+base::sample(v)
 ```
 
-Is this correct?
+This is not a recommended thing to do. It's also not recommended for package developers to name functions the same as common base R functions. But this doesn't stop them!
+
+Back to real packages... the content for the MASS package was sitting on the hard drive since it comes with R. But what if you want to use a package that does not come with R? We'll have to install the package just like pip for Python, Rubygems for Ruby, R has a package management system built in. For example, here's a useful package for time series / finance stuff:
 
 ```{r}
-mean(cars$Price[cars$Type == "Compact"])
-mean(cars$Price[cars$Type == "Large"])
-mean(cars$Price[cars$Type == "Midsize"])
-mean(cars$Price[cars$Type == "Small"])
-mean(cars$Price[cars$Type == "Sporty"])
-mean(cars$Price[cars$Type == "Van"])
+install.packages("tseries")
 ```
 
-What does $R^2$ look like?
+Note that it knew where to go online - it went to a CRAN mirror. CRAN is the official repository for R packages. Now that it's installed, step 2 is to load it into namespace so we can more seamlessly access its functionality.
 
 ```{r}
-summary(anova_mod)$r.squared
+library(tseries)
 ```
 
-Remember this from last time? What happened? The $R^2$ calculation in `lm` is not accurate without the intercept. Keep this in mind. 
+What was a welcome message.
 
-What does the design matrx (model matrix) look like?
+This library is really cool e.g.
 
 ```{r}
-Xmm = model.matrix(Price ~ 0 + Type, cars)
-head(Xmm, 20)
+ibm_stock_history = get.hist.quote(instrument = "IBM", start = "2018-01-01", end = "2018-02-01")
+ibm_stock_history
 ```
 
-Very similar. 
-
-Regressions without an intercept are not recommended. Here's why. What if we were doing two factors? I want a linear model with both Type and Airbags:
+Is this a data frame?
 
 ```{r}
-table(cars$AirBags)
+class(ibm_stock_history)
 ```
 
-Airags is another nominal categorical variable, this time with three levels.
+Nope - they made their own data type. If we had a unit on "writing your own R packages", I would explain how this is done but alas there is no time...
 
-We invoke the model as follows.
+Let's say you're sharing your code with someone and one of your lines is loading a library e.g.
 
 ```{r}
-anova_mod = lm(Price ~ Type + AirBags, cars)
-coef(anova_mod)
-summary(anova_mod)$r.squared
+library(a_library_my_computer_does_not_have_installed_yet)
 ```
 
-What are interpretations now? What is the "reference level"? It's actually two levels in one: Type = compact and Airbags = Driver \& Passenger. 
-
-A deeper question: can we read off Type = Midsize and AirBags = none? No... this is a modeling "enhancement" we will discuss in a few lectures from now.
-
-If we model it without an intercept,
-
+And my computer doesn't have this library. Then we need to stop what we're doing and install. This could be annoying. Here is a convenience: use the pacman package that installs if necessary:
 
 ```{r}
-anova_mod = lm(Price ~ 0 + Type + AirBags, cars)
-coef(anova_mod)
+if (!require("pacman")){install.packages("pacman")} #installs pacman if necessary but does not load it!
+pacman::p_load(devtools) #ensures that devtools gets installed and loaded into the workspace but pacman does not (very tidy)!
 ```
 
-we only get $\bar{y}$'s for the first factor predictor crossed with the reference category of the second. So above `TypeCompact` refers to the average of Type = Compact and Airbags = Driver \& Passenger.
-
-Now let's create a linear model using one categorical predictor and one continuous predictor. The combination is called for historical reasons "Analysis of Covariance" or "ANCOVA" for short.
-
-Let's use `Type` and `Horsepower`:
+It is typical to then have a few lines declaring all packages on top of your R/Rmd script file. Here is an example header from one of my projects. 
 
 ```{r}
-ancova_mod = lm(Price ~ Type + Horsepower, cars)
-coef(ancova_mod)
-summary(ancova_mod)$r.squared
+#if (!require("pacman")){install.packages("pacman")}
+#pacman::p_load(knitr, randomForest, dplyr, tidyverse, doParallel, xtable, pracma, yaml)
 ```
 
-Interpretation of estimated coefficients? Why did $R^2$ increase? (We will be explaining this in detail in the next unit).
+We will be seeing this in pretty much all our demos in the future. It is very rare to be coding in R without making use of packages beyond base R. I'm going to require the use of pacman for HW / projects, etc. Just makes code easier to share, run, etc.
 
-What's going on the design / model matrix?
+The devtools package is important for modern R usage. It allows downloading R packages directly from source that are not even on CRAN. This allows you to get "bleeding edge" features. For example:
 
 ```{r}
-head(model.matrix(Price ~ Type + Horsepower, cars))
+install_github("yihui/knitr")
 ```
 
-Same as model matrix with just `Type`. Since `Horsepower` is continuous, it doesn't get dummified to more features.
-
-What if we went back to the `Type` regression, left out the intercept, dummified and added the intercept back in?
+However this doesn't always work!
 
 ```{r}
-Xmm = model.matrix(Price ~ 0 + Type, cars)
-Xmm = cbind(1, Xmm)
-head(Xmm)
+install_github("hadley/ggplot2")
 ```
 
-Are the columns linearly independent? No ... so when we try to get the hat matrix,
+Why can this fail? Because the computer you're running this on is not setup for compiling C++. Admittedly, MAC's usually succeed here and Windows usually fails here. To make it succeed you need to install a separate program beyond R called Rtools. This is one of the big advantages of using Linux and MAC over Windows - Windows just is more buggy when it comes to "real coding" and it gets in the way when you're out there trying to get stuff done. Linux absolutely rules here and because Linux is usually the production environment anyway, it may make sense to use it for all your assignments and coding anyway.
+
+Note, you can use the pacman library for this type of installation too. So your header becomes:
 
 ```{r}
-Xmm %*% solve(t(Xmm) %*% Xmm) %*% t(Xmm)
+if (!require("pacman")){install.packages("pacman")}
+pacman::p_load(devtools)
+pacman::p_load_gh("hadley/ggplot2")
 ```
 
-You can't invert a non-invertible matrix!!
+# Convenient Mapping Function for Lists with the purrr package
 
-What does R do when using the linear model function:
+We first load the library.
 
 ```{r}
-coef(lm(cars$Price ~ 0 + Xmm))
+pacman::p_load(purrr)
 ```
 
-SOMEHOW: it doesn't complain since it handles the non-invertibility (we don't know why...) but we do see that it's busted. Look at the coefficients! One is missing! What is it doing?? It's just arbitrarily dropping one (just like recommended).
+We will see later that the library `purrr` is part of a collection of libraries called the `tidyverse`.
 
-## Multivariate linear regression
-
-We want to run a multivariate linear regression $\mathcal{H}$ employing the least squares $\mathcal{A}$ manually using our derived linear algebra. Let us first pull out $\mathbb{D}$ as $y$ and $X$.
-
-Let's ensure we augment the `X` to include the 1 vector in front. We need this for the intercept in the $w$ vector in our spec, $\mathcal{H}$.
+Now imagine you have a collection of objects in a list. For example, let's let the object be matrices with different sizes:
 
 ```{r}
-y = MASS::Boston$medv
-X = cbind(1, MASS::Boston[, 1: 13])
+my_matrix_list = list()
+my_matrix_list[["first"]] = matrix(rnorm(9), nrow = 3)
+my_matrix_list[["second"]] = matrix(rnorm(12), nrow = 2)
+my_matrix_list[["third"]] = matrix(rnorm(8), nrow = 4)
+my_matrix_list
 ```
 
-Can we find $X^\top X$?
+And you want to operate on each of those objects and return a list. Let's say I want to get back the dimensions, or the first rows, or the average values and return the same keys:
 
 ```{r}
-XtX = t(X) %*% X
+my_dims_list = modify(my_matrix_list, ~ dim(.x))
+my_dims_list
+my_first_rows_list = modify(my_matrix_list, ~ .x[1, ])
+my_first_rows_list
+my_avgs_list = modify(my_matrix_list, ~ mean(.x))
+my_avgs_list
 ```
 
-The data frame is great, but unfortunately R does not allow us to use matrix algebra on it.
-
-So let's create a matrix. Note: there are no factor variables with more than one level. `chas` is a binary variable and that's okay. If there were factors with more than level, the following will not work. We will explore this later.
+This is a very convenient function known as "mapping" in functional programming. It saves a few lines of code e.g. the first `modify` would be:
 
 ```{r}
-X = as.matrix(cbind(1, MASS::Boston[, 1: 13]))
-```
-
-So $p = 12$ and $p + 1 = 14$.
-
-Let's make each predictor name nice just for aesthetic value:
-
-```{r}
-colnames(X)
-colnames(X)[1] = "(intercept)" #this is the standard way lm denotes it (which we will compare to later)
-colnames(X)
-```
-
-
-Can we find $X^\top X$?
-
-```{r}
-XtX = t(X) %*% X
-```
-
-Is it full rank?
-
-```{r}
-XtXinv = solve(XtX)
-```
-
-It worked. This means $X$ is full rank i.e. there is no linear duplication of information over the `13 + 1` predictors. In case we're in doubt:
-
-```{r}
-pacman::p_load(Matrix)
-rankMatrix(X)[[1]]
-rankMatrix(t(X))[[1]]
-rankMatrix(XtX)[[1]]
-rankMatrix(XtXinv)[[1]]
-```
-
-
-Let's calculate the LS solution then:
-
-```{r}
-b = XtXinv %*% t(X) %*% y
-b
-```
-
-Interpretation: if `crim` "increases" by 1, $\hat{y}$ increases by... etc etc. How would `crim` increase? Big philosophical topic which we are punting on (for now). If all predictors are 0, then $y$ would be predicted to be the intercept, 20.65. Strange concept... not usually important.
-
-What would $g$ look like?
-
-```{r}
-g_predict_function = function(x_star){
-   x_star %*% b
+my_dims_list = list() #make new list to store keys --> dimensions of original matrices
+for (key in names(my_matrix_list)){ #iterate over all list by key
+  .x = my_matrix_list[[key]] #get value at the key for this iteration
+  my_dims_list[[key]] = dim(.x) #run function on value and save it to new list
 }
-g_predict_function(X[7, ])
-y[7] #good prediction!
+my_dims_list
 ```
 
-Pretty simple...  and `x_star` could be a matrix of `n_star * (p + 1)` - where `n_star` is however many new observations you wish to predict.
+The above which takes 5 lines and is repeated again and again and again in code all takes one line using the `modify` function. 
 
-We can compute all predictions:
+The `modify` function uses funky syntax which is not standard R. And it doesn't have to be; packages are allowed to extend the language and use symbols to create their own little mini-language. The `.x` above is a dummy variable for the value in the iteration in the imagined for loop (like in my rewritten boilerplate code above). The "~" tilde symbol we will be seeing in base R later on in class but in a completely different context. Here it just means "run the following function".
+
+Modify is just one of the functions in the `purrr` package. See the following cheatsheet for more convenient functions: https://github.com/rstudio/cheatsheets/blob/master/purrr.pdf.
+
+
+## Loading datasets from R packages
+
+Since R is a language built for data and statistics, it has a ton of interesting data sets by default and even more that are contained in packages. There is really just one command to know:
 
 ```{r}
-yhat = X %*% b
+rm(list = ls())
+data(iris) #load the iris dataset (as a data frame). This dataset is included in the package "datasets" which is autoloaded by default
+class(iris)
+?iris
+#3 things I always do immediately upon getting a dataset
+head(iris)
+str(iris)
+summary(iris)
 ```
 
-Can you tell this is projected onto a 14 dimensionsal space from a 506 dimensional space? Not really... but it is...
-
-We can calculate the residuals:
+Here is another very famous dataset
 
 ```{r}
-e = y - yhat
-head(e)
+MASS::Boston #this just references the object but does not load it into the environment
+data(Boston) #error since package MASS is not loaded by default
+data(Boston, package = "MASS") #package argument not needed if package loaded 
+head(Boston)
 ```
 
-What is RMSE?
+Most data sets are names some descriptive name like "loandata" or "cars". R has so many datasets. Here they all are by package installed:
 
 ```{r}
-SSE = t(e) %*% e
-MSE = 1 / (nrow(X) - ncol(X)) * SSE
-RMSE = sqrt(MSE)
-SSE
-MSE
-RMSE
+data(package = .packages(all.available = TRUE))
 ```
 
-Interpret the RMSE...
+## Continue discussion concerning data frames and the modeling from class
 
-We can calculate $R^2$ two ways:
+We quickly recreate our data frame from last class:
 
 ```{r}
-s_sq_y = var(y)
-s_sq_e = var(e)
-Rsq = (s_sq_y - s_sq_e) / s_sq_y
-Rsq
-
-n = length(e)
-SST = (n - 1) * s_sq_y
-Rsq = 1 - SSE / SST
-Rsq
+n = 100
+X = data.frame(
+  salary = round(rnorm(n, 50000, 20000)),
+  has_past_unpaid_loan = rbinom(n, size = 1, prob = 0.2),
+  past_crime_severity = sample(
+    c("no crime", "infraction", "misdimeanor", "felony"),
+    size = n,
+    replace = TRUE,
+    prob = c(.50, .40, .08, .02)
+  )
+)
+row.names(X) = c(
+  "Sophia", "Emma", "Olivia", "Ava", "Mia", "Isabella", "Riley", 
+  "Aria", "Zoe", "Charlotte", "Lily", "Layla", "Amelia", "Emily", 
+  "Madelyn", "Aubrey", "Adalyn", "Madison", "Chloe", "Harper", 
+  "Abigail", "Aaliyah", "Avery", "Evelyn", "Kaylee", "Ella", "Ellie", 
+  "Scarlett", "Arianna", "Hailey", "Nora", "Addison", "Brooklyn", 
+  "Hannah", "Mila", "Leah", "Elizabeth", "Sarah", "Eliana", "Mackenzie", 
+  "Peyton", "Maria", "Grace", "Adeline", "Elena", "Anna", "Victoria", 
+  "Camilla", "Lillian", "Natalie", "Jackson", "Aiden", "Lucas", 
+  "Liam", "Noah", "Ethan", "Mason", "Caden", "Oliver", "Elijah", 
+  "Grayson", "Jacob", "Michael", "Benjamin", "Carter", "James", 
+  "Jayden", "Logan", "Alexander", "Caleb", "Ryan", "Luke", "Daniel", 
+  "Jack", "William", "Owen", "Gabriel", "Matthew", "Connor", "Jayce", 
+  "Isaac", "Sebastian", "Henry", "Muhammad", "Cameron", "Wyatt", 
+  "Dylan", "Nathan", "Nicholas", "Julian", "Eli", "Levi", "Isaiah", 
+  "Landon", "David", "Christian", "Andrew", "Brayden", "John", 
+  "Lincoln"
+)
+X
 ```
 
-Let's look at distribution of $y$ and $e$ to get an idea about $R^2$ as we did before:
-
+Remember our cross tab? Now we can get fancier using our new libary skills. Any Stata fans out there?
 
 ```{r}
-pacman::p_load(ggplot2)
-
-ggplot(data.frame(null_residuals = y - mean(y), residuals = e)) + 
-  stat_density(aes(x = residuals), fill = "darkgreen", alpha = 0.3) + 
-  stat_density(aes(x = null_residuals, fill = "red", alpha = 0.3)) +
-  theme(legend.position = "none")
+pacman::p_load(gmodels)
+CrossTable(X$has_past_unpaid_loan, X$past_crime_severity, chisq = TRUE)
 ```
 
-What does this tell you about $R^2$?
 
-Now, of course, R has its own function to do all this. We've already seen them! To run a multivariate least squares linear model,
+And add a new variable, the response to the data frame:
 
 ```{r}
-mult_lin_mod = lm(medv ~ ., MASS::Boston)
+X$paid_back_loan = factor(rbinom(n, size = 1, prob = 0.9), labels = c("No", "Yes"))
 ```
 
-No need to (a) create a matrix from the data frame (b) append a 1's column (c) do the linear algebra. It's all done for you. What is this formula `medv ~ .`? Previously we've seen `medv ~ rm` to indicate "fit phenomenon `medv` using predictor `rm`". Here, it's "fit phenomenon `medv` using all available predictors in the data frame". This is a very powerful formula!
-
-Let's extract the estimates $b$ as well as $R^2$ and RMSE:
+Note that our matrix is now no longer just $X$; it includes $y$. I could make a renamed copy, but I want to show off dropping this column and create a new object that's both features and response column-binded together:
 
 ```{r}
-coef(mult_lin_mod)
-summary(mult_lin_mod)$r.squared
-summary(mult_lin_mod)$sigma
+y = X$paid_back_loan
+X$paid_back_loan = NULL #drop column
+Xy = cbind(X, y) #an aside: what do you think the "rbind" function does?
+head(Xy) #make sure that worked
+summary(Xy) #much better now!
+#Note: Xy = X; rm(X) would've been easier
 ```
 
-Does R offer a simple way to do $g$? Sure...
+I prefer calling the full training set ${X, y}$ a data frame called $Xy$. 
+
+
+The object $X$ is now extraneous, so we should clean up our workspace now.
 
 ```{r}
-x_star = MASS::Boston[7, ]
-y_hat_star = predict(mult_lin_mod, newdata = x_star)
-y_hat_star
-y[7]
+rm(list = setdiff(ls(), "Xy"))
 ```
 
-If you care about the internals of what R is doing, it retraces our steps perfectly. It first creates the "model matrix" we called the "design matrix" and denoted it X:
+
+## The Null Model
 
 ```{r}
-Xmm = model.matrix(medv ~ ., MASS::Boston)
-head(Xmm)
-head(X) #same
+#There's no standard R function for sample mode!!!
+sample_mode = function(data){
+  mode_name = names(sort(-table(data)))[1]
+  if (class(data) == "factor"){
+    factor(mode_name, levels = levels(data))
+  } else if (class(data) == "numeric"){
+    as.numeric(mode_name)
+  } else if (class(data) == "integer"){
+    as.integer(mode_name)
+  } else {
+    mode_name
+  }
+}
+
+g0 = function(){
+  sample_mode(Xy$y) #return mode regardless of x
+} 
+
+g0()
 ```
 
-Then it uses an internal function to compute the linear algebra:
+
+## The Threshold Model
+
+Let's compute the threshold model and see what happens. Here's an inefficent but quite pedagogical way to do this:
 
 ```{r}
-raw_mod = lm.fit(Xmm, y)
-raw_mod$coefficients
+n = nrow(Xy)
+num_errors_by_parameter = matrix(NA, nrow = n, ncol = 2)
+colnames(num_errors_by_parameter) = c("threshold_param", "num_errors")
+y_logical = Xy$y == "Yes"
+for (i in 1 : n){
+  threshold = Xy$salary[i]
+  num_errors = sum((Xy$salary > threshold) != y_logical)
+  num_errors_by_parameter[i, ] = c(threshold, num_errors)
+}
+num_errors_by_parameter
+
+#look at all thresholds in order
+num_errors_by_parameter[order(num_errors_by_parameter[, "num_errors"]), ]
+
+#now grab the smallest num errors
+best_row = order(num_errors_by_parameter[, "num_errors"])[1]
+x_star = c(num_errors_by_parameter[best_row, "threshold_param"], use.names = FALSE)
+x_star
 ```
 
-We will soon see the internals of the `lm.fit` algorithm when we do the linear algebra in class.
-
-## Null Model
+Let's program `g`, the model that is shipped as the prediction function for future `x_*`
 
 ```{r}
-y = MASS::Boston$medv
-mean(y)
+g = function(x){
+  ifelse(x > x_star, 1, 0)
+} 
+
+g(15000)
 ```
 
-We can use `lm`.
+
+## The Perceptron
+
+Time for some new data first... we are bored of the fabricated creditworthiness data.
 
 ```{r}
-mod = lm(y ~ 1)
-summary(mod)
-mod$fitted.values
+rm(list = ls())
+Xy = na.omit(MASS::biopsy) #The "breast cancer" data
+?MASS::biopsy
+head(Xy)
+X = Xy[, 2 : 10] #V1, V2, ..., V9
+head(X)
+y_binary = as.numeric(Xy$class == "malignant")
+table(y_binary)
 ```
 
-
-Let's do a simple example of projection. Let's project $y$ onto the intercept column, the column of all 1's. What do you think will happen?
+First question. Let $\mathcal{H}$ be the set $\{0, 1\}$ meaning $g = 0$ or $g = 1$. What are the error rates then on $\mathbb{D}$? 
 
 ```{r}
-ones = rep(1, length(y))
-H = ones %*% t(ones) / sum(ones^2)
-H[1 : 5, 1 : 5]
-#in fact
-unique(c(H))
+#If always 0, all the 1's are errors
+239 / (444 + 239)
+#If always 1, all the 0's are errors
+444 / (444 + 239)
+
+g0 = function(){
+  sample_mode(y_binary) #return mode regardless of x's
+} 
+
+g0()
 ```
 
-The whole matrix is just one single value for each element! What is this value? It's 1 / 506 where 506 is $n$. So what's going to happen?
+If your $g$ can't beat that, either your features $x_1, \ldots, x_p$ are terrible, and/or $\mathcal{H}$ was a terrible choice and/or $\mathcal{A}$ can't pull its weight.
+
+Okay... back to the "perceptron learning algorithm".
+
+Let's do so for one dimension - just "V1" in the breast cancer data. You will do an example with more features for the lab.
 
 ```{r}
-y_proj_ones = H %*% y
-head(y_proj_ones)
+# y_binary = ifelse(y_binary == 1, 0, 1)
+MAX_ITER = 1000
+w_vec = rep(0, 2) #intialize a 2-dim vector
+
+X1 = as.matrix(cbind(1, X[, 1, drop = FALSE]))
+
+for (iter in 1 : MAX_ITER){  
+  for (i in 1 : nrow(X1)){
+    x_i = X1[i, ]
+    yhat_i = ifelse(sum(x_i * w_vec) > 0, 1, 0)
+    y_i = y_binary[i]
+    w_vec[1] = w_vec[1] + (y_i - yhat_i) * x_i[1]
+    w_vec[2] = w_vec[2] + (y_i - yhat_i) * x_i[2]
+  }
+}
+w_vec
 ```
 
-Projection onto the space of all ones makes the null model ($g = \bar{y}$). It's the same as the model of response = intercept. The best intercept is $\bar{y}$.
-
-## Multivariate linear regression with the Hat Matrix
+What is our error rate?
 
 ```{r}
-X = as.matrix(cbind(1, MASS::Boston[, 1: 13]))
-Xt = t(X)
-XtXinv = solve(Xt %*% X)
-b = XtXinv %*% t(X) %*% y
-b
+yhat = ifelse(X1 %*% w_vec > 0, 1, 0)
+sum(y_binary != yhat) / length(y_binary)
 ```
 
-We can compute all predictions:
+Looks like the perceptron fit to just the first feature beat the null model (at least on the data in $\mathbb{D}$). Is this expected? Yes if the first feature is at all predictive of `y`.
 
-```{r}
-H = X %*% XtXinv %*% t(X)
-
-yhat = H %*% y
-head(yhat)
-```
-
-Can you tell this is projected onto a 13 dimensionsal space from a 506 dimensional space? Not really... but it is...
-
-Now let's project over and over...
-
-```{r}
-head(H %*% H %*% H %*% H %*% H %*% H %*% H %*% H %*% H %*% y)
-```
-
-Same thing! Once you project, you're there. That's the idempotency of $H$.
-
-Let's make sure that it really does represent the column space of $X$. Let's try to project different columns of $X$:
-
-```{r}
-head(X[, 1, drop = FALSE])
-head(H %*% X[, 1, drop = FALSE])
-
-head(X[, 2, drop = FALSE])
-head(H %*% X[, 2, drop = FALSE])
-
-head(X[, 3, drop = FALSE])
-head(H %*% X[, 3, drop = FALSE]) #why?? Numerical error...
-
-#etc....
-```
-
-We can calculate the residuals:
-
-```{r}
-I = diag(nrow(X))
-e = y - yhat
-head(e)
-e = (I - H) %*% y
-head(e)
-```
-
-Let's do that projection over and over onto the complement of the column space of $X$:
-
-```{r}
-head((I - H) %*% (I - H) %*% (I - H) %*% (I - H) %*% (I - H) %*% (I - H) %*% y)
-```
