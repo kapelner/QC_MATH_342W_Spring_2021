@@ -177,7 +177,21 @@ x_3_ord
 * Convert this variable into three binary variables without any information loss and put them into a data matrix.
 
 ```{r}
-#TO-DO
+x_3_infraction = as.integer(x_3 == "infraction")
+x_3_misdimeanor = as.integer(x_3 == "misdimeanor")
+x_3_felony = as.integer(x_3 == "felony")
+
+X = cbind(x_3_infraction, x_3_misdimeanor, x_3_felony)
+head(X)
+
+p_level_names = levels(x_3)[-1]
+X = matrix(NA, nrow = length(x_3), ncol = length(p_level_names))
+colnames(X) = p_level_names
+
+for (j in 1 : length(p_level_names)){
+  X[, j] = as.integer(x_3 == p_level_names[j])
+}
+head(X)
 ```
 
 * What should the sum of each row be (in English)? 
@@ -253,7 +267,15 @@ Print out a summary of the whole dataframe.
 * Randomly punch holes (i.e. `NA`) values in this matrix so that an each entry is missing with probability 30%.
 
 ```{r}
-#TO-DO
+n = 100
+X = matrix(rnorm(n^2), nrow = n, ncol = n)
+for (i in 1 : n){
+  for (j in 1 : n){
+    if (runif(1) < 0.3){
+      X[i,j] = NA
+    }
+  }
+}
 ```
 
 * Sort the rows in matrix `R` by the largest row sum to lowest. Be careful about the NA's!
