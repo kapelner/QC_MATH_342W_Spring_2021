@@ -1,0 +1,278 @@
+---
+title: "Lab 5"
+author: "Your Name Here"
+output: pdf_document
+date: "11:59PM March 7, 2020"
+---
+
+Load the Boston housing data frame and create the vector $y$ (the median value) and matrix $X$ (all other features) from the data frame. Name the columns the same as Boston except for the first name it "(Intercept)".
+
+```{r}
+y = MASS::Boston$medv
+X = MASS::Boston[ , 1: 13] 
+
+```
+
+Run the OLS linear model to get $b$, the vector of coefficients. Do not use `lm`.
+
+```{r}
+X = cbind(1,as.matrix(X))
+b = solve(t(X) %*% X ) %*% t(X) %*% y
+
+```
+
+Find the hat matrix for this regression `H`. Verify its dimension is correct and verify its rank is correct.
+
+```{r}
+H = X %*% solve(t(X) %*% X ) %*% t(X)
+dim(H)
+pacman::p_load(Matrix)
+rankMatrix(H)
+```
+
+Verify this is a projection matrix by verifying the two sufficient conditions. Use the `testthat` library's `expect_equal(matrix1, matrix2, tolerance = 1e-2)`.
+
+```{r}
+pacman::p_load(testthat)
+expect_equal(H, t(H))
+expect_equal(H, H %*% H)
+
+```
+
+Find the matrix that projects onto the space of residuals `Hcomp` and find its rank. Is this rank expected?
+
+```{r}
+Hcomp = diag(nrow(X)) - H
+rankMatrix(H)
+rankMatrix(Hcomp, tol = 1e-2)
+```
+
+Verify this is a projection matrix by verifying the two sufficient conditions. Use the `testthat` library.
+
+```{r}
+expect_equal(Hcomp, t(Hcomp))
+expect_equal(Hcomp, Hcomp %*% Hcomp)
+```
+
+Use `diag` to find the trace of both `H` and `Hcomp`.
+
+```{r}
+sum(diag(H))
+sum(diag(Hcomp))
+```
+
+Do you have a conjecture about the trace of an orthogonal projection matrix?
+ 
+trace is equal to the rank
+
+Find the eigendecomposition of both `H` and `Hcomp` as `eigenvals_H`, `eigenvecs_H`, `eigenvals_Hcomp`, `eigenvecs_Hcomp`. Verify these results are the correct dimensions.
+
+```{r}
+eigen_H = eigen(H)
+eigen_Hcomp = eigen(Hcomp)
+
+eigenvals_H = eigen_H$values
+eigenvecs_H = eigen_H$vectors
+eigenvals_Hcomp = eigen_Hcomp$values
+eigenvecs_Hcomp = eigen_Hcomp$vectors
+
+length(eigenvals_H)
+dim(eigenvecs_H)
+length(eigenvals_Hcomp)
+dim(eigenvecs_Hcomp)
+```
+
+The eigendecomposition suffers from numerical error which is making them become imaginary. We can coerce imaginary numbers back to real by using the `Re` function. There is also lots of numerical error. Use the `Re` function to coerce to real and the `round` function to round all four objects to the nearest 10 digits.
+
+```{r, warning = FALSE, message = FALSE}
+eigenvals_H = round(as.numeric(eigenvals_H), 10)
+eigenvecs_H = round(Re(eigenvecs_H), 10)
+eigenvals_Hcomp = round(as.numeric(eigenvals_Hcomp), 10)
+eigenvecs_Hcomp = round(Re(eigenvecs_Hcomp), 10)
+```
+
+Print out the eigenvalues of both `H` and `Hcomp`. Is this expected?
+
+```{r}
+eigenvals_H
+eigenvecs_H
+eigenvals_Hcomp
+```
+
+Find the length of all eigenvectors of `H` in one line. 
+
+```{r}
+apply(eigenvecs_H, MARGIN =2, FUN = function(v){
+  sqrt(sum(v^2))
+})
+```
+
+Is this expected? What is the convention for eigenvectors in R's `eigen` function?
+
+Yes. The convention is length 1.
+
+The first p+1 eigenvectors are the columns of $X$ but they are in arbitrary order. Find the column that represents the one-vector. 
+
+```{r}
+head(eigenvecs_H[, 3])
+```
+
+Why is it not exactly 506 1's?
+
+Numeric error
+
+Use the first p+1 eigenvectors as a model matrix and run the OLS model of medv on that model matrix. 
+
+
+```{r}
+mod1 = lm(y ~ X)
+mod2 = lm(y ~ eigenvecs_H[, 1:14])
+summary(mod1)
+summary(mod2)
+```
+
+Is b about the same above (in arbitrary order)?
+
+NO, the eigen vectors are scaled to be unit length
+
+Calculate $\hat{y}$ using the hat matrix.
+
+```{r}
+y_hat= H %*% y
+y_hat
+```
+
+Calculate $e$ two ways: (1) the difference of $y$ and $\hat{y}$ and (2) the projection onto the space of the residuals. Verify the two means of calculating the residuals provide the same results via `expect_equal`.
+
+```{r}
+e1 = y -y_hat
+e2 = Hcomp %*% y
+expect_equal(e1, e2)
+```
+
+Calculate $R^2$ using the angle relationship between the responses and their predictions.
+
+```{r}
+
+length_of_vec = function(v){sqrt(sum(v^2))}
+y_avg_adj = y - mean(y)
+y_yhat_adj = y_hat - mean(y)
+(sum(y_avg_adj * y_yhat_adj) / (length_of_vec(y_avg_adj) * length_of_vec(y_yhat_adj))) ** 2
+
+```
+
+Find the cosine-squared of $y - \bar{y}$ and $\hat{y} - \bar{y}$ and verify it is the same as $R^2$.
+
+```{r}
+summary(mod1)$r.squared
+```
+
+Verify $\hat{y}$ and $e$ are orthogonal.
+
+```{r}
+sum(y_hat*e1)
+
+```
+
+Verify $\hat{y} - \bar{y}$ and $e$ are orthogonal.
+
+```{r}
+sum((y_hat -mean(y)) *e1)
+```
+
+Verify the sum of squares identity which we learned was due to the Pythagorean Theorem (applies since the projection is specifically orthogonal). You need to compute all three quantities first: SST, SSR and SSE.
+
+```{r}
+#TO-DO
+```
+
+Create a matrix that is $(p + 1) \times (p + 1)$ full of NA's. Label the columns the same columns as X. Do not label the rows. For the first row, find the OLS estimate of the $y$ regressed on the first column only and put that in the first entry. For the second row, find the OLS estimates of the $y$ regressed on the first and second columns of $X$ only and put them in the first and second entries. For the third row, find the OLS estimates of the $y$ regressed on the first, second and third columns of $X$ only and put them in the first, second and third entries, etc. For the last row, fill it with the full OLS estimates.
+
+```{r}
+#TO-DO
+```
+
+Examine this matrix. Why are the estimates changing from row to row as you add in more predictors?
+
+#TO-DO
+
+Clear the workspace and load the diamonds dataset in the package `ggplot2`.
+
+```{r}
+#TODO
+```
+
+Extract $y$, the price variable and `col`, the nominal variable "color" as vectors.
+
+```{r}
+#TO-DO
+```
+
+Convert the `col` vector to $X$ which contains an intercept and an appropriate number of dummies. Let the color G be the refernce category as it is the modal color. Name the columns of $X$ appropriately. The first should be "(Intercept)". Delete `col`.
+
+```{r}
+#TO-DO
+```
+
+Repeat the iterative exercise above we did for Boston here.
+
+```{r}
+#TO-DO
+```
+
+Why didn't the estimates change as we added more and more features?
+
+#TO-DO
+
+Model `price` with both `color` and `clarity` with and without an intercept and report the coefficients.
+
+```{r}
+#TO-DO
+```
+
+Which coefficients did not change between the models and why?
+
+#TO-DO
+
+
+
+Create a 2x2 matrix with the first column 1's and the next column iid normals. Find the absolute value of the angle (in degrees, not radians) between the two columns.
+
+```{r}
+#TO-DO
+```
+
+Repeat this exercise $Nsim = 1e5$ times and report the average absolute angle.
+
+```{r}
+#TO-DO
+```
+
+Create a 2xn matrix with the first column 1's and the next column iid normals. Find the absolute value of the angle (in degrees, not radians) between the two columns. For $n \in {10, 50, 100, 200, 500, 1000}$, report the average absolute angle over $Nsim = 1e5$ simulations.
+
+```{r}
+#TO-DO
+```
+
+What is this absolute angle converging to? Why does this make sense?
+
+#TO-DO
+
+Create a vector $y$ by simulating $n = 100$ standard iid normals. Create a matrix of size 100 x 2 and populate the first column by all ones (for the intercept) and the second column by 100 standard iid normals. Find the $R^2$ of an OLS regression of `y ~ X`. Use matrix algebra.
+
+```{r}
+#TO-DO
+```
+
+Write a for loop to each time bind a new column of 100 standard iid normals to the matrix $X$ and find the $R^2$ each time until the number of columns is 100. Create a vector to save all $R^2$'s. What happened??
+
+```{r}
+#TO-DO
+```
+
+Add one final column to $X$ to bring the number of columns to 101. Then try to compute $R^2$. What happens?
+
+```{r}
+#TO-DO
+```
+

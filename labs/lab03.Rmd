@@ -1,0 +1,95 @@
+---
+title: "Lab 3"
+author: "Your Name Here"
+output: pdf_document
+date: "11:59PM March 4, 2021"
+---
+
+
+## Support Vector Machine
+
+
+```{r}
+X_simple_feature_matrix = as.matrix(Xy_simple[, 2 : 3])
+y_binary = as.numeric(Xy_simple$response == 1)
+```
+
+Use the `e1071` package to fit an SVM model to `y_binary` using the features in `X_simple_feature_matrix`. Do not specify the $\lambda$ (i.e. do not specify the `cost` argument). Call the model object `svm_model`. Otherwise the remaining code won't work.
+
+```{r}
+svm_model = #TO-DO
+```
+
+and then use the following code to visualize the line in purple:
+
+```{r}
+w_vec_simple_svm = c(
+  svm_model$rho, #the b term
+  -t(svm_model$coefs) %*% X_simple_feature_matrix[svm_model$index, ] # the other terms
+)
+simple_svm_line = geom_abline(
+    intercept = -w_vec_simple_svm[1] / w_vec_simple_svm[3], 
+    slope = -w_vec_simple_svm[2] / w_vec_simple_svm[3], 
+    color = "purple")
+simple_viz_obj + simple_perceptron_line + simple_svm_line
+```
+
+Is this SVM line a better fit than the perceptron?
+
+TO-DO
+
+3. Now write pseuocode for your own implementation of the linear support vector machine algorithm using the Vapnik objective function we discussed.
+
+Note there are differences between this spec and the perceptron learning algorithm spec in question \#1. You should figure out a way to respect the `MAX_ITER` argument value. 
+
+
+```{r}
+#' Support Vector Machine 
+#
+#' This function implements the hinge-loss + maximum margin linear support vector machine algorithm of Vladimir Vapnik (1963).
+#'
+#' @param Xinput      The training data features as an n x p matrix.
+#' @param y_binary    The training data responses as a vector of length n consisting of only 0's and 1's.
+#' @param MAX_ITER    The maximum number of iterations the algorithm performs. Defaults to 5000.
+#' @param lambda      A scalar hyperparameter trading off margin of the hyperplane versus average hinge loss.
+#'                    The default value is 1.
+#' @return            The computed final parameter (weight) as a vector of length p + 1
+linear_svm_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 5000, lambda = 0.1){
+  #TO-DO: write pseudo code in comments
+}
+```
+
+
+If you are enrolled in 390 the following is extra credit but if you're enrolled in 650, the following is required. Write the actual code. You may want to take a look at the `optimx` package we discussed in class. You can feel free to define another function (a "private" function) in this chunk if you wish. R has a way to create public and private functions, but I believe you need to create a package to do that (beyond the scope of this course).
+
+```{r}
+#' This function implements the hinge-loss + maximum margin linear support vector machine algorithm of Vladimir Vapnik (1963).
+#'
+#' @param Xinput      The training data features as an n x p matrix.
+#' @param y_binary    The training data responses as a vector of length n consisting of only 0's and 1's.
+#' @param MAX_ITER    The maximum number of iterations the algorithm performs. Defaults to 5000.
+#' @param lambda      A scalar hyperparameter trading off margin of the hyperplane versus average hinge loss.
+#'                    The default value is 1.
+#' @return            The computed final parameter (weight) as a vector of length p + 1
+linear_svm_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 5000, lambda = 0.1){
+  #TO-DO
+}
+```
+
+If you wrote code (the extra credit), run your function using the defaults and plot it in brown vis-a-vis the previous model's line:
+
+```{r}
+svm_model_weights = linear_svm_learning_algorithm(X_simple_feature_matrix, y_binary)
+my_svm_line = geom_abline(
+    intercept = svm_model_weights[1] / svm_model_weights[3],#NOTE: negative sign removed from intercept argument here
+    slope = -svm_model_weights[2] / svm_model_weights[3], 
+    color = "brown")
+simple_viz_obj  + my_svm_line
+```
+
+Is this the same as what the `e1071` implementation returned? Why or why not?
+
+
+
+
+
