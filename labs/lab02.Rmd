@@ -10,19 +10,47 @@ date: "11:59PM February 25, 2021"
 * Create a function `my_reverse` which takes as required input a vector and returns the vector in reverse where the first entry is the last entry, etc. No function calls are allowed inside your function otherwise that would defeat the purpose of the exercise! (Yes, there is a base R function that does this called `rev`). Use `head` on `v` and `tail` on `my_reverse(v)` to verify it works.
 
 ```{r}
-#TO-DO
+my_reverse = function(v){
+  v_rev = rep(NA, times=length((v)))
+  for(i in length(v):1){
+    v_rev[length(v) - i + 1] = v[i]
+  }
+  v_rev
+}
+
+v = 1:10
+
+my_reverse(v)
 ```
 
 * Create a function `flip_matrix` which takes as required input a matrix, an argument `dim_to_rev` that returns the matrix with the rows in reverse order or the columns in reverse order depending on the `dim_to_rev` argument. Let the default be the dimension of the matrix that is greater.
 
 ```{r}
-#TO-DO
+flip_matrix = function(x, dim_to_rev = NULL){
+  if(is.null(dim_to_rev)){
+    dim_to_rev = ifelse(nrow(x) >= ncol(x), "rows", "cols")
+  }
+  if(dim_to_rev == "rows"){
+    x[my_reverse(1:nrow(x))]
+  } else if (dim_to_rev == "cols"){
+    x(,my_reverse((1:ncol(x))))
+  } else {
+    stop("Illegal arg")
+  }
+}
+
+X = matrix(rnorm(100), nrow = 25, ncols=25)
+flip_matrix(X)
 ```
 
 * Create a list named `my_list` with keys "A", "B", ... where the entries are arrays of size 1, 2 x 2, 3 x 3 x 3, etc. Fill the array with the numbers 1, 2, 3, etc. Make 8 entries.
 
 ```{r}
-#TO-DO
+arrays=list()
+LETTERS
+arrays[["A"]] = array(data=1:4, dim=c(2,2))
+array(data=1:27, dim=c(3,3,3))
+arrays
 ```
 
 Run the following code:
@@ -49,6 +77,268 @@ Now cleanup the namespace by deleting all stored objects and functions:
 lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi posuere varius volutpat. Morbi faucibus ligula id massa ultricies viverra. Donec vehicula sagittis nisi non semper. Donec at tempor erat. Integer dapibus mi lectus, eu posuere arcu ultricies in. Cras suscipit id nibh lacinia elementum. Curabitur est augue, congue eget quam in, scelerisque semper magna. Aenean nulla ante, iaculis sed vehicula ac, finibus vel arcu. Mauris at sodales augue. "
 ```
 
+You have a set of names divided by gender (M / F) and generation (Boomer / GenX / Millenial):
+
+* M / Boomer      "Theodore, Bernard, Gene, Herbert, Ray, Tom, Lee, Alfred, Leroy, Eddie"
+* M / GenX        "Marc, Jamie, Greg, Darryl, Tim, Dean, Jon, Chris, Troy, Jeff"
+* M / Millennial  "Zachary, Dylan, Christian, Wesley, Seth, Austin, Gabriel, Evan, Casey, Luis"
+* F / Boomer      "Gloria, Joan, Dorothy, Shirley, Betty, Dianne, Kay, Marjorie, Lorraine, Mildred"
+* F / GenX        "Tracy, Dawn, Tina, Tammy, Melinda, Tamara, Tracey, Colleen, Sherri, Heidi"
+* F / Millennial  "Samantha, Alexis, Brittany, Lauren, Taylor, Bethany, Latoya, Candice, Brittney, Cheyenne"
+
+Create a list-within-a-list that will intelligently store this data.
+
+```{r}
+#HINT: 
+#strsplit("Theodore, Bernard, Gene, Herbert, Ray, Tom, Lee, Alfred, Leroy, Eddie", split = ", ")[[1]]
+#TO-DO
+```
+
+## Dataframe creation
 
 
+Imagine you are running an experiment with many manipulations. You have 14 levels in the variable "treatment" with levels a, b, c, etc. For each of those manipulations you have 3 submanipulations in a variable named "variation" with levels A, B, C. Then you have "gender" with levels M / F. Then you have "generation" with levels Boomer, GenX, Millenial. Then you will have 6 runs per each of these groups. In each set of 6 you will need to select a name without duplication from the appropriate set of names (from the last question). Create a data frame with columns treatment, variation, gender, generation, name and y that will store all the unique unit information in this experiment. Leave y empty because it will be measured as the experiment is executed.
 
+```{r}
+n = 14 * 3 * 2 * 3 * 10
+#X = data.frame(treatment = rep(NA,n), 
+#                ...
+#TO-DO
+```
+
+## Packages
+
+Install the package `pacman` using regular base R.
+
+```{r}
+install.packages("pacman")
+```
+
+
+First, install the package `testthat` (a widely accepted testing suite for R) from https://github.com/r-lib/testthat using `pacman`. If you are using Windows, this will be a long install, but you have to go through it for some of the stuff we are doing in class. LINUX (or MAC) is preferred for coding. If you can't get it to work, install this package from CRAN (still using `pacman`), but this is not recommended long term.
+
+```{r}
+pacman::p_load(testthat)
+```
+
+* Create vector `v` consisting of all numbers from -100 to 100 and test using the second line of code su
+
+```{r}
+v= seq(-100, 100)
+expect_equal(v, -100 : 101)
+```
+
+If there are any errors, the `expect_equal` function will tell you about them. If there are no errors, then it will be silent.
+
+Test the `my_reverse` function from lab2 using the following code:
+
+```{r}
+v = 1:100
+
+expect_equal(my_reverse(v), rev(v))
+expect_equal(my_reverse(c("A", "B", "C")), c("C", "B", "A"))
+```
+
+## Multinomial Classification using KNN
+
+Write a $k=1$ nearest neighbor algorithm using the Euclidean distance function. This is standard "Roxygen" format for documentation. Hopefully, we will get to packages at some point and we will go over this again. It is your job also to fill in this documentation.
+
+```{r}
+#' One Neareset Neighbor Classifier
+#'
+#' Classify an observation based on the label of the colosest observation in the set of training observations
+#'
+#' @param Xinput      A matrix of features for training data observations
+#' @param y_binary    The vector of training data labels
+#' @param Xtest       A test observation as a row vector
+#' @return            The predictive label for the test observation
+nn_algorithm_predict = function(Xinput, y_binary, Xtest){
+  n = nrow(Xinput)
+  distances = array(NA, n)
+  for(i in 1:n){
+    distances[i] = sum((Xinput[i,]-Xtest)^2)
+    
+  }
+  y_binary[which.min(distances)]
+}
+```
+
+Write a few tests to ensure it actually works:
+
+```{r}
+#TO-DO
+```
+
+We now add an argument `d` representing any legal distance function to the `nn_algorithm_predict` function. Update the implementation so it performs NN using that distance function. Set the default function to be the Euclidean distance in the original function. Also, alter the documentation in the appropriate places.
+
+```{r}
+#' One Neareset Neighbor Classifier
+#'
+#' Classify an observation based on the label of the colosest observation in the set of training observations
+#'
+#' @param Xinput      A matrix of features for training data observations
+#' @param y_binary    The vector of training data labels
+#' @param Xtest       A test observation as a row vector
+#' @param d           A distance function
+#' @return            The predictive label for the test observation
+nn_algorithm_predict = function(Xinput, y_binary, Xtest, d=function(v1,v2){sum((v1-v2)^2)}){
+  n = nrow(Xinput)
+  distances = array(NA, n)
+  for(i in 1:n){
+    distances[i] = d((Xinput[i,]-Xtest)^2)
+    
+  }
+  y_binary[which.min(distances)]
+}
+```
+
+For extra credit (unless you're a masters student), add an argument `k` to the `nn_algorithm_predict` function and update the implementation so it performs KNN. In the case of a tie, choose $\hat{y}$ randomly. Set the default `k` to be the square root of the size of $\mathcal{D}$ which is an empirical rule-of-thumb popularized by the "Pattern Classification" book by Duda, Hart and Stork (2007). Also, alter the documentation in the appropriate places.
+
+```{r}
+#TO-DO for the 650 students but extra credit for undergrads
+```
+
+## Basic Binary Classification Modeling
+
+* Load the famous `iris` data frame into the namespace. Provide a summary of the columns using the `skim` function in package `skimr` and write a few descriptive sentences about the distributions using the code below and in English.
+
+```{r}
+data(iris)
+pacman::p_load(skimr)
+skim(iris)
+```
+
+TO-DO: describe this data
+
+The outcome / label / response is `Species`. This is what we will be trying to predict. However, we only care about binary classification between "setosa" and "versicolor" for the purposes of this exercise. Thus the first order of business is to drop one class. Let's drop the data for the level "virginica" from the data frame.
+
+```{r}
+iris = iris[iris$Species != "virginica", ]
+```
+
+Now create a vector `y` that is length the number of remaining rows in the data frame whose entries are 0 if "setosa" and 1 if "versicolor".
+
+```{r}
+y = as.integer(iris$Species == "setosa")
+```
+
+* Write a function `mode` returning the sample mode.
+
+```{r}
+mode = function(v){
+  names(sort(table(v),decreasing = TRUE))
+  
+}
+mode()
+```
+
+* Fit a threshold model to `y` using the feature `Sepal.Length`. Write your own code to do this. What is the estimated value of the threshold parameter? Save the threshold value as `threshold`. 
+
+```{r}
+#TO-DO
+```
+
+What is the total number of errors this model makes?
+
+```{r}
+#TO-DO
+```
+
+Does the threshold model's performance make sense given the following summaries:
+
+```{r}
+threshold
+summary(iris[iris$Species == "setosa", "Sepal.Length"])
+summary(iris[iris$Species == "versicolor", "Sepal.Length"])
+```
+
+TO-DO: Write your answer here in English.
+
+Create the function `g` explicitly that can predict `y` from `x` being a new `Sepal.Length`.
+
+```{r}
+g = function(x){
+  #TO-DO
+}
+```
+
+
+## Perceptron
+
+You will code the "perceptron learning algorithm" for arbitrary number of features $p$. Take a look at the comments above the function. Respect the spec below:
+
+```{r}
+#' TO-DO: Provide a name for this function 
+#'
+#' TO-DO: Explain what this function does in a few sentences
+#'
+#' @param Xinput      TO-DO: Explain this
+#' @param y_binary    TO-DO: Explain this
+#' @param MAX_ITER    TO-DO: Explain this
+#' @param w           TO-DO: Explain this
+#'
+#' @return            The computed final parameter (weight) as a vector of length p + 1
+perceptron_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 1000, w = NULL){
+  #TO-DO
+}
+```
+
+To understand what the algorithm is doing - linear "discrimination" between two response categories, we can draw a picture. First let's make up some very simple training data $\mathbb{D}$.
+
+```{r}
+Xy_simple = data.frame(
+ response = factor(c(0, 0, 0, 1, 1, 1)), #nominal
+ first_feature = c(1, 1, 2, 3, 3, 4),    #continuous
+ second_feature = c(1, 2, 1, 3, 4, 3)    #continuous
+)
+```
+
+We haven't spoken about visualization yet, but it is important we do some of it now. Thus, I will write this code for you and you will just run it. First we load the visualization library we're going to use:
+
+```{r}
+pacman::p_load(ggplot2)
+```
+
+We are going to just get some plots and not talk about the code to generate them as we will have a whole unit on visualization using `ggplot2` in the future.
+
+Let's first plot $y$ by the two features so the coordinate plane will be the two features and we use different colors to represent the third dimension, $y$.
+
+```{r}
+simple_viz_obj = ggplot(Xy_simple, aes(x = first_feature, y = second_feature, color = response)) + 
+  geom_point(size = 5)
+simple_viz_obj
+```
+
+TO-DO: Explain this picture.
+
+Now, let us run the algorithm and see what happens:
+
+```{r}
+w_vec_simple_per = perceptron_learning_algorithm(
+  cbind(Xy_simple$first_feature, Xy_simple$second_feature),
+  as.numeric(Xy_simple$response == 1))
+w_vec_simple_per
+```
+
+Explain this output. What do the numbers mean? What is the intercept of this line and the slope? You will have to do some algebra.
+
+TO-DO
+
+
+```{r}
+simple_perceptron_line = geom_abline(
+    intercept = -w_vec_simple_per[1] / w_vec_simple_per[3], 
+    slope = -w_vec_simple_per[2] / w_vec_simple_per[3], 
+    color = "orange")
+simple_viz_obj + simple_perceptron_line
+```
+
+Explain this picture. Why is this line of separation not "satisfying" to you?
+
+TO-DO 
+
+For extra credit, program the maximum-margin hyperplane perceptron that provides the best linear discrimination model for linearly separable data. Make sure you provide ROxygen documentation for this function.
+
+```{r}
+#TO-DO
+```

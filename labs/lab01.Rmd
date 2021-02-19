@@ -1,6 +1,6 @@
 ---
 title: "Lab 1"
-author: "Your Name Here"
+author: "Alexis Montes"
 output: pdf_document
 date: "11:59PM February 18, 2021"
 ---
@@ -177,28 +177,51 @@ x_3_ord
 * Convert this variable into three binary variables without any information loss and put them into a data matrix.
 
 ```{r}
-#TO-DO
+x_3_matrix = matrix(nrow=100, ncol=3)
+currentRow = 1
+for(i in x_3_ord){
+  
+  if(i == "none"){
+    
+    x_3_matrix[currentRow,]<-c(0,0,0)
+    currentRow = currentRow + 1
+    
+  } else if (i == "infraction"){
+    x_3_matrix[currentRow, ] <-  c(1,0,0)
+    
+    currentRow = currentRow + 1
+  } else if (i == "misdimeanor"){
+    x_3_matrix[currentRow, ] <-  c(0,1,0)
+    currentRow = currentRow + 1
+  } else if (i == "felony"){
+    x_3_matrix[currentRow, ] <-  c(0,0,1)
+    
+    currentRow = currentRow + 1
+  }
+}
+x_3_matrix
 ```
 
 * What should the sum of each row be (in English)? 
 
-#TO-DO
+if the sum of a row =  1 then that person has some sort of criminal record
 
 Verify that. 
 
 
 ```{r}
-#TO-DO
+rowSums(x_3_matrix)
 ```
 
 * How should the column sum look (in English)? 
 
-#TO-DO
+The total sum of people that have a criminal record of some sort 
 
 Verify that.
 
 ```{r}
-#TO-DO
+number_of_people_with_records = sum(rowSums(x_3_matrix))
+print(paste("The Number of people with records is:", number_of_people_with_records))
 ```
 
 * Generate a matrix with 100 rows where the first column is realization from a normal with mean 17 and variance 38, the second column is uniform between -10 and 10, the third column is poisson with mean 6, the fourth column in exponential with lambda of 9, the fifth column is binomial with n = 20 and p = 0.12 and the sixth column is a binary variable with exactly 24% 1's dispersed randomly. Name the rows the entries of the `fake_first_names` vector.
@@ -223,19 +246,45 @@ fake_first_names = c(
   "Lincoln"
 )
 
-#TO-DO
+
+fifth_column_binomial = rbinom(n=20,size=length(fake_first_names), p=0.12 )
+sixth_column_binary = sample(
+   c(0,1),
+   size=length(fake_first_names),
+   replace = TRUE,
+   prob=c(.76,.24)
+ )
+
+fake_first_names_matrix = matrix(,nrow =length(fake_first_names), ncol=6, dimnames = list(fake_first_names), c(1:6) )
+for (r in 1:nrow(fake_first_names_matrix)){
+    fake_first_names_matrix[r,1] = rnorm(1, mean=17, sd= 38)
+    fake_first_names_matrix[r,2] = runif(1, min=-10, max=10)
+    fake_first_names_matrix[r,3] = rpois(1, 6)
+    fake_first_names_matrix[r,4] = rexp(1, 9)
+    fake_first_names_matrix[r,5] = sample(fifth_column_binomial, 1)
+    fake_first_names_matrix[r,6] = sixth_column_binary[r]
+    
+}
+fake_first_names_matrix
+
+sum(sixth_column_binary)
+
 ```
 
 * Create a data frame of the same data as above except make the binary variable a factor "DOMESTIC" vs "FOREIGN" for 0 and 1 respectively. Use RStudio's `View` function to ensure this worked as desired.
 
 ```{r}
-#TO-DO
+dataF = data.frame(fake_first_names_matrix)
 ```
 
 * Print out a table of the binary variable. Then print out the proportions of "DOMESTIC" vs "FOREIGN".
 
 ```{r}
-#TO-DO
+sum(dataF$X6 == 0)
+sum(dataF$X6 == 1)
+
+percent_domestic = sum(dataF$X6 == 0)/ length(dataF$X6)
+percent_foreign = sum(dataF$X6 == 1)/ length(dataF$X6)
 ```
 
 Print out a summary of the whole dataframe.
@@ -247,67 +296,112 @@ Print out a summary of the whole dataframe.
 * Let `n = 50`. Create a n x n matrix `R` of exactly 50% entries 0's, 25% 1's 25% 2's. These values should be in random locations.
 
 ```{r}
-#TO-DO
+
+ sample(
+   c(0,1,2),
+   size=10,
+   replace = TRUE,
+   prob=c(.50,.25,.25)
+ )
+
+n=50
+result = rep(c(0,1,2), round((n*n)*c(.50,.25,.25)))
+R = matrix(data=sample(result), nrow = n, ncol = n)
+
 ```
 
 * Randomly punch holes (i.e. `NA`) values in this matrix so that an each entry is missing with probability 30%.
 
 ```{r}
-#TO-DO
+holes = rep(c(0,1), round((n*n)*c(0.7,0.3)))
+holes_matrix = matrix(data=sample(holes), nrow=n, ncol=n)
+
+for (r in 1:nrow(R)){
+    for (c in 1:ncol(R)){
+        if(holes_matrix[r,c] == 1){
+          R[r,c] = NA
+        }
+    }
+}
 ```
 
 * Sort the rows in matrix `R` by the largest row sum to lowest. Be careful about the NA's!
 
 ```{r}
-#TO-DO
+test <- R[order(rowSums(R, na.rm = TRUE), decreasing = TRUE)]
+new_matrix = matrix(data=NA,ncol=n, nrow=n)
+
+Rsums = rowSums(R, na.rm = TRUE)
+for(i in 1:nrow(R)){
+  new_matrix[i,] <- R[which.min(Rsums),]
+  Rsums[which.min(Rsums)] = NA
+}
+
+rowSums(new_matrix, na.rm = TRUE)
 ```
 
 * We will now learn the `apply` function. This is a handy function that saves writing for loops which should be eschewed in R. Use the apply function to compute a vector whose entries are the standard deviation of each row. Use the apply function to compute a vector whose entries are the standard deviation of each column. Be careful about the NA's! This should be one line.
 
 ```{r}
-#TO-DO
+data <- data.frame(A1=round(rnorm(25,5,4)),A2=round(rnorm(25,5,4)),A3=round(rnorm(25,5,4)),
+A4=round(rnorm(25,5,4)),A5=round(rnorm(25,5,4)),A6=round(rnorm(25,5,4)))
+
+data_deviation = apply(data[,1:6],2,sd)
+
+data_deviation
 ```
 
 * Use the `apply` function to compute a vector whose entries are the count of entries that are 1 or 2 in each column. This should be one line.
 
 ```{r}
-#TO-DO
+data_count_entries = apply(data[,1:6],2,function(n){length(which(n==1)) + length(which(n==2))})
+data
 ```
 
 * Use the `split` function to create a list whose keys are the column number and values are the vector of the columns. Look at the last example in the documentation `?split`.
 
 ```{r}
-#TO-DO
+data_split = split(data, rep(1:nrow(data)))
 ```
 
 * In one statement, use the `lapply` function to create a list whose keys are the column number and values are themselves a list with keys: "min" whose value is the minimum of the column, "max" whose value is the maximum of the column, "pct_missing" is the proportion of missingness in the column and "first_NA" whose value is the row number of the first time the NA appears.
 
 ```{r}
-#TO-DO
+lapply(row(new_matrix),function(x){
+  c(
+  min = min(x),
+  max = max(x),
+  pct_missing = (is.na(x)/length(x)) * 100,
+  first_NA = match(NA, x)
+  )
+})
 ```
 
 * Set a seed and then create a vector `v` consisting of a sample of 1,000 iid normal realizations with mean -10 and variance 100.
 
 ```{r}
-#TO-DO
+set.seed(123)
+v = rnorm(1000, -10, 100)
 ```
 
 * Repeat this exercise by resetting the seed to ensure you obtain the same results.
 
 ```{r}
-#TO-DO
+set.seed(123)
+v_copy = rnorm(1000,-10,100)
 ```
 
 * Find the average of `v` and the standard error of `v`.
 
 ```{r}
-#TO-DO
+v_average = mean(v)
+v_error = sd(v)/sqrt(length(v))
 ```
 
 * Find the 5%ile of `v` and use the `qnorm` function to compute what it theoretically should be. Is the estimate about what is expected by theory?
 
 ```{r}
-#TO-DO
+qnorm(p=0.05, mean=v_average, sd=sd(v))
 ```
 
 * What is the percentile of `v` that corresponds to the value 0? What should it be theoretically? Is the estimate about what is expected by theory?
