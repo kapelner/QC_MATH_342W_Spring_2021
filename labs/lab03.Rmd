@@ -152,7 +152,7 @@ simple_viz_obj
 
 Does this make sense given the values of $beta_0$ and $beta_1$?
 
-Write a function `my_simple_ols` that takes in a vector `x` and vector `y` and returns a list that contains the `b_0` (intercept), `b_1` (slope), `yhat` (the predictions), `e` (the residuals), `SSE`, `SST`, `MSE`, `RMSE` and `Rsq` (for the R-squared metric). Internally, you can only use the functions `sum` and `length` and other basic arithmetic operations. You should throw errors if the inputs are non-numeric or not the same length. You should also name the class of the return value 'my_simple_ols_obj` by using the `class` function as a setter. No need to create ROxygen documentation here.
+Write a function `my_simple_ols` that takes in a vector `x` and vector `y` and returns a list that contains the `b_0` (intercept), `b_1` (slope), `yhat` (the predictions), `e` (the residuals), `SSE`, `SST`, `MSE`, `RMSE` and `Rsq` (for the R-squared metric). Internally, you can only use the functions `sum` and `length` and other basic arithmetic operations. You should throw errors if the inputs are non-numeric or not the same length. You should also name the class of the return value `my_simple_ols_obj` by using the `class` function as a setter. No need to create ROxygen documentation here.
 
 ```{r}
 my_simple_ols = function(x, y){
@@ -191,15 +191,6 @@ Use the `model.matrix` function to compute the matrix `X` and verify it is the s
 #TO-DO
 ```
 
-Using matrix algebra, verify the OLS estimate is the same as you computed from the `my_simple_ols` function. 
-
-```{r}
-#TO-DO
-```
-
-
-
-
 Create a prediction method `g` that takes in a vector `x_star` and `my_simple_ols_obj`, an object of type `my_simple_ols_obj` and predicts y values for each entry in `x_star`. 
 
 ```{r}
@@ -214,13 +205,6 @@ Use this function to verify that when predicting for the average x, you get the 
 expect_equal(g(my_lm_mod, mean(x)), mean(y))
 ```
 
-Create a prediction method `g` that takes in a vector `x_star` and the dataset $\mathbb{D}$ i.e. `X` where the first column is the one vector and `y` and returns the OLS predictions.
-
-```{r}
-g = function(x_star, X, y){
-  #TO-DO
-}
-```
 
 In class we spoke about error due to ignorance, misspecification error and estimation error. Show that as n grows, estimation error shrinks. Let us define an error metric that is the difference between $b_0$ and $b_1$ and $\beta_0$ and $\beta_1$. How about $h = ||b - \beta||^2$ where the quantities are now the vectors of size two. Show as n increases, this shrinks. 
 
@@ -359,6 +343,29 @@ M = 1000
 ```
 
 
+Write a function `my_ols` that takes in `X`, a matrix with with p columns representing the feature measurements for each of the n units, a vector of $n$ responses `y` and returns a list that contains the `b`, the $p+1$-sized column vector of OLS coefficients, `yhat` (the vector of $n$ predictions), `e` (the vector of $n$ residuals), `df` for degrees of freedom of the model, `SSE`, `SST`, `MSE`, `RMSE` and `Rsq` (for the R-squared metric). Internally, you cannot use `lm` or any other package; it must be done manually. You should throw errors if the inputs are non-numeric or not the same length. Or if `X` is not otherwise suitable. You should also name the class of the return value `my_ols` by using the `class` function as a setter. No need to create ROxygen documentation here.
+
+
+```{r}
+my_ols = function(X, y){
+  #TO-DO
+}
+```
+
+Verify that the OLS coefficients for the `Type` of cars in the cars dataset gives you the same results as we did in class (i.e. the ybar's within group). 
+
+```{r}
+#TO-DO
+```
+
+
+Create a prediction method `g` that takes in a vector `x_star` and the dataset $\mathbb{D}$ i.e. `X` and `y` and returns the OLS predictions. Let `X` be a matrix with with p columns representing the feature measurements for each of the n units
+
+```{r}
+g = function(x_star, X, y){
+  #TO-DO
+}
+```
 
 
 
