@@ -1,6 +1,6 @@
 ---
 title: "Lab 2"
-author: "Alexis Montes"
+author: "Your Name Here"
 output: pdf_document
 date: "11:59PM February 25, 2021"
 ---
@@ -10,47 +10,19 @@ date: "11:59PM February 25, 2021"
 * Create a function `my_reverse` which takes as required input a vector `v` and returns the vector in reverse where the first entry is the last entry, etc. No function calls are allowed inside your function otherwise that would defeat the purpose of the exercise! (Yes, there is a base R function that does this called `rev`). Use `head` on `v` and `tail` on `my_reverse(v)` to verify it works.
 
 ```{r}
-my_reverse = function(v){
-  v_rev = rep(NA, times=length((v)))
-  for(i in length(v):1){
-    v_rev[length(v) - i + 1] = v[i]
-  }
-  v_rev
-}
-
-v = 1:10
-
-my_reverse(v)
+#TO-DO
 ```
 
 * Create a function `flip_matrix` which takes as required input a matrix, an argument `dim_to_rev` that returns the matrix with the rows in reverse order or the columns in reverse order depending on the `dim_to_rev` argument. Let the default be the dimension of the matrix that is greater. If the number of rows 
 
 ```{r}
-flip_matrix = function(x, dim_to_rev = NULL){
-  if(is.null(dim_to_rev)){
-    dim_to_rev = ifelse(nrow(x) >= ncol(x), "rows", "cols")
-  }
-  if(dim_to_rev == "rows"){
-    x[my_reverse(1:nrow(x))]
-  } else if (dim_to_rev == "cols"){
-    x(,my_reverse((1:ncol(x))))
-  } else {
-    stop("Illegal arg")
-  }
-}
-
-X = matrix(rnorm(100), nrow = 25, ncol=25)
-flip_matrix(X)
+#TO-DO
 ```
 
 * Create a list named `my_list` with keys "A", "B", ... where the entries are arrays of size 1, 2 x 2, 3 x 3 x 3, etc. Fill the array with the numbers 1, 2, 3, etc. Make 8 entries according to this sequence.
 
 ```{r}
-my_list=list()
-LETTERS
-my_list[["A"]] = array(data=1:4, dim=c(2,2))
-array(data=1:27, dim=c(3,3,3))
-my_list
+#TO-DO
 ```
 
 Run the following code:
@@ -66,7 +38,7 @@ Use `?object.size` to read about what these functions do. Then explain the outpu
 Now cleanup the namespace by deleting all stored objects and functions:
 
 ```{r}
-rm(list = ls())
+#TO-DO
 ```
 
 ## A little about strings
@@ -75,9 +47,6 @@ rm(list = ls())
 
 ```{r}
 lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi posuere varius volutpat. Morbi faucibus ligula id massa ultricies viverra. Donec vehicula sagittis nisi non semper. Donec at tempor erat. Integer dapibus mi lectus, eu posuere arcu ultricies in. Cras suscipit id nibh lacinia elementum. Curabitur est augue, congue eget quam in, scelerisque semper magna. Aenean nulla ante, iaculis sed vehicula ac, finibus vel arcu. Mauris at sodales augue. "
-
-lorem_split = strsplit(lorem, split=". ", fixed=TRUE)
-lorem_sample = sample(lorem_split[[1]])
 ```
 
 You have a set of names divided by gender (M / F) and generation (Boomer / GenX / Millenial):
@@ -92,14 +61,9 @@ You have a set of names divided by gender (M / F) and generation (Boomer / GenX 
 Create a list-within-a-list that will intelligently store this data.
 
 ```{r}
-M_Boomer = strsplit("Theodore, Bernard, Gene, Herbert, Ray, Tom, Lee, Alfred, Leroy, Eddie", split = ", ")[[1]]
-M_GenX = strsplit("Marc, Jamie, Greg, Darryl, Tim, Dean, Jon, Chris, Troy, Jeff", split = ", ")[[1]]
-M_Millennial = strsplit("Zachary, Dylan, Christian, Wesley, Seth, Austin, Gabriel, Evan, Casey, Luis", split = ", ")[[1]]
-F_Boomer = strsplit("Gloria, Joan, Dorothy, Shirley, Betty, Dianne, Kay, Marjorie, Lorraine, Mildred", split = ", ")[[1]]
-F_GenX = strsplit("Tracy, Dawn, Tina, Tammy, Melinda, Tamara, Tracey, Colleen, Sherri, Heidi", split = ", ")[[1]]
-F_Millennial = strsplit("Samantha, Alexis, Brittany, Lauren, Taylor, Bethany, Latoya, Candice, Brittney, Cheyenne", split = ", ")[[1]]
-myList = list( "M / Boomer" = M_Boomer, "M / GenX" = M_GenX, "M / Millennial" = M_Millennial, "F / Bommer" = F_Boomer, "F / GenX" = F_GenX, "F / Millennial" = F_Millennial)
-
+#HINT: 
+#strsplit("Theodore, Bernard, Gene, Herbert, Ray, Tom, Lee, Alfred, Leroy, Eddie", split = ", ")[[1]]
+#TO-DO
 ```
 
 ## Dataframe creation
@@ -133,7 +97,7 @@ pacman::p_load(testthat)
 
 ```{r}
 v= seq(-100, 100)
-expect_equal(v, -100 : 100)
+expect_equal(v, -100 : 101)
 ```
 
 If there are any errors, the `expect_equal` function will tell you about them. If there are no errors, then it will be silent.
@@ -141,33 +105,25 @@ If there are any errors, the `expect_equal` function will tell you about them. I
 Test the `my_reverse` function from lab2 using the following code:
 
 ```{r}
-v = 1:100
-
 expect_equal(my_reverse(v), rev(v))
 expect_equal(my_reverse(c("A", "B", "C")), c("C", "B", "A"))
 ```
 
 ## Multinomial Classification using KNN
 
-Write a $k=1$ nearest neighbor algorithm using the Euclidean distance function. This is standard "Roxygen" format for documentation. Hopefully, we will get to packages at some point and we will go over this again. It is your job also to fill in this documentation.
+Write a $k=1$ nearest neighbor algorithm using the Euclidean distance function. The following comments are standard "Roxygen" format for documentation. Hopefully, we will get to packages at some point and we will go over this again. It is your job also to fill in this documentation.
 
 ```{r}
-#' One Neareset Neighbor Classifier
+#' TO-DO: Provide a name for this function 
 #'
-#' Classify an observation based on the label of the closest observation in the set of training observations
+#' TO-DO: Explain what this function does in a few sentences
 #'
-#' @param Xinput      A matrix of features for training data observations
-#' @param y_binary    The vector of training data labels
-#' @param Xtest       A test observation as a row vector
-#' @return            The predictive label for the test observation
+#' @param Xinput      TO-DO: explain this argument
+#' @param y_binary    TO-DO: explain this argument
+#' @param Xtest       TO-DO: explain this argument
+#' @return            TO-DO: explain this argument
 nn_algorithm_predict = function(Xinput, y_binary, Xtest){
-  n = nrow(Xinput)
-  distances = array(NA, n)
-  for(i in 1:n){
-    distances[i] = sum((Xinput[i,]-Xtest)^2)
-    
-  }
-  y_binary[which.min(distances)]
+  #TO-DO
 }
 ```
 
@@ -175,31 +131,12 @@ Write a few tests to ensure it actually works:
 
 ```{r}
 #TO-DO
-matrix_test = matrix(1:10)
-nn_algorithm_predict(matrix_test, c(1:5), c(1:10))
 ```
 
 We now add an argument `d` representing any legal distance function to the `nn_algorithm_predict` function. Update the implementation so it performs NN using that distance function. Set the default function to be the Euclidean distance in the original function. Also, alter the documentation in the appropriate places.
 
 ```{r}
-#' One Neareset Neighbor Classifier
-#'
-#' Classify an observation based on the label of the colosest observation in the set of training observations
-#'
-#' @param Xinput      A matrix of features for training data observations
-#' @param y_binary    The vector of training data labels
-#' @param Xtest       A test observation as a row vector
-#' @param d           A distance function
-#' @return            The predictive label for the test observation
-nn_algorithm_predict = function(Xinput, y_binary, Xtest, d=function(v1,v2){sum((v1-v2)^2)}){
-  n = nrow(Xinput)
-  distances = array(NA, n)
-  for(i in 1:n){
-    distances[i] = d((Xinput[i,]-Xtest)^2)
-    
-  }
-  y_binary[which.min(distances)]
-}
+#TO-DO
 ```
 
 For extra credit (unless you're a masters student), add an argument `k` to the `nn_algorithm_predict` function and update the implementation so it performs KNN. In the case of a tie, choose $\hat{y}$ randomly. Set the default `k` to be the square root of the size of $\mathcal{D}$ which is an empirical rule-of-thumb popularized by the "Pattern Classification" book by Duda, Hart and Stork (2007). Also, alter the documentation in the appropriate places.
@@ -210,12 +147,10 @@ For extra credit (unless you're a masters student), add an argument `k` to the `
 
 ## Basic Binary Classification Modeling
 
-* Load the famous `iris` data frame into the namespace. Provide a summary of the columns using the `skim` function in package `skimr` and write a few descriptive sentences about the distributions using the code below and in English.
+* Load the famous `iris` data frame into the namespace. Provide a summary of the columns using the `skim` function in package `skimr` and write a few descriptive sentences about the distributions using the code below in English.
 
 ```{r}
-data(iris)
-pacman::p_load(skimr)
-skim(iris)
+#TO-DO
 ```
 
 TO-DO: describe this data
@@ -223,45 +158,31 @@ TO-DO: describe this data
 The outcome / label / response is `Species`. This is what we will be trying to predict. However, we only care about binary classification between "setosa" and "versicolor" for the purposes of this exercise. Thus the first order of business is to drop one class. Let's drop the data for the level "virginica" from the data frame.
 
 ```{r}
-iris = iris[iris$Species != "virginica", ]
+#TO-DO
 ```
 
 Now create a vector `y` that is length the number of remaining rows in the data frame whose entries are 0 if "setosa" and 1 if "versicolor".
 
 ```{r}
-y <- ifelse(iris$Species == "setosa", 0, 1)
-y
+#TO-DO
 ```
 
 * Write a function `mode` returning the sample mode.
 
 ```{r}
-mode = function(v){
-  names(sort(table(v),decreasing = TRUE))
-  
-}
+#TO-DO
 ```
 
 * Fit a threshold model to `y` using the feature `Sepal.Length`. Write your own code to do this. What is the estimated value of the threshold parameter? Save the threshold value as `threshold`. 
 
 ```{r}
 #TO-DO
-n <- nrow(iris)
-numErrors <- array(NA, n)
-
-for (i in 1:n){
-  y_length <- as.numeric(iris$Sepal.Length > iris$Sepal.Length[i])
-  numErrors[i] <- sum(y_length != y)
-}
-threshold <- iris$Sepal.Length[which.min(numErrors)]
-
-threshold
 ```
 
 What is the total number of errors this model makes?
 
 ```{r}
-sum( as.numeric(iris$Sepal.Length > threshold) != y)
+#TO-DO
 ```
 
 Does the threshold model's performance make sense given the following summaries:
@@ -273,14 +194,12 @@ summary(iris[iris$Species == "versicolor", "Sepal.Length"])
 ```
 
 TO-DO: Write your answer here in English.
-Yes since in the 75th percentile of the data of versicolors is greater than the threshold 5.4 and less than 
-the length of setosas
 
 Create the function `g` explicitly that can predict `y` from `x` being a new `Sepal.Length`.
 
 ```{r}
-g <- function(x){
-  as.numeric(x > threshold)
+g = function(x){
+  #TO-DO
 }
 ```
 
@@ -290,37 +209,18 @@ g <- function(x){
 You will code the "perceptron learning algorithm" for arbitrary number of features $p$. Take a look at the comments above the function. Respect the spec below:
 
 ```{r}
-#' Perceptron learning algorithm
+#' TO-DO: Provide a name for this function 
 #'
-#' The perceptron fits the best line for the passed data
+#' TO-DO: Explain what this function does in a few sentences
 #'
-#' @param Xinput      Training data as a matrix
-#' @param y_binary    Training data as a binaty matrix
-#' @param MAX_ITER    maximum number of iterations for the function
-#' @param w           weights data as vector
+#' @param Xinput      TO-DO: Explain this
+#' @param y_binary    TO-DO: Explain this
+#' @param MAX_ITER    TO-DO: Explain this
+#' @param w           TO-DO: Explain this
 #'
 #' @return            The computed final parameter (weight) as a vector of length p + 1
 perceptron_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 1000, w = NULL){
-  n <- nrow(Xinput)
-  
-  Xinput <- cbind(rep(1, n), Xinput)
-  
-  p <- ncol(Xinput)
-  
-  if (is.null(w)) {
-    w <- rep(0, p)
-  }
-  
-  for (i in 1:MAX_ITER) {
-    for (j in 1:n) {
-      X <- Xinput[j, ]
-      e <- y_binary[j] - ifelse(sum(w %*% X) > 0, 1, 0)
-      for (k in 1:p) {
-        w[k] <- w[k] + e * X[k]
-      }
-    }
-  }
-  return(w)
+  #TO-DO
 }
 ```
 
@@ -350,7 +250,7 @@ simple_viz_obj = ggplot(Xy_simple, aes(x = first_feature, y = second_feature, co
 simple_viz_obj
 ```
 
-This graph above show the binary response of the first_feature and the second_feature
+TO-DO: Explain this picture.
 
 Now, let us run the algorithm and see what happens:
 
@@ -363,9 +263,7 @@ w_vec_simple_per
 
 Explain this output. What do the numbers mean? What is the intercept of this line and the slope? You will have to do some algebra.
 
-The first number represents the intercept
-The second number is the slope
-The algebra equation resulting from the out put is y = 4x + 7
+TO-DO
 
 
 ```{r}
@@ -378,7 +276,7 @@ simple_viz_obj + simple_perceptron_line
 
 Explain this picture. Why is this line of separation not "satisfying" to you?
 
-It is not the most optimal way to sperate the data in the graph
+TO-DO 
 
 For extra credit, program the maximum-margin hyperplane perceptron that provides the best linear discrimination model for linearly separable data. Make sure you provide ROxygen documentation for this function.
 
