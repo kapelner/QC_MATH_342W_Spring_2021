@@ -1,0 +1,57 @@
+---
+title: "Lab 4"
+author: "Your Name Here"
+output: pdf_document
+date: "11:59PM Feb 29, 2020"
+---
+
+Load up the famous iris dataset. We are going to do a different prediction problem. Imagine the only input x is Species and you are trying to predict y which is Petal.Length. What would a reasonable, naive prediction be under all Species? Hint: it's what we did in class.
+
+```{r}
+#TO-DO
+```
+
+Prove that this is the OLS model by fitting an appropriate `lm` and then using the predict function to verify you get the same answers as you wrote previously. Show this by doing a linear regression with and without the intercept.
+
+```{r}
+#TO-DO
+```
+
+Use the `model.matrix` function to compute the matrix `X` for the regression with the intercept and without the intercept. What is different?
+
+```{r}
+#TO-DO
+```
+
+
+
+
+
+Find the hat matrix $H$.
+
+```{r}
+H = X %*% XtXinvX
+H
+```
+
+Verify that this specific hat matrix is symmetric.
+
+```{r}
+expect_equal(H, t(H))
+
+```
+
+
+Using the `diag` function, find the trace of the hat matrix.
+
+```{r}
+diag(H)
+sum(diag(H))
+```
+
+
+
+
+
+
+

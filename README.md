@@ -59,9 +59,10 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec05.Rmd) 
   - Theory Notes [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec10eng.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec10nissanthan.pdf)
 * Lecture 9 video on slack
-  - Theory Notes [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec09eng.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec09nissanthan.pdf)
+  - Theory Notes [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec09eng.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec09nissanthan.pdf)-->
 * Lecture 8 video on slack
-  - Theory Notes [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08nissanthan.pdf) [(Shakif Shadman)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08shadman.pdf) [(Rameasa Arna)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08arna.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08eng.pdf)-->
+  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec08.Rmd) 
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08kap.pdf)
 * Lecture 7 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec07.Rmd) 
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec07kap.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec07gubbins.pdf)
@@ -138,9 +139,9 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 
 I *want* you to come to office hours! My office hours are:
 
-Time: Tues/Thurs 11:00-11:30AM\
-Time: Friday, 11-11:30AM\
-Location: on Zoom\
+Time: Mon/Wed 4:30-5PM\
+Time: Friday, 11:05-11:30AM\
+Location: on Zoom
 
 <!--In addition, the TA, Moshe Weiss will hold office hours as well:
 
