@@ -132,7 +132,7 @@ beta_0 = 3
 beta_1 = -2
 ```
 
-Compute $h^*(x)$ as `h_star_x, then draw $\epsilon \sim N(0, 0.33^2)$ as `epsilon`, then compute $\y$.
+Compute $h^*(x)$ as `h_star_x`, then draw $\epsilon \sim N(0, 0.33^2)$ as `epsilon`, then compute $\y$.
 
 ```{r}
 h_star_x = #TO-DO 
@@ -202,7 +202,7 @@ g = function(my_simple_ols_obj, x_star){
 Use this function to verify that when predicting for the average x, you get the average y.
 
 ```{r}
-expect_equal(g(my_lm_mod, mean(x)), mean(y))
+expect_equal(g(my_simple_ols_obj, mean(x)), mean(y))
 ```
 
 
@@ -257,7 +257,7 @@ Find the average height (include both parents and children in this computation).
 #TO-DO
 ```
 
-If you were to use the null model, what would the RMSE be of this model be?
+If you were predicting child height from parent and you were using the null model, what would the RMSE be of this model be?
 
 ```{r}
 #TO-DO
