@@ -1,8 +1,199 @@
 ---
-title: "Practice Lecture 5 MATH 390.4 Queens College"
+title: "Practice Lecture 8 MATH 390.4 Queens College"
 author: "Professor Adam Kapelner"
-date: "February 27, 2020"
+date: "February 24, 2021"
 ---
+
+
+
+Let's take a look at another dataset.
+
+```{r}
+?MASS::Cars93
+cars = MASS::Cars93
+(cars)
+dim(cars)
+```
+
+Usually, we are trying to build a model for `Price`. Let's see how `Horsepower` is related to price:
+
+```{r}
+ggplot(cars, aes(Horsepower, Price)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+```
+
+
+```{r}
+simple_linear_model = lm(Price ~ Horsepower, data = cars)
+coef(simple_linear_model)
+summary(simple_linear_model)$r.squared
+summary(simple_linear_model)$sigma
+```
+
+62\% is pretty good $R^2$! But the RMSE is about \$6,000. Using the empirical rule heuristic, that means you can only predict within $\pm \$12,000$ around 95\% of the time. Not so good!
+
+# Predictions with linear models in R
+
+After the model is fit, you may want to predict with it using the $g$ function. Of course R can do this:
+
+```{r}
+predict(simple_linear_model, data.frame(Horsepower = 400)) #i.e. g(400)
+predict(simple_linear_model, data.frame(Horsepower = c(400, 450, 500))) #i.e. g(400), g(450), g(500)
+```
+
+##Simple regression with nominal variables
+
+Let's load up the cars data again.
+
+```{r}
+?MASS::Cars93
+cars = MASS::Cars93
+(cars)
+dim(cars)
+```
+
+Let's take a look at the factor variable as the predictor. We'll use `Origin` in this example:
+
+```{r}
+table(cars$Origin)
+```
+
+We can plot how this looks:
+
+```{r}
+pacman::p_load(ggplot2)
+ggplot(cars, aes(Origin, Price)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+```
+
+Note that ggplot cannot handle fitting a line with a factor variable.
+
+However...
+
+```{r}
+simple_linear_model = lm(Price ~ Origin, data = cars)
+coef(simple_linear_model)
+summary(simple_linear_model)$r.squared
+summary(simple_linear_model)$sigma
+```
+
+What happened here? The `lm` function can handle factors. It picks a level to be the reference category (in this case, it's origin = USA) and the fitted slope $b_1$ would be the difference between non-USA and USA. Does it make sense that the slope is positive? Yes - foreign cars charge transport fees and there are a lot of luxury foreign cars.
+
+Why is $R^2$ so low?? Remember the null model is one $\bar{y}$, this model is just two $\bar{y}$'s. How much variance can you possible expect to explain with just two possible prediction values?? Now take a look at RMSE. It's about \$10,000. Before, it was about \$6,000 and the $R^2$ = 62\%. Yes the RMSE has gone up in this case. $R^2$ is not proportion standard error explained, it's proportion variance and that squared error is very different than its square root.
+
+Let's cast this predict as numeric and run it again just to make sure it will be the same. We first code a new dummy variable:
+
+```{r}
+cars$origin_is_not_usa = ifelse(cars$Origin == "non-USA", 1, 0)
+```
+
+and then we model using this new dummy variable:
+
+```{r}
+simple_linear_model = lm(Price ~ origin_is_not_usa, data = cars)
+coef(simple_linear_model)
+summary(simple_linear_model)$r.squared
+summary(simple_linear_model)$sigma
+```
+
+Note the reference category is USA and the "non-USA" coefficient indicates the difference in sample averages.
+
+Note that now ggplot can handle the line:
+
+```{r}
+ggplot(cars, aes(origin_is_not_usa, Price)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+```
+
+Let's code the dummy variable differently to take a look at the equivalent regression but this time with the reference category as non-USA
+
+```{r}
+cars$origin_is_usa = ifelse(cars$Origin == "USA", 1, 0)
+```
+
+```{r}
+simple_linear_model = lm(Price ~ origin_is_usa, data = cars)
+coef(simple_linear_model)
+summary(simple_linear_model)$r.squared
+summary(simple_linear_model)$sigma
+```
+
+The coefficients here are like "the opposite" in some sense of what we just saw. 
+
+And of course $R^2$ and RMSE are equivalent - it's the same linear model with the same information, just coded differently.
+
+The following is not covered right now. We may return to it later. I will leave out the intercept:
+
+```{r}
+simple_linear_model = lm(Price ~ 0 + Origin, data = cars)
+coef(simple_linear_model)
+summary(simple_linear_model)$r.squared
+summary(simple_linear_model)$sigma
+```
+
+I think the `lm` method is calculating $R^2$ differently here if there is no intercept. I think the null model it is comparing to is $g = 0$ not $\bar{y}$.
+
+Let's do an example of a categorical nominal variable with L>2 levels.
+
+```{r}
+summary(cars)
+table(cars$Type)
+mean(cars[cars$Type == "Compact", "Price"])
+mean(cars[cars$Type == "Large",   "Price"])
+mean(cars[cars$Type == "Midsize", "Price"])
+mean(cars[cars$Type == "Small",   "Price"])
+mean(cars[cars$Type == "Sporty",  "Price"])
+mean(cars[cars$Type == "Van",     "Price"])
+lm(Price ~ 0 + Type, cars)
+lm(Price ~ Type, cars)
+```
+What is the reference level in this variable? Can we change it?
+
+```{r}
+levels(cars$Type)
+cars$Type = relevel(cars$Type, ref = "Van")
+lm(Price ~ Type, cars)
+lm(Price ~ 0 + Type, cars)
+```
+
+
+## Correlation and Covariance
+
+Let's load up the Boston Housing data again.
+
+```{r}
+boston = MASS::Boston
+str(boston)
+```
+
+Let us take a look at some covariances and correlations with the response, the median home value.
+
+```{r}
+pacman::p_load(ggplot2)
+cov(boston$rm, boston$medv)
+cor(boston$rm, boston$medv)
+ggplot(boston, aes(rm, medv)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+cov(boston$indus, boston$medv)
+cor(boston$indus, boston$medv)
+ggplot(boston, aes(indus, medv)) + 
+  geom_point() + 
+  geom_smooth(method = 'lm')
+```
+
+Ever wonder why it's called $R^2$?
+
+```{r}
+summary(lm(medv ~ rm, boston))$r.squared
+cor(boston$rm, boston$medv)^2
+summary(lm(medv ~ indus, boston))$r.squared
+cor(boston$indus, boston$medv)^2
+```
+
 
 ## Eigendecomposition in R
 

@@ -61,17 +61,16 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 * Lecture 9 video on slack
   - Theory Notes [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec09eng.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec09nissanthan.pdf)
 * Lecture 8 video on slack
-  - Theory Notes [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08nissanthan.pdf) [(Shakif Shadman)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08shadman.pdf) [(Rameasa Arna)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08arna.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08eng.pdf)
+  - Theory Notes [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08nissanthan.pdf) [(Shakif Shadman)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08shadman.pdf) [(Rameasa Arna)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08arna.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08eng.pdf)-->
 * Lecture 7 video on slack
-  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec04.Rmd) 
-  - Theory Notes [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec07nissanthan.pdf) [(Shakif Shadman)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec07shadman.pdf) [(Rameasa Arna)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec07arna.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec07eng.pdf)
+  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec07.Rmd) 
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec07kap.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec07gubbins.pdf)
 * Lecture 6 video on slack
-  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec03.Rmd) 
-  - Theory Notes [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec06nissanthan.pdf) [(Shakif Shadman)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec06shadman.pdf) [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec06eng.pdf) [(Rameasa Arna)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec06arna.pdf)
--->
+  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec06.Rmd) 
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec06kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec06kim.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec06gubbins.pdf) [(Kennly Weerasinghe)](https://github.com/wskennly/QC_MATH_342W_Spring_2021/blob/master/lectures/lec06weerasinghe.pdf)
 * Lecture 5 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec05.Rmd)
-  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec05kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec05kim.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec05gubbins.pdf)
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec05kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec05kim.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec05gubbins.pdf) [(Alexis Montes)](https://github.com/AlexNYC25/QC_MATH_342W_Spring_2021/blob/master/lectures/lec05montes.pdf) [(Kennly Weerasinghe)](https://github.com/wskennly/QC_MATH_342W_Spring_2021/blob/master/lectures/lec05weerasinghe.pdf)
 * Lecture 4 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec04.Rmd)
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec04kap.pdf) [(Hanlin Wang)](https://github.com/Hanlin-Wang/QC_MATH_342W_Spring_2021/blob/master/lectures/lec04wang.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec04kim.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec04gubbins.pdf) [(Alexis Montes)](https://github.com/AlexNYC25/QC_MATH_342W_Spring_2021/blob/master/lectures/lec04montes.pdf)
@@ -94,8 +93,8 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 * [(Lab 6, due 3/21)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab06.Rmd)
 * [(Lab 5, due 3/7)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab05.Rmd)
 * [(Lab 4, due 2/29)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab04.Rmd)
-* [(Lab 3, due 2/22)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab03.Rmd)
-* [(Lab 2, due 2/17)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab02.Rmd)-->
+* [(Lab 3, due 3/4)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab03.Rmd)-->
+* [(Lab 2, due 2/25)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab02.Rmd)
 * [(Lab 1, due 2/18)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab01.Rmd)
 
 ## Theory Homeworks
@@ -103,8 +102,8 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 <!--
 * Homework 5 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw05/hw05t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw05/hw05t.pdf) (due 5/18)
 * Homework 4 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw04/hw04t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw04/hw04t.pdf) (due 4/20)
-* Homework 3 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw03/hw03t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw03/hw03t.pdf) (due 3/18)
-* Homework 2 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw02/hw02t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw02/hw02t.pdf) (due 2/24)-->
+* Homework 3 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw03/hw03t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw03/hw03t.pdf) (due 3/18)-->
+* Homework 2 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw02/hw02t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw02/hw02t.pdf) (due 3/6)
 * Homework 1 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw01/hw01t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw01/hw01t.pdf) (due 2/11) 
 * Homework 0 [(syllabus, page 7)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/syllabus/syllabus.pdf?raw=true) (due 1/31)
 
