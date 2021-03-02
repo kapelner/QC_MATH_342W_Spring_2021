@@ -234,8 +234,6 @@ Now create a vector `y` that is length the number of remaining rows in the data 
 
 ```{r}
 #TO-DO
-<<<<<<< HEAD
-=======
 n <- nrow(iris)
 numErrors <- array(NA, n)
 for (i in 1:n){
@@ -244,7 +242,6 @@ for (i in 1:n){
 }
 threshold <- iris$Sepal.Length[which.min(numErrors)]
 threshold
->>>>>>> added my lab02 files
 ```
 
 What is the total number of errors this model makes?
@@ -262,12 +259,9 @@ summary(iris[iris$Species == "versicolor", "Sepal.Length"])
 ```
 
 TO-DO: Write your answer here in English.
-<<<<<<< HEAD
-=======
 
 Yes since in the 75th percentile of the data of versicolors is greater than the threshold 5.4 and less than 
 the length of setosas
->>>>>>> added my lab02 files
 
 Create the function `g` explicitly that can predict `y` from `x` being a new `Sepal.Length`.
 
@@ -294,9 +288,6 @@ You will code the "perceptron learning algorithm" for arbitrary number of featur
 #'
 #' @return            The computed final parameter (weight) as a vector of length p + 1
 perceptron_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 1000, w = NULL){
-<<<<<<< HEAD
-  #TO-DO
-=======
   num_rows <- nrow(Xinput)
   
   Xinput <- cbind(rep(1, num_rows), Xinput)
@@ -317,7 +308,6 @@ perceptron_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 1000, w = 
     }
   }
   return(w)
->>>>>>> added my lab02 files
 }
 ```
 
@@ -379,9 +369,4 @@ For extra credit, program the maximum-margin hyperplane perceptron that provides
 
 ```{r}
 #TO-DO
-<<<<<<< HEAD
 ```
-
-=======
-```
->>>>>>> added my lab02 files
