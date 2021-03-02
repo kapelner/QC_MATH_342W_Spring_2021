@@ -57,9 +57,10 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
   - Theory Notes [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec11nissanthan.pdf)
 * Lecture 10 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec05.Rmd) 
-  - Theory Notes [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec10eng.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec10nissanthan.pdf)
+  - Theory Notes [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec10eng.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec10nissanthan.pdf)-->
 * Lecture 9 video on slack
-  - Theory Notes [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec09eng.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec09nissanthan.pdf)-->
+  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec09.Rmd) 
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec09kap.pdf)
 * Lecture 8 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec08.Rmd) 
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec08kim.pdf)
