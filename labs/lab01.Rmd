@@ -15,55 +15,48 @@ To "hand in" the homework, you should first download this file. The best way to 
 * Print out the numerical constant pi with ten digits after the decimal point using the internal constant `pi`.
 
 ```{r}
-options(digits=11)
-x <- pi
-x
+#TO-DO
 ```
 
 * Sum up the first 103 terms of the series 1 + 1/2 + 1/4 + 1/8 + ...
 
 ```{r}
-sum(1/(2^(0:102)))
+#TO-DO
 ```
 
 * Find the product of the first 37 terms in the sequence 1/3, 1/6, 1/9  ...
 
 ```{r}
-prod(1/(3*(1:37)))
-prod(1/seq(from=3, by=3, length.out=37))
+#TO-DO
 ```
 
 
 * Find the product of the first 387 terms of `1 * 1/2 * 1/4 * 1/8 *` ...
 
 ```{r}
-prod(1/(2^(0:386)))
+#TO-DO
 ```
 
 Is this answer *exactly* correct? 
   
-  #TO-DO
+#TO-DO
   
-  * Figure out a means to express the answer more exactly. Not compute exactly, but express more exactly.
+* Figure out a means to express the answer more exactly. Not compute exactly, but express more exactly.
 
 ```{r}
-sum(log(1/(2^(0:386))))
--log(2)*sum(0:386)
+#TO-DO
 ```
 
 * Create the sequence `x = [Inf, 20, 18, ..., -20]`.
 
 ```{r}
-x <- c(Inf, seq(from=20, to=-20, by=-2))
-x
+#TO-DO
 ```
 
 Create the sequence `x = [log_3(Inf), log_3(100), log_3(98), ... log_3(-20)]`.
 
 ```{r}
-x <- c(Inf, seq(from=100, to=-20, by=-2))
-x <- log(x, base=3)
-log(100, 3)
+#TO-DO
 ```
 
 Comment on the appropriateness of the non-numeric values.
@@ -75,123 +68,100 @@ NAN occurs because you cannot take the log of a negative number.
 * Create a vector of booleans where the entry is true if `x[i]` is positive and finite.
 
 ```{r}
-y = !is.nan(x) & is.finite(x) & x > 0
-y
+#TO-DO
 ```
 
 * Locate the indices of the non-real numbers in this vector. Hint: use the `which` function. Don't hesitate to use the documentation via `?which`.
 
 ```{r}
-?which
-which(!y)
-which(y == FALSE)
+#TO-DO
 ```
 
 * Locate the indices of the infinite quantities in this vector. 
 
 ```{r}
-which(is.infinite(x))
+#TO-DO
 ```
 
 * Locate the indices of the min and max in this vector. Hint: use the `which.min` and `which.max` functions.
 
 ```{r}
-which.min(x)
-which.max(x)
+#TO-DO
 ```
 
 * Count the number of unique values in `x`.
 
 ```{r}
-length(unique(x))
+#TO-DO
 ```
 
 * Cast `x` to a factor. Do the number of levels make sense?
 
 ```{r}
-as.factor(x)
+#TO-DO
 ```
 
 * Cast `x` to integers. What do we learn about R's infinity representation in the integer data type?
   
 ```{r}
-as.integer(x)
+#TO-DO
 ```
 
 * Use `x` to create a new vector `y` containing only the real numbers in x.
 
 ```{r}
-y = x[!is.nan(x) & is.finite(x)]
-y
+#TO-DO
 ```
 
 * Use the left rectangle method to numerically integrate x^2 from 0 to 1 with rectangle width size 1e-6.
 
 ```{r}
-sum(seq(from=0, to=1-(1e-6), by=1e-6)^2)*1e-6
+#TO-DO
 ```
 
 
 * Calculate the average of 100 realizations of standard Bernoullis in one line using the `sample` function.
 
 ```{r}
-sum(sample(c(0,1), size=100, replace=TRUE))/100
+#TO-DO
 ```
 
 
 * Calculate the average of 500 realizations of Bernoullis with p = 0.9 in one line using the `sample` and `mean` functions.
 
 ```{r}
-sum(sample(c(0,1), size=500, replace=TRUE, prob=c(0.1, 0.9)))/500
+#TO-DO
 ```
 
 
 * Calculate the average of 1000 realizations of Bernoullis with p = 0.9 in one line using `rbinom`.
 
 ```{r}
-?rbinom
-rbinom(n=1000, size=1, p=0.9)
+#TO-DO
 ```
 
 * In class we considered a variable `x_3` which measured "criminality". We imagined L = 4 levels "none", "infraction", "misdimeanor" and "felony". Create a variable `x_3` here with 100 random elements (equally probable). Create it as a nominal (i.e. unordered) factor.
 
 ```{r}
-x_3 = as.factor(sample(c("none",  "infraction", "misdimeanor", "felony"), size=100, replace=TRUE))
-x_3
+#TO-DO
 ```
 
 * Use `x_3` to create `x_3_bin`, a binary feature where 0 is no crime and 1 is any crime.
 
 ```{r}
-x_3_bin = x_3 != "none"
-x_3_bin
+#TO-DO
 ```
 
 * Use `x_3` to create `x_3_ord`, an ordered factor variable. Ensure the proper ordinal ordering.
 
 ```{r}
-x_3_ord = factor(x_3, levels = c("none",  "infraction", "misdimeanor", "felony"), order=TRUE)
-x_3_ord
+#TO-DO
 ```
 
 * Convert this variable into three binary variables without any information loss and put them into a data matrix.
 
 ```{r}
-x_3_infraction = as.integer(x_3 == "infraction")
-x_3_misdimeanor = as.integer(x_3 == "misdimeanor")
-x_3_felony = as.integer(x_3 == "felony")
-
-X = cbind(x_3_infraction, x_3_misdimeanor, x_3_felony)
-head(X)
-
-p_level_names = levels(x_3)[-1]
-X = matrix(NA, nrow = length(x_3), ncol = length(p_level_names))
-colnames(X) = p_level_names
-
-for (j in 1 : length(p_level_names)){
-  X[, j] = as.integer(x_3 == p_level_names[j])
-}
-head(X)
+#TO-DO
 ```
 
 * What should the sum of each row be (in English)? 
