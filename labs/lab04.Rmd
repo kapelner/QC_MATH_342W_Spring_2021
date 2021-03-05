@@ -2,56 +2,142 @@
 title: "Lab 4"
 author: "Your Name Here"
 output: pdf_document
-date: "11:59PM Feb 29, 2020"
+date: "11:59PM March 10, 2021"
 ---
 
-Load up the famous iris dataset. We are going to do a different prediction problem. Imagine the only input x is Species and you are trying to predict y which is Petal.Length. What would a reasonable, naive prediction be under all Species? Hint: it's what we did in class.
+Load up the famous iris dataset. We are going to do a different prediction problem. Imagine the only input x is Species and you are trying to predict y which is Petal.Length. A reasonable prediction is the average petal length within each Species. Prove that this is the OLS model by fitting an appropriate `lm` and then using the predict function to verify.
 
 ```{r}
 #TO-DO
 ```
 
-Prove that this is the OLS model by fitting an appropriate `lm` and then using the predict function to verify you get the same answers as you wrote previously. Show this by doing a linear regression with and without the intercept.
+Construct the design matrix with an intercept, $X$, without using `model.matrix`.
 
 ```{r}
 #TO-DO
 ```
 
-Use the `model.matrix` function to compute the matrix `X` for the regression with the intercept and without the intercept. What is different?
+Find the hat matrix $H$ for this regression.
 
 ```{r}
 #TO-DO
 ```
 
-
-
-
-
-Find the hat matrix $H$.
+Verify this hat matrix is symmetric using the `expect_equal` function in the package `testthat`.
 
 ```{r}
-H = X %*% XtXinvX
-H
+#TO-DO
 ```
 
-Verify that this specific hat matrix is symmetric.
+Verify this hat matrix is idempotent using the `expect_equal` function in the package `testthat`.
 
 ```{r}
-expect_equal(H, t(H))
-
+#TO-DO
 ```
-
 
 Using the `diag` function, find the trace of the hat matrix.
 
 ```{r}
-diag(H)
-sum(diag(H))
+#TO-DO
+```
+
+It turns out the trace of a hat matrix is the same as its rank! But we don't have time to prove these interesting and useful facts..
+
+For masters students: create a matrix $X_\perp$.
+
+```{r}
+#TO-DO
+```
+
+Using the hat matrix, compute the $\hat{y}$ vector and using the projection onto the residual space, compute the $e$ vector and verify they are orthogonal to each other.
+
+```{r}
+#TO-DO
+```
+
+Compute SST, SSR and SSE and $R^2$ and then show that SST = SSR + SSE.
+
+```{r}
+#TO-DO
+```
+
+Find the angle $\theta$ between $y$ - $\bar{y}1$ and $\hat{y} - \bar{y}1$ and then verify that its cosine squared is the same as the $R^2$ from the previous problem.
+
+```{r}
+#TO-DO
+```
+
+Project the $y$ vector onto each column of the $X$ matrix and test if the sum of these projections is the same as yhat.
+
+```{r}
+#TO-DO
+```
+
+Construct the design matrix without an intercept, $X$, without using `model.matrix`.
+
+```{r}
+#TO-DO
+```
+
+Find the OLS estimates using this design matrix. It should be the sample averages of the petal lengths within species.
+
+```{r}
+#TO-DO
+```
+
+Verify the hat matrix constructed from this design matrix is the same as the hat matrix constructed from the design matrix with the intercept. (Fact: orthogonal projection matrices are unique).
+
+```{r}
+#TO-DO
+```
+
+Project the $y$ vector onto each column of the $X$ matrix and test if the sum of these projections is the same as yhat.
+
+```{r}
+#TO-DO
+```
+
+Convert this design matrix into $Q$, an orthonormal matrix.
+
+```{r}
+#TO-DO
+```
+
+Project the $y$ vector onto each column of the $Q$ matrix and test if the sum of these projections is the same as yhat.
+
+```{r}
+#TO-DO
+```
+
+Find the $p=3$ linear OLS estimates if $Q$ is used as the design matrix using the `lm` method. Is the OLS solution the same as the OLS solution for $X$?
+
+```{r}
+#TO-DO
+```
+
+Use the predict function and ensure that the predicted values are the same for both linear models: the one created with $X$ as its design matrix and the one created with $Q$ as its design matrix.
+
+```{r}
+#TO-DO
 ```
 
 
+Clear the workspace and load the boston housing data and extract $X$ and $y$. The dimensions are $n=506$ and $p=13$. Create a matrix that is $(p + 1) \times (p + 1)$ full of NA's. Label the columns the same columns as X. Do not label the rows. For the first row, find the OLS estimate of the $y$ regressed on the first column only and put that in the first entry. For the second row, find the OLS estimates of the $y$ regressed on the first and second columns of $X$ only and put them in the first and second entries. For the third row, find the OLS estimates of the $y$ regressed on the first, second and third columns of $X$ only and put them in the first, second and third entries, etc. For the last row, fill it with the full OLS estimates.
 
+```{r}
+#TO-DO
+```
 
+Why are the estimates changing from row to row as you add in more predictors?
 
+#TO-DO
 
+Create a vector of length $p+1$ and compute the R^2 values for each of the above models. 
 
+```{r}
+#TO-DO
+```
+
+Is R^2 monotonically increasing? Why?
+
+#TO-DO
