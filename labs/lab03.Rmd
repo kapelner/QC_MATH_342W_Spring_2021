@@ -1,8 +1,10 @@
 ---
 title: "Lab 3"
-author: "Your Name Here"
-output: pdf_document
+author: "Alexis Montes"
 date: "11:59PM March 4, 2021"
+output:
+  pdf_document:
+    latex_engine: xelatex
 ---
 
 
@@ -27,8 +29,8 @@ Use the `e1071` package to fit an SVM model to the simple data. Use a formula to
 ```{r}
 pacman::p_load(e1071)
 svm_model = svm(
-  formula = #TO-DO, 
-  data = #TO-DO, 
+  as.matrix(Xy_simple[, 2 :3]),
+  Xy_simple$response,
   kernel = "linear", 
   scale = FALSE
 )
@@ -45,13 +47,45 @@ simple_svm_line = geom_abline(
     intercept = -w_vec_simple_svm[1] / w_vec_simple_svm[3], 
     slope = -w_vec_simple_svm[2] / w_vec_simple_svm[3], 
     color = "purple")
-
 simple_viz_obj + simple_svm_line
 ```
 
 Source the `perceptron_learning_algorithm` function from lab 2. Then run the following to fit the perceptron and plot its line in orange with the SVM's line:
 
 ```{r}
+#' Perceptron learning algorithm
+#'
+#' The perceptron fits the best line for the passed data
+#'
+#' @param Xinput      Training data as a matrix
+#' @param y_binary    Training data as a binaty matrix
+#' @param MAX_ITER    maximum number of iterations for the function
+#' @param w           weights data as vector
+#'
+#' @return            The computed final parameter (weight) as a vector of length p + 1
+perceptron_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 1000, w = NULL){
+  num_rows <- nrow(Xinput)
+  
+  Xinput <- cbind(rep(1, num_rows), Xinput)
+  
+  num_cols<- ncol(Xinput)
+  
+  if (is.null(w)) {
+    w <- rep(0, num_cols)
+  }
+  
+  for (i in 1:MAX_ITER) {
+    for (j in 1:num_rows) {
+      X <- Xinput[j, ]
+      e <- y_binary[j] - ifelse(sum(w %*% X) > 0, 1, 0)
+      for (k in 1:num_cols) {
+        w[k] <- w[k] + e * X[k]
+      }
+    }
+  }
+  return(w)
+}
+
 w_vec_simple_per = perceptron_learning_algorithm(
   cbind(Xy_simple$first_feature, Xy_simple$second_feature),
   as.numeric(Xy_simple$response == 1)
@@ -60,7 +94,6 @@ simple_perceptron_line = geom_abline(
     intercept = -w_vec_simple_per[1] / w_vec_simple_per[3], 
     slope = -w_vec_simple_per[2] / w_vec_simple_per[3], 
     color = "orange")
-
 simple_viz_obj + simple_perceptron_line + simple_svm_line
 ```
 
@@ -85,7 +118,14 @@ Note there are differences between this spec and the perceptron learning algorit
 #'                    The default value is 1.
 #' @return            The computed final parameter (weight) as a vector of length p + 1
 linear_svm_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 5000, lambda = 0.1){
-  #TO-DO: write pseudo code in comments
+ 
+  # Initialize a w vector
+  # for ( iter in 1 : MAX_ITER){
+  #  for (i in 1 : nrow(Xinput)){
+  #    Create a function that will help pick the maximum margin for the data
+  #   }
+  #  }
+  #}
 }
 ```
 
@@ -101,20 +141,14 @@ If you are enrolled in 342W the following is extra credit but if you're enrolled
 #' @param lambda      A scalar hyperparameter trading off margin of the hyperplane versus average hinge loss.
 #'                    The default value is 1.
 #' @return            The computed final parameter (weight) as a vector of length p + 1
-linear_svm_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 5000, lambda = 0.1){
+#linear_svm_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 5000, lambda = 0.1){
   #TO-DO
-}
+#}
 ```
 
 If you wrote code (the extra credit), run your function using the defaults and plot it in brown vis-a-vis the previous model's line:
 
 ```{r}
-svm_model_weights = linear_svm_learning_algorithm(X_simple_feature_matrix, y_binary)
-my_svm_line = geom_abline(
-    intercept = svm_model_weights[1] / svm_model_weights[3],#NOTE: negative sign removed from intercept argument here
-    slope = -svm_model_weights[2] / svm_model_weights[3], 
-    color = "brown")
-simple_viz_obj  + my_svm_line
 ```
 
 Is this the same as what the `e1071` implementation returned? Why or why not?
@@ -132,12 +166,11 @@ beta_0 = 3
 beta_1 = -2
 ```
 
-Compute $h^*(x)$ as `h_star_x`, then draw $\epsilon \sim N(0, 0.33^2)$ as `epsilon`, then compute $\y$.
-
+Compute $h^*(x)$ as `h_star_x, then draw $\epsilon \sim N(0, 0.33^2)$ as `epsilon`, then compute y.
 ```{r}
-h_star_x = #TO-DO 
-epsilon = #TO-DO
-y = #TO-DO
+h_star_x = beta_0 + beta_1 * x
+epsilon = rnorm(n,0, 0.33)
+y = h_star_x + epsilon
 ```
 
 Graph the data by running the following chunk:
@@ -152,19 +185,50 @@ simple_viz_obj
 
 Does this make sense given the values of $beta_0$ and $beta_1$?
 
+
 Write a function `my_simple_ols` that takes in a vector `x` and vector `y` and returns a list that contains the `b_0` (intercept), `b_1` (slope), `yhat` (the predictions), `e` (the residuals), `SSE`, `SST`, `MSE`, `RMSE` and `Rsq` (for the R-squared metric). Internally, you can only use the functions `sum` and `length` and other basic arithmetic operations. You should throw errors if the inputs are non-numeric or not the same length. You should also name the class of the return value `my_simple_ols_obj` by using the `class` function as a setter. No need to create ROxygen documentation here.
 
 ```{r}
 my_simple_ols = function(x, y){
-  #TO-DO
+  n = length(y)
+  x_bar = sum(x)/length(x)
+  y_bar = sum(y)/n
+  if( length(x) != n){
+    stop("x and y need to be the same length")
+  }
+  if(class(x) != 'numeric' && class(x) != 'integer' ){
+    stop("x needs to be numeric")
+  }
+  if(class(y) != 'numeric' && class(y) != 'integer' ){
+    stop("y needs to be numeric")
+  }
+  if(n < 2){
+    stop("n must be more than 2")
+  }
+  
+  b_1 = (sum(x*y)-n*x_bar*y_bar )/ (sum(x^2) - n*x_bar^2)
+  b_0 = y_bar - b_1 * x_bar
+  yhat = b_0 + b_1 * x
+  e = y - yhat
+  SSE = sum(e^2)
+  SST = sum((y-y_bar)^2)
+  MSE = SSE/ (n-2)
+  RMSE = sqrt(MSE)
+  Rsq = 1 - SSE/SST
+  
+  
+  
+  model = list(b_0 = b_0, b_1 = b_1, yhat = yhat, e = e, SSE = SSE, SST = SST, MSE = MSE, RMSE = RMSE, Rsq = Rsq)
+  class(model) = "my_simple_ols_obj"
+  model
 }
 ```
 
 Verify your computations are correct for the vectors `x` and `y` from the first chunk using the `lm` function in R:
 
 ```{r}
-lm_mod = #TO-DO
-my_simple_ols_mod = #TO-DO
+lm_mod = lm(y~x)
+my_simple_ols_mod = my_simple_ols(x,y)
 #run the tests to ensure the function is up to spec
 pacman::p_load(testthat)
 expect_equal(my_simple_ols_mod$b_0, as.numeric(coef(lm_mod)[1]), tol = 1e-4)
@@ -176,33 +240,34 @@ expect_equal(my_simple_ols_mod$Rsq, summary(lm_mod)$r.squared, tol = 1e-4)
 Verify that the average of the residuals is 0 using the `expect_equal`. Hint: use the syntax above.
 
 ```{r}
-#TO-DO
+
+expect_equal(mean(my_simple_ols_mod$e), 0)
 ```
 
 Create the $X$ matrix for this data example. Make sure it has the correct dimension.
 
 ```{r}
-#TO-DO
+X = cbind(1,x)
 ```
 
 Use the `model.matrix` function to compute the matrix `X` and verify it is the same as your manual construction.
 
 ```{r}
-#TO-DO
+model.matrix(~x)
 ```
 
 Create a prediction method `g` that takes in a vector `x_star` and `my_simple_ols_obj`, an object of type `my_simple_ols_obj` and predicts y values for each entry in `x_star`. 
 
 ```{r}
 g = function(my_simple_ols_obj, x_star){
-  #TO-DO
+  my_simple_ols_obj$b_0 + my_simple_ols_obj$b_1 * x_star
 }
 ```
 
 Use this function to verify that when predicting for the average x, you get the average y.
 
 ```{r}
-expect_equal(g(my_simple_ols_obj, mean(x)), mean(y))
+expect_equal(g(my_simple_ols_mod, mean(x)), mean(y))
 ```
 
 
@@ -212,9 +277,8 @@ In class we spoke about error due to ignorance, misspecification error and estim
 beta_0 = 3
 beta_1 = -2
 beta = c(beta_0, beta_1)
-
-ns = #TO-DO
-errors = array(NA, length(ns))
+ns = 10^(1:6)
+errors_in_b = array(NA, length(ns))
 for (i in 1 : length(ns)) {
   n = ns[i]
   x = runif(n)
@@ -222,10 +286,12 @@ for (i in 1 : length(ns)) {
   epsilon = rnorm(n, mean = 0, sd = 0.33)
   y = h_star_x + epsilon
   
-  #TO-DO
-  errors[i] = sum((beta - b)^2)
+  mod = my_simple_ols(x,y)
+  b = c(mod$b_0, mod$b_1)
+  errors_in_b[i] = sum((beta - b)^2)
 }
-errors
+log(errors_in_b,10)
+errors_in_b
 ```
 
 
@@ -254,13 +320,15 @@ TO-DO
 Find the average height (include both parents and children in this computation).
 
 ```{r}
-#TO-DO
+avg_height = mean(c(Galton$parent, Galton$child))
 ```
 
-If you were predicting child height from parent and you were using the null model, what would the RMSE be of this model be?
+If you were to use the null model, what would the RMSE be of this model be?
 
 ```{r}
-#TO-DO
+n = nrow(Galton)
+SST = sum((Galton$child - mean(Galton$child))^2) 
+sqrt(SST/(n-1))
 ```
 
 Note that in Math 241 you learned that the sample average is an estimate of the "mean", the population expected value of height. We will call the average the "mean" going forward since it is probably correct to the nearest tenth of an inch with this amount of data.
@@ -268,7 +336,11 @@ Note that in Math 241 you learned that the sample average is an estimate of the 
 Run a linear model attempting to explain the childrens' height using the parents' height. Use `lm` and use the R formula notation. Compute and report $b_0$, $b_1$, RMSE and $R^2$. 
 
 ```{r}
-#TO-DO
+mod = lm(child~parent,Galton)
+b_0 = coef(mod)[1]
+b_1 = coef(mod)[2]
+summary(mod)$sigma
+summary(mod)$r.squared
 ```
 
 Interpret all four quantities: $b_0$, $b_1$, RMSE and $R^2$. Use the correct units of these metrics in your answer.
@@ -304,33 +376,39 @@ ggplot(Galton, aes(x = parent, y = child)) +
 
 Fill in the following sentence: 
 
-TO-DO: Children of short parents became ... on average and children of tall parents became ... on average.
+TO-DO: 
+Children of short parents became tall on average and children of tall parents became shorter on average.
 
 Why did Galton call it "Regression towards mediocrity in hereditary stature" which was later shortened to "regression to the mean"?
 
-TO-DO
+TO-DO:
+The average height of the children regressed to the mean or average of the height of the parents. The children of taller parents ended up being shorter, averaging towards the mean height. And the children of shorter parents ended up being taller, averaging towards the mean about.
+
 
 Why should this effect be real?
 
-TO-DO
+This effect possibly occurred due to sampling error. Since results are taken from children that are tall or short, the two will average out towards the mean. When taking a similar sample size from two opposing values they will always regress because their values would average each other out.
+
 
 You now have unlocked the mystery. Why is it that when modeling with $y$ continuous, everyone calls it "regression"? Write a better, more descriptive and appropriate name for building predictive models with $y$ continuous.
 
 TO-DO
+It is called a regression because of Galton's findings that the average heights of short children and tall children move towards the average height, showing the "regression" of the heights.
+
 
 You can now clear the workspace. Create a dataset $\mathbb{D}$ which we call `Xy` such that the linear model as $R^2$ about 50\% and RMSE approximately 1.
 
 ```{r}
-x = #TO-DO
-y = #TO-DO
+x = c(10, 7, 7, 8, 8, 5)
+y = c(2, 4, 3, 5, 3, 5)
 Xy = data.frame(x = x, y = y)
 ```
 
 Create a dataset $\mathbb{D}$ which we call `Xy` such that the linear model as $R^2$ about 0\% but x, y are clearly associated.
 
 ```{r}
-x = #TO-DO
-y = #TO-DO
+x = c(4, 2, 4, 5, 7, 8)
+y = c(2, 4, 2, 4, 2, 4)
 Xy = data.frame(x = x, y = y)
 ```
 
@@ -347,8 +425,51 @@ Write a function `my_ols` that takes in `X`, a matrix with with p columns repres
 
 
 ```{r}
+
 my_ols = function(X, y){
-  #TO-DO
+  n = nrow(X) 
+  p = ncol(X) + 1 
+  
+  if (nrow(X) != nrow(y)) {
+    stop("X and y must have the same number of rows") 
+  }
+  if (class(X)  != "numeric" & class(X) != "integer") {
+    stop("x needs to be numeric")
+  }
+  if (class(y)  != "numeric" & class(y) != "integer") {
+    stop("y needs to be numeric")
+  }
+  if (n <= 2) {
+    stop("Dimensions of n must be greater than 2")
+  }
+  
+  
+  X = as.matrix(cbind(1, X[, 1:p]))
+  colnames(X)[1] = "(intercept)" 
+  XtX = t(X) %*% X
+  
+  tryCatch({
+    XtXinv = solve(XtX)
+  }, error = function(e) {
+    stop("Matrix is not invertible or does not have full rank")
+  })
+  
+  b = XtXinv %*% t(X) %*% y
+  yhat = X %*% b 
+  e = y - yhat
+  df  = ... 
+  SSE = t(e) %*% e
+  s_sq_y = var(y )
+  SST = (n -1)  * s_sq_y
+  MSE = 1 /(nrow(X) - ncol(X)) * SSE 
+  RMSE = sqrt(MSE)
+  Rsq = 1 - SSE / SST
+  
+  model = list("b"=b, "yhat"=yhat, "e"=e, "SSE"=SSE, "SST"=SST, "MSE"=MSE, "RMSE"=RMSE, "Rsq"=Rsq)
+  
+  class(model) = "my_ols"
+  
+  model
 }
 ```
 
@@ -363,10 +484,11 @@ Create a prediction method `g` that takes in a vector `x_star` and the dataset $
 
 ```{r}
 g = function(x_star, X, y){
-  #TO-DO
+  model = my_ols(X, y) 
+  
+  x_start %*% model$b
 }
 ```
-
 
 
 
