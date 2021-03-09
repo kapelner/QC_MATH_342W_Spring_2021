@@ -1,9 +1,206 @@
 ---
-title: "Practice Lecture 7 MATH 390.4 Queens College"
+title: "Practice Lecture 12 MATH 390.4 Queens College"
 author: "Professor Adam Kapelner"
-date: "March 19, 2020"
+date: "March 10, 2021"
 ---
 
+# Correlation zero means orthogonality
+
+Let's generate some fake data. In this example we'll have one predictor which will be orthogonal to the centered response. We enforce the response to be centered by adding a column of 1's:
+
+```{r}
+n = 100; p = 2
+Q = qr.Q(qr(cbind(1, matrix(rnorm(n * p), nrow = n))))
+y = Q[, p + 1]
+x = Q[, 2]
+```
+
+Let's make sure it's orthogonal:
+
+```{r}
+x %*% y
+```
+
+If they're orthogonal and y is mean-centered, what is the correlation?
+
+```{r}
+cor(x, y)
+```
+
+If the correlation is 0, what is $b_1$, the slope? It has to be zero. Thus $b_0$ has to be $bar{x}$. Since x was also orthogonalized to the vector of 1's, it's centered and hence has average = 0. So both intercept and slope are 0:
+
+What is $b$?
+
+```{r}
+mod = lm(y ~ x)
+coef(mod)
+```
+
+What is $R^2$? Since $x$ and $y$ are orthogonal... a projection onto the colspace of $X$ gets annhilated.
+
+```{r}
+summary(mod)$r.squared
+```
+
+# Random correlations are non-zero
+
+```{r}
+n = 100
+x = rnorm(n)
+x = x - mean(x)
+y = rnorm(n)
+y = y - mean(y)
+```
+
+In this setup, $x$ and $y$ are centered Gaussian random vectors. Are they orthogonal?
+
+```{r}
+x %*% y
+theta_in_rad = acos(x %*% y / sqrt(sum(x^2) * sum(y^2)))
+theta_in_rad
+theta_in_rad * 180 / pi
+
+
+theta_in_rad = acos(X[, 65] %*% y / sqrt(sum(X[, 65]^2) * sum(y^2)))
+theta_in_rad
+theta_in_rad * 180 / pi
+```
+
+Nope... what about correlated?
+
+```{r}
+cor(x, y)
+cor(x, y)^2
+```
+
+They *nearly* uncorrelated but they still have some correlation. How is this possible? 
+
+There is "random chance"" AKA "chance capitalization"!
+
+What about the best fitting line?
+
+```{r}
+mod = lm(y ~ x)
+coef(mod)
+```
+
+Slope is about -0.8 which is small but non-zero.
+
+What is $R^2$? Since $x$ and $y$ are nearly orthogonal... a projection onto the colspace of $X$ gets nearly annhilated.
+
+```{r}
+summary(mod)$r.squared
+```
+
+but not entirely. Lesson learned: random noise can be correlated with the response $y$ and give you the illusion of fit!
+
+
+# The monotonicity of SSR (or $R^2$) with more features
+
+As p increases, $R^2$ goes up. Here's a nice exercise:
+
+```{r}
+n = 100
+y = rnorm(n)
+Rsqs = array(NA, n)
+
+#we know that Rsq = 0 for the null model (i.e. just regressing on the intercept)
+Rsqs[1] = 0
+
+#create a matrix with the correct number of rows but no columns
+X = matrix(NA, nrow = n, ncol = 0)
+X = cbind(1, X)
+
+#for every new p, tack on a new random continuos predictor:
+for (p_plus_one in 2 : n){
+  X = cbind(X, rnorm(n))
+  Rsqs[p_plus_one] = summary(lm(y ~ X))$r.squared
+}
+```
+
+Now let's plot it and see what happens:
+
+```{r}
+pacman::p_load(ggplot2)
+base = ggplot(data.frame(p_plus_one = 1 : n, Rsq = Rsqs))
+base + geom_line(aes(x = p_plus_one, y = Rsq))
+```
+
+With each additional predictor, what happens to $R^2$?
+
+```{r}
+pacman::p_load(latex2exp)
+base + geom_line(aes(x = p_plus_one, y = c(0, diff(Rsq)))) + xlab("p + 1") + ylab(TeX("$\\Delta R^2$"))
+```
+
+$R^2$ always increases:
+
+```{r}
+all(diff(Rsqs) > 0)
+```
+
+How can this possibly be?? The $x$'s are not related to $y$ whatsoever!!
+
+Chance capitalization prevails. Each additional predictor picks up another dimension to add to the column space of $X$. Eventually, the projection explains *all* the variance. If $n = p + 1$, that matrix is square and of full rank, hence $\hat{y} = y$ and all residuals $e = 0$ since it is merely solving $n$ linearly independent equations.
+
+So here's an idea. To get a perfect fit, just augment your design matrix with $n - (p + 1)$ random vectors and you get $R^2 = 100\%$!! There must be something wrong with this!!
+
+Even if $p$ is large and $<n$, you are getting a lot of fit for free. So there's something wrong with this too!
+
+This is called overfitting.
+
+## Overfitting
+
+Let's see how overfitting increases generalized estimation error.
+
+```{r}
+bbeta = c(1, 2, 3, 4)
+
+#build training data
+n = 100
+X = cbind(1, rnorm(n), rnorm(n), rnorm(n))
+y = X %*% bbeta + rnorm(n, 0, 0.3)
+#\amthbb{D}
+
+#build test data
+n_star = 100
+X_star = cbind(1, rnorm(n_star), rnorm(n_star), rnorm(n_star))
+y_star = X_star %*% bbeta + rnorm(n_star, 0, 0.3)
+
+all_betas = matrix(NA, n, n)
+all_betas[4, 1 : 4] = coef(lm(y ~ 0 + X))
+in_sample_rmse_by_p = array(NA, n)
+for (j in 5 : n){
+  X = cbind(X, rnorm(n))
+  lm_mod = lm(y ~ 0 + X)
+  all_betas[j, 1 : j] = coef(lm_mod)
+  y_hat = X %*% all_betas[j, 1 : j]
+  in_sample_rmse_by_p[j] = sqrt(mean((y - y_hat)^2))
+}
+plot(1 : n, in_sample_rmse_by_p)
+
+
+all_betas[4 : n, 1 : 4]
+b_error_by_p = rowSums((all_betas[, 1 : 4] - matrix(rep(bbeta, n), nrow = n, byrow = TRUE))^2)
+plot(1 : n, b_error_by_p)
+
+#look at out of sample error in the case of only the first four features
+oos_rmse_by_p = array(NA, n)
+for (j in 4 : n){
+  y_hat_star = X_star %*% all_betas[j, 1 : 4]
+  oos_rmse_by_p[j] = sqrt(mean((y_star - y_hat_star)^2))
+}
+plot(1 : n, oos_rmse_by_p)
+
+#look at out of sample error in the case of the random features too
+oos_rmse_by_p = array(NA, n)
+for (j in 5 : n){
+  X_star = cbind(X_star, rnorm(n))
+  y_hat_star = X_star %*% all_betas[j, 1 : j]
+  oos_rmse_by_p[j] = sqrt(mean((y_star - y_hat_star)^2))
+}
+plot(1 : n, oos_rmse_by_p, ylim = c(0, 2))
+```
 
 # Review of Overfitting
 
@@ -410,4 +607,25 @@ basic +
   stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "purple")
 ```
 
+## Eigendecomposition in R
 
+```{r}
+B = array(seq(1, 4), dim = c(2, 2))
+B
+eigen_decomp = eigen(B)
+V = eigen_decomp$vectors
+V
+v1 = V[, 1, drop = FALSE]
+v2 = V[, 2, drop = FALSE]
+lambdas = eigen_decomp$values
+lambdas
+lambda1 = lambdas[1]
+lambda2 = lambdas[2]
+B %*% v1
+lambda1 * v1
+B %*% v2 
+lambda2 * v2
+B %*% v2 == lambda2 * v2 #why not?
+#diagonolization
+V %*% diag(lambdas) %*% solve(V)
+```
