@@ -1,8 +1,6 @@
-# MATH 342W Intro to Data Science Spring 2021
-This is the course homepage for Math 342W (and Masters level ...) at Queens College, City University of New York taught by Professor Adam Kapelner. The course syllabus can be found [here](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/syllabus/syllabus.pdf). We are now using [slack](https://.....slack.com/) for class discussions and videos.
-=======
+# MATH 342W Introdution to Data Science Spring 2021
 
-This is the course homepage for Math 342W (and Masters level 650.4) at Queens College, City University of New York taught by Professor Adam Kapelner. The course syllabus can be found [here](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/syllabus/syllabus.pdf). We are now using [slack](https://slack.com/) for class discussions and videos.
+This is the course homepage for Math 342W (and Masters level 650.4) at Queens College, City University of New York taught by Professor Adam Kapelner. The course syllabus can be found [here](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/syllabus/syllabus.pdf). We are now using [slack](https://.....slack.com/) for class discussions and videos.
 
 ## Lectures
 
@@ -52,24 +50,22 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec13kap.pdf) [(Steven Grgas)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec13grgas.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec13nissanthan.pdf)
 * Lecture 12 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec06.Rmd) 
-  - Theory Notes [(Nabila Ahmed)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec12ahmed.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec12nissanthan.pdf)
+  - Theory Notes [(Nabila Ahmed)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec12ahmed.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec12nissanthan.pdf)-->
 * Lecture 11 video on slack
-  - Theory Notes [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec11nissanthan.pdf)
+  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec11.Rmd)
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec11kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec11kim.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec11gubbins.pdf)
 * Lecture 10 video on slack
-  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec05.Rmd) 
-  - Theory Notes [(Jonathan Eng)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec10eng.pdf) [(Christella Nissanthan)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec10nissanthan.pdf)-->
-  * Lecture 10 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec10.Rmd)
-  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec10kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec10kim.pdf)
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec10kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec10kim.pdf) [(Kennly Weerasinghe)](https://github.com/wskennly/QC_MATH_342W_Spring_2021/blob/master/lectures/lec10weerasinghe.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec10gubbins.pdf)
 * Lecture 9 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec09.Rmd) 
-  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec09kap.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec09gubbins.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec09kim.pdf)
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec09kap.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec09gubbins.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec09kim.pdf) [(Kennly Weerasinghe)](https://github.com/wskennly/QC_MATH_342W_Spring_2021/blob/master/lectures/lec09weerasinghe.pdf)
 * Lecture 8 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec08.Rmd) 
-  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec08kim.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec08gubbins.pdf)
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec08kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec08kim.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec08gubbins.pdf) [(Kennly Weerasinghe)](https://github.com/wskennly/QC_MATH_342W_Spring_2021/blob/master/lectures/lec08weerasinghe.pdf)
 * Lecture 7 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec07.Rmd) 
-  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec07kap.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec07gubbins.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec07kim.pdf) [(Alexis Montes)](https://github.com/AlexNYC25/QC_MATH_342W_Spring_2021/blob/master/lectures/lec07montes.pdf)
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec07kap.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec07gubbins.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec07kim.pdf) [(Alexis Montes)](https://github.com/AlexNYC25/QC_MATH_342W_Spring_2021/blob/master/lectures/lec07montes.pdf) [(Kennly Weerasinghe)](https://github.com/wskennly/QC_MATH_342W_Spring_2021/blob/master/lectures/lec07weerasinghe.pdf)
 * Lecture 6 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec06.Rmd) 
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec06kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec06kim.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec06gubbins.pdf) [(Kennly Weerasinghe)](https://github.com/wskennly/QC_MATH_342W_Spring_2021/blob/master/lectures/lec06weerasinghe.pdf) [(Alexis Montes)](https://github.com/AlexNYC25/QC_MATH_342W_Spring_2021/blob/master/lectures/lec06montes.pdf)

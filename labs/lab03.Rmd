@@ -103,7 +103,7 @@ TO-DO
 
 Now write pseuocode for your own implementation of the linear support vector machine algorithm using the Vapnik objective function we discussed.
 
-Note there are differences between this spec and the perceptron learning algorithm spec in question \#1. You should figure out a way to respect the `MAX_ITER` argument value. 
+Note there are differences between this spec and the perceptron learning algorithm spec in question #1. You should figure out a way to respect the `MAX_ITER` argument value. 
 
 
 ```{r}
@@ -166,7 +166,8 @@ beta_0 = 3
 beta_1 = -2
 ```
 
-Compute $h^*(x)$ as `h_star_x, then draw $\epsilon \sim N(0, 0.33^2)$ as `epsilon`, then compute y.
+Compute h^* as `h_star_x`, then draw epsilon from an iid N(0, 0.33^2) distribution as `epsilon`, then compute the vector y.
+
 ```{r}
 h_star_x = beta_0 + beta_1 * x
 epsilon = rnorm(n,0, 0.33)
@@ -183,7 +184,7 @@ simple_viz_obj = ggplot(simple_df, aes(x, y)) +
 simple_viz_obj
 ```
 
-Does this make sense given the values of $beta_0$ and $beta_1$?
+Does this make sense given the values of beta_0 and beta_1?
 
 
 Write a function `my_simple_ols` that takes in a vector `x` and vector `y` and returns a list that contains the `b_0` (intercept), `b_1` (slope), `yhat` (the predictions), `e` (the residuals), `SSE`, `SST`, `MSE`, `RMSE` and `Rsq` (for the R-squared metric). Internally, you can only use the functions `sum` and `length` and other basic arithmetic operations. You should throw errors if the inputs are non-numeric or not the same length. You should also name the class of the return value `my_simple_ols_obj` by using the `class` function as a setter. No need to create ROxygen documentation here.
@@ -271,7 +272,7 @@ expect_equal(g(my_simple_ols_mod, mean(x)), mean(y))
 ```
 
 
-In class we spoke about error due to ignorance, misspecification error and estimation error. Show that as n grows, estimation error shrinks. Let us define an error metric that is the difference between $b_0$ and $b_1$ and $\beta_0$ and $\beta_1$. How about $h = ||b - \beta||^2$ where the quantities are now the vectors of size two. Show as n increases, this shrinks. 
+In class we spoke about error due to ignorance, misspecification error and estimation error. Show that as n grows, estimation error shrinks. Let us define an error metric that is the difference between b_0 and b_1 and beta_0 and beta_1. How about ||b - beta||^2 where the quantities are now the vectors of size two. Show as n increases, this shrinks. 
 
 ```{r}
 beta_0 = 3
@@ -307,7 +308,7 @@ In it, there is a dataset called `Galton`. Load it up.
 data(Galton)
 ```
 
-You now should have a data frame in your workspace called `Galton`. Summarize this data frame and write a few sentences about what you see. Make sure you report $n$, $p$ and a bit about what the columns represent and how the data was measured. See the help file `?Galton`.
+You now should have a data frame in your workspace called `Galton`. Summarize this data frame and write a few sentences about what you see. Make sure you report n, p and a bit about what the columns represent and how the data was measured. See the help file `?Galton`.
 p is 1 and n is 928 the number of observations  
 
 ```{r}
@@ -333,7 +334,7 @@ sqrt(SST/(n-1))
 
 Note that in Math 241 you learned that the sample average is an estimate of the "mean", the population expected value of height. We will call the average the "mean" going forward since it is probably correct to the nearest tenth of an inch with this amount of data.
 
-Run a linear model attempting to explain the childrens' height using the parents' height. Use `lm` and use the R formula notation. Compute and report $b_0$, $b_1$, RMSE and $R^2$. 
+Run a linear model attempting to explain the childrens' height using the parents' height. Use `lm` and use the R formula notation. Compute and report b_0, b_1, RMSE and R^2. 
 
 ```{r}
 mod = lm(child~parent,Galton)
@@ -343,7 +344,7 @@ summary(mod)$sigma
 summary(mod)$r.squared
 ```
 
-Interpret all four quantities: $b_0$, $b_1$, RMSE and $R^2$. Use the correct units of these metrics in your answer.
+Interpret all four quantities: b_0, b_1, RMSE and R^2. Use the correct units of these metrics in your answer.
 
 TO-DO
 
@@ -355,11 +356,11 @@ It is reasonable to assume that parents and their children have the same height?
 
 TO-DO
 
-If they were to have the same height and any differences were just random noise with expectation 0, what would the values of $\beta_0$ and $\beta_1$ be?
+If they were to have the same height and any differences were just random noise with expectation 0, what would the values of beta_0 and beta_1 be?
 
 TO-DO
 
-Let's plot (a) the data in $\mathbb{D}$ as black dots, (b) your least squares line defined by $b_0$ and $b_1$ in blue, (c) the theoretical line $\beta_0$ and $\beta_1$ if the parent-child height equality held in red and (d) the mean height in green.
+Let's plot (a) the data in D as black dots, (b) your least squares line defined by b_0 and b_1 in blue, (c) the theoretical line beta_0 and beta_1 if the parent-child height equality held in red and (d) the mean height in green.
 
 ```{r}
 pacman::p_load(ggplot2)
@@ -390,13 +391,13 @@ Why should this effect be real?
 This effect possibly occurred due to sampling error. Since results are taken from children that are tall or short, the two will average out towards the mean. When taking a similar sample size from two opposing values they will always regress because their values would average each other out.
 
 
-You now have unlocked the mystery. Why is it that when modeling with $y$ continuous, everyone calls it "regression"? Write a better, more descriptive and appropriate name for building predictive models with $y$ continuous.
+You now have unlocked the mystery. Why is it that when modeling with y continuous, everyone calls it "regression"? Write a better, more descriptive and appropriate name for building predictive models with y continuous.
 
 TO-DO
 It is called a regression because of Galton's findings that the average heights of short children and tall children move towards the average height, showing the "regression" of the heights.
 
 
-You can now clear the workspace. Create a dataset $\mathbb{D}$ which we call `Xy` such that the linear model as $R^2$ about 50\% and RMSE approximately 1.
+You can now clear the workspace. Create a dataset D which we call `Xy` such that the linear model as R^2 about 50\% and RMSE approximately 1.
 
 ```{r}
 x = c(10, 7, 7, 8, 8, 5)
@@ -404,7 +405,7 @@ y = c(2, 4, 3, 5, 3, 5)
 Xy = data.frame(x = x, y = y)
 ```
 
-Create a dataset $\mathbb{D}$ which we call `Xy` such that the linear model as $R^2$ about 0\% but x, y are clearly associated.
+Create a dataset D which we call `Xy` such that the linear model as R^2 about 0\% but x, y are clearly associated.
 
 ```{r}
 x = c(4, 2, 4, 5, 7, 8)
@@ -412,7 +413,7 @@ y = c(2, 4, 2, 4, 2, 4)
 Xy = data.frame(x = x, y = y)
 ```
 
-Extra credit: create a dataset $\mathbb{D}$ and a model that can give you $R^2$ arbitrarily close to 1 i.e. approximately 1 - epsilon but RMSE arbitrarily high i.e. approximately M.
+Extra credit: create a dataset D and a model that can give you R^2 arbitrarily close to 1 i.e. approximately 1 - epsilon but RMSE arbitrarily high i.e. approximately M.
 
 ```{r}
 epsilon = 0.01
@@ -421,7 +422,7 @@ M = 1000
 ```
 
 
-Write a function `my_ols` that takes in `X`, a matrix with with p columns representing the feature measurements for each of the n units, a vector of $n$ responses `y` and returns a list that contains the `b`, the $p+1$-sized column vector of OLS coefficients, `yhat` (the vector of $n$ predictions), `e` (the vector of $n$ residuals), `df` for degrees of freedom of the model, `SSE`, `SST`, `MSE`, `RMSE` and `Rsq` (for the R-squared metric). Internally, you cannot use `lm` or any other package; it must be done manually. You should throw errors if the inputs are non-numeric or not the same length. Or if `X` is not otherwise suitable. You should also name the class of the return value `my_ols` by using the `class` function as a setter. No need to create ROxygen documentation here.
+Write a function `my_ols` that takes in `X`, a matrix with with p columns representing the feature measurements for each of the n units, a vector of n responses `y` and returns a list that contains the `b`, the p+1-sized column vector of OLS coefficients, `yhat` (the vector of n predictions), `e` (the vector of n residuals), `df` for degrees of freedom of the model, `SSE`, `SST`, `MSE`, `RMSE` and `Rsq` (for the R-squared metric). Internally, you cannot use `lm` or any other package; it must be done manually. You should throw errors if the inputs are non-numeric or not the same length. Or if `X` is not otherwise suitable. You should also name the class of the return value `my_ols` by using the `class` function as a setter. No need to create ROxygen documentation here.
 
 
 ```{r}
@@ -480,7 +481,7 @@ Verify that the OLS coefficients for the `Type` of cars in the cars dataset give
 ```
 
 
-Create a prediction method `g` that takes in a vector `x_star` and the dataset $\mathbb{D}$ i.e. `X` and `y` and returns the OLS predictions. Let `X` be a matrix with with p columns representing the feature measurements for each of the n units
+Create a prediction method `g` that takes in a vector `x_star` and the dataset D i.e. `X` and `y` and returns the OLS predictions. Let `X` be a matrix with with p columns representing the feature measurements for each of the n units
 
 ```{r}
 g = function(x_star, X, y){
