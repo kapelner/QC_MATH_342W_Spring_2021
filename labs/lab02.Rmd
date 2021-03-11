@@ -1,11 +1,8 @@
 ---
 title: "Lab 2"
-author: "Alexis Montes"
+author: "Your Name Here"
+output: pdf_document
 date: "11:59PM February 25, 2021"
-output:
-  pdf_document:
-    latex_engine: xelatex
-  latex_engine: default
 ---
 
 # More Basic R Skills
@@ -13,34 +10,13 @@ output:
 * Create a function `my_reverse` which takes as required input a vector `v` and returns the vector in reverse where the first entry is the last entry, etc. No function calls are allowed inside your function otherwise that would defeat the purpose of the exercise! (Yes, there is a base R function that does this called `rev`). Use `head` on `v` and `tail` on `my_reverse(v)` to verify it works.
 
 ```{r}
-my_reverse = function(v){
-  v_rev = rep(NA, times=length((v)))
-  for(i in length(v):1){
-    v_rev[length(v) - i + 1] = v[i]
-  }
-  v_rev
-}
-v = 1:10
-my_reverse(v)
+#TO-DO
 ```
 
 * Create a function `flip_matrix` which takes as required input a matrix, an argument `dim_to_rev` that returns the matrix with the rows in reverse order or the columns in reverse order depending on the `dim_to_rev` argument. Let the default be the dimension of the matrix that is greater. If the number of rows 
 
 ```{r}
-flip_matrix = function(x, dim_to_rev = NULL){
-  if(is.null(dim_to_rev)){
-    dim_to_rev = ifelse(nrow(x) >= ncol(x), "rows", "cols")
-  }
-  if(dim_to_rev == "rows"){
-    x[my_reverse(1:nrow(x))]
-  } else if (dim_to_rev == "cols"){
-    x(,my_reverse((1:ncol(x))))
-  } else {
-    stop("Illegal arg")
-  }
-}
-X = matrix(rnorm(100), nrow = 25, ncol=25)
-flip_matrix(X)
+#TO-DO
 ```
 
 * Create a list named `my_list` with keys "A", "B", ... where the entries are arrays of size 1, 2 x 2, 3 x 3 x 3, etc. Fill the array with the numbers 1, 2, 3, etc. Make 8 entries according to this sequence.
@@ -62,7 +38,7 @@ Use `?object.size` to read about what these functions do. Then explain the outpu
 Now cleanup the namespace by deleting all stored objects and functions:
 
 ```{r}
-#rm(list = ls())
+#TO-DO
 ```
 
 ## A little about strings
@@ -71,8 +47,6 @@ Now cleanup the namespace by deleting all stored objects and functions:
 
 ```{r}
 lorem = "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Morbi posuere varius volutpat. Morbi faucibus ligula id massa ultricies viverra. Donec vehicula sagittis nisi non semper. Donec at tempor erat. Integer dapibus mi lectus, eu posuere arcu ultricies in. Cras suscipit id nibh lacinia elementum. Curabitur est augue, congue eget quam in, scelerisque semper magna. Aenean nulla ante, iaculis sed vehicula ac, finibus vel arcu. Mauris at sodales augue. "
-lorem_split = strsplit(lorem, split=". ", fixed=TRUE)
-lorem_sample = sample(lorem_split[[1]])
 ```
 
 You have a set of names divided by gender (M / F) and generation (Boomer / GenX / Millenial):
@@ -87,24 +61,9 @@ You have a set of names divided by gender (M / F) and generation (Boomer / GenX 
 Create a list-within-a-list that will intelligently store this data.
 
 ```{r}
-M_Boomer = strsplit("Theodore, Bernard, Gene, Herbert, Ray, Tom, Lee, Alfred, Leroy, Eddie", split = ", ")[[1]]
-M_GenX = strsplit("Marc, Jamie, Greg, Darryl, Tim, Dean, Jon, Chris, Troy, Jeff", split = ", ")[[1]]
-M_Millennial = strsplit("Zachary, Dylan, Christian, Wesley, Seth, Austin, Gabriel, Evan, Casey, Luis", split = ", ")[[1]]
-F_Boomer = strsplit("Gloria, Joan, Dorothy, Shirley, Betty, Dianne, Kay, Marjorie, Lorraine, Mildred", split = ", ")[[1]]
-F_GenX = strsplit("Tracy, Dawn, Tina, Tammy, Melinda, Tamara, Tracey, Colleen, Sherri, Heidi", split = ", ")[[1]]
-F_Millennial = strsplit("Samantha, Alexis, Brittany, Lauren, Taylor, Bethany, Latoya, Candice, Brittney, Cheyenne", split = ", ")[[1]]
-
-myList = list("M" = list(), "F" = list())
-
-myList$M$Boomer = M_Boomer
-myList$M$GenX = M_GenX
-myList$M$Millennial = M_Millennial
-myList$F$Boomer = F_Boomer
-myList$F$Gen_X = F_GenX
-myList$F$Millennial = F_Millennial
-
-
-
+#HINT: 
+#strsplit("Theodore, Bernard, Gene, Herbert, Ray, Tom, Lee, Alfred, Leroy, Eddie", split = ", ")[[1]]
+#TO-DO
 ```
 
 ## Dataframe creation
@@ -115,15 +74,8 @@ Imagine you are running an experiment with many manipulations. You have 14 level
 ```{r}
 n = 14 * 3 * 2 * 3 * 10
 #X = data.frame(treatment = rep(NA,n), 
-X = data.frame(treatment = rep(NA,n), variation = rep(NA,n), gender = rep(NA,n), generation = rep(NA,n), name = rep(NA,n), y = rep(NA, n))
-
-X$treatment = rep(letters[1:14], each = n / 14)
-X$variation = rep(rep(LETTERS[1:3], each = n / 14 / 3) , times = 14)
-X$gender = rep(rep(c("M", "F"), each = n / 14 / 3 / 2), times = 14*3)
-X$generation = rep(rep(c("Boomer", "GenX", "Millenial"), each = n / 14/ 3 /2 / 3), times = 14 * 3 * 2)
-X$name = rep(unlist(myList), times = 14 * 3)
-
-X
+#                ...
+#TO-DO
 ```
 
 ## Packages
@@ -131,7 +83,7 @@ X
 Install the package `pacman` using regular base R.
 
 ```{r}
-#install.packages("pacman")
+install.packages("pacman")
 ```
 
 
@@ -153,7 +105,6 @@ If there are any errors, the `expect_equal` function will tell you about them. I
 Test the `my_reverse` function from lab2 using the following code:
 
 ```{r}
-v = c(1:100)
 expect_equal(my_reverse(v), rev(v))
 expect_equal(my_reverse(c("A", "B", "C")), c("C", "B", "A"))
 ```
@@ -179,15 +130,7 @@ nn_algorithm_predict = function(Xinput, y_binary, Xtest){
 Write a few tests to ensure it actually works:
 
 ```{r}
-test_input = matrix( cbind(c(1, 1, 2, 3, 3, 4), c(1, 2, 1, 3, 4, 3)) )
-test_data = matrix( c(1, 3, 4, 2, 1, 2) )
-binary_data = factor(c(0, 1, 0, 1, 0, 1))
-nn_algorithm_predict(test_input, binary_data, test_data)
-
-test_input = matrix( cbind(c(1, 2, 1, 3, 1, 4), c(2, 4, 1, 3, 2, 1)) )
-test_data = matrix( c(1, 2, 3, 4, 1, 2) )
-binary_data = factor(c(1, 1, 0, 1, 0, 0))
-nn_algorithm_predict(test_input, binary_data, test_data)
+#TO-DO
 ```
 
 We now add an argument `d` representing any legal distance function to the `nn_algorithm_predict` function. Update the implementation so it performs NN using that distance function. Set the default function to be the Euclidean distance in the original function. Also, alter the documentation in the appropriate places.
@@ -210,7 +153,7 @@ For extra credit (unless you're a masters student), add an argument `k` to the `
 #TO-DO
 ```
 
-TO-DO: gives an overview of the iris data including variable means and standard deviation
+TO-DO: describe this data
 
 The outcome / label / response is `Species`. This is what we will be trying to predict. However, we only care about binary classification between "setosa" and "versicolor" for the purposes of this exercise. Thus the first order of business is to drop one class. Let's drop the data for the level "virginica" from the data frame.
 
@@ -234,14 +177,6 @@ Now create a vector `y` that is length the number of remaining rows in the data 
 
 ```{r}
 #TO-DO
-n <- nrow(iris)
-numErrors <- array(NA, n)
-for (i in 1:n){
-  y_length <- as.numeric(iris$Sepal.Length > iris$Sepal.Length[i])
-  numErrors[i] <- sum(y_length != y)
-}
-threshold <- iris$Sepal.Length[which.min(numErrors)]
-threshold
 ```
 
 What is the total number of errors this model makes?
@@ -259,9 +194,6 @@ summary(iris[iris$Species == "versicolor", "Sepal.Length"])
 ```
 
 TO-DO: Write your answer here in English.
-
-Yes since in the 75th percentile of the data of versicolors is greater than the threshold 5.4 and less than 
-the length of setosas
 
 Create the function `g` explicitly that can predict `y` from `x` being a new `Sepal.Length`.
 
@@ -288,26 +220,7 @@ You will code the "perceptron learning algorithm" for arbitrary number of featur
 #'
 #' @return            The computed final parameter (weight) as a vector of length p + 1
 perceptron_learning_algorithm = function(Xinput, y_binary, MAX_ITER = 1000, w = NULL){
-  num_rows <- nrow(Xinput)
-  
-  Xinput <- cbind(rep(1, num_rows), Xinput)
-  
-  num_cols<- ncol(Xinput)
-  
-  if (is.null(w)) {
-    w <- rep(0, num_cols)
-  }
-  
-  for (i in 1:MAX_ITER) {
-    for (j in 1:num_rows) {
-      X <- Xinput[j, ]
-      e <- y_binary[j] - ifelse(sum(w %*% X) > 0, 1, 0)
-      for (k in 1:num_cols) {
-        w[k] <- w[k] + e * X[k]
-      }
-    }
-  }
-  return(w)
+  #TO-DO
 }
 ```
 
