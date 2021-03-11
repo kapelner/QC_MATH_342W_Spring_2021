@@ -91,10 +91,10 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 * [(Lab 9, due 5/2)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab09.Rmd)
 * [(Lab 8, due 4/25)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab08.Rmd)
 * [(Lab 7, due 4/8)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab07.Rmd)
-* [(Lab 6, due 3/21)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab06.Rmd)
-* [(Lab 5, due 3/7)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab05.Rmd)
-* [(Lab 4, due 2/29)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab04.Rmd)
-* [(Lab 3, due 3/4)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab03.Rmd)-->
+* [(Lab 6, due 3/21)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab06.Rmd)-->
+* [(Lab 5, due 3/18)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab05.Rmd)
+* [(Lab 4, due 2/11)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab04.Rmd)
+* [(Lab 3, due 3/4)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab03.Rmd)
 * [(Lab 2, due 2/25)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab02.Rmd)
 * [(Lab 1, due 2/18)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab01.Rmd)
 

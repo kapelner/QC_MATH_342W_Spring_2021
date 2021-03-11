@@ -2,7 +2,7 @@
 title: "Lab 4"
 author: "Your Name Here"
 output: pdf_document
-date: "11:59PM March 10, 2021"
+date: "11:59PM March 11, 2021"
 ---
 
 Load up the famous iris dataset. We are going to do a different prediction problem. Imagine the only input x is Species and you are trying to predict y which is Petal.Length. A reasonable prediction is the average petal length within each Species. Prove that this is the OLS model by fitting an appropriate `lm` and then using the predict function to verify.
