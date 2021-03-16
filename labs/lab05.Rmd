@@ -6,10 +6,13 @@ date: "11:59PM March 18, 2021"
 ---
 
 
-Create a 2x2 matrix with the first column 1's and the next column iid normals. Find the absolute value of the angle (in degrees, not radians) between the two columns.
+Create a 2x2 matrix with the first column 1's and the next column iid normals. Find the absolute value of the angle (in degrees, not radians) between the two columns in absolute difference from 90 degrees.
 
 ```{r}
-#TO-DO
+n = 100
+
+X = matrix(rnorm(2 * n), ncol = 2)
+acos(t(X[,1]) %*% X[,2] / sqrt(sum(X[, 1]^2) * sum(X[, 2]^2))) * 180 / pi
 ```
 
 Repeat this exercise `Nsim = 1e5` times and report the average absolute angle.
@@ -18,13 +21,13 @@ Repeat this exercise `Nsim = 1e5` times and report the average absolute angle.
 #TO-DO
 ```
 
-Create a 2xn matrix with the first column 1's and the next column iid normals. Find the absolute value of the angle (in degrees, not radians) between the two columns. For n = 10, 50, 100, 200, 500, 1000, report the average absolute angle over `Nsim = 1e5` simulations.
+Create a n x 2 matrix with the first column 1's and the next column iid normals. Find the absolute value of the angle (in degrees, not radians) between the two columns. For n = 10, 50, 100, 200, 500, 1000, report the average absolute angle over `Nsim = 1e5` simulations.
 
 ```{r}
 #TO-DO
 ```
 
-What is this absolute angle converging to? Why does this make sense?
+What is this absolute angle difference from 90 degrees converging to? Why does this make sense?
 
 #TO-DO
 
@@ -128,7 +131,7 @@ V[ , 1] = X[ , 1]
 Convert V into Q whose columns are the same except normalized
 
 ```{r}
-Q = matrix(NA, nrow = n, ncol = p)
+Q = matrix(NA, nrow = n, ncol = p_plus_one)
 #TO-DO
 ```
 

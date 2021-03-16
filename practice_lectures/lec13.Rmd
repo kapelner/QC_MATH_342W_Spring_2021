@@ -1,0 +1,289 @@
+---
+title: "Practice Lecture 13 MATH 342W Queens College"
+author: "Professor Adam Kapelner"
+date: "March 15, 2021"
+---
+
+# Nonlinear Linear Regression: Polynomial Regression
+
+Let's generate a polynomial model of degree 2 ($f = h^* \in \mathcal{H}$) and let $\epsilon$ be random noise (the error due to ignorance) for $\mathbb{D}$ featuring $n = 2$.
+
+```{r}
+set.seed(1003)
+n = 25
+beta_0 = 1
+beta_1 = 0
+beta_2 = 1
+x = runif(n, -2, 5)
+#best possible model
+h_star_x = beta_0 + beta_1 * x + beta_2 * x^2
+
+#actual data differs due to information we don't have
+epsilon = rnorm(n)
+y = h_star_x + epsilon
+
+#scatterplot it
+df = data.frame(x = x, y = y, h_star_x = h_star_x)
+pacman::p_load(ggplot2)
+basic = ggplot(df, aes(x, y)) +
+  geom_point()
+basic
+head(x)
+```
+
+Let's try to estimate with a line:
+
+```{r}
+linear_mod = lm(y ~ x)
+b_linear = summary(linear_mod)$coef
+basic + geom_abline(intercept = b_linear[1], slope = b_linear[2], col = "red")
+```
+
+The relationship is "underfit". $\mathcal{H}$ is not rich enough right now to express something close to $f(x)$. But it is better than the null model!
+
+Now let's do a polynomial regression of degree two. Let's do so manually:
+
+```{r}
+X = as.matrix(cbind(1, x, x^2))
+head(X)
+b = solve(t(X) %*% X) %*% t(X) %*% y
+b
+c(beta_0, beta_1, beta_2)
+```
+
+These are about the same as the $\beta_0, \beta_1$ and $\beta_2$ as defined in $f(x)$ the true model. In order to graph this, we can no longer use the routine `geom_abline`, we need to use `stat_function`.
+
+```{r}
+plot_function_degree_2 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2
+}
+
+basic + 
+  stat_function(fun = plot_function_degree_2, args = list(b = b), col= "red") + 
+  stat_function(fun = plot_function_degree_2, args = list(b = c(beta_0, beta_1, beta_2)), col= "darkgreen")
+```
+
+Now let's try polynomial of degree 3:
+
+```{r}
+X = as.matrix(cbind(1, x, x^2, x^3))
+b = solve(t(X) %*% X) %*% t(X) %*% y
+b
+
+plot_function_degree_3 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3
+}
+
+basic + stat_function(fun = plot_function_degree_3, args = list(b = b), col = "red") + 
+  stat_function(fun = plot_function_degree_2, args = list(b = c(beta_0, beta_1, beta_2, 0)), col= "darkgreen")
+```
+Still the same. Why? The $x^3$ term is like adding one "nonsense" predictor. One nonsense predictor marginally affects $R^2$ but it doesn't matter too much.
+
+Now let's try polynomial of degree 8:
+
+```{r}
+X = as.matrix(cbind(1, x, x^2, x^3, x^4, x^5, x^6, x^7, x^8))
+b = solve(t(X) %*% X) %*% t(X) %*% y
+b
+
+plot_function_degree_8 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 
+}
+
+basic + stat_function(fun = plot_function_degree_8, args = list(b = b), col = "red") + 
+  stat_function(fun = plot_function_degree_2, args = list(b = c(beta_0, beta_1, beta_2, rep(0, 6))), col= "darkgreen")
+```
+
+We are seeing now a little bit of "overfitting" in the edge(s). We now have $p=9$ and $n=100$. We can do a lot worse!
+
+Let's learn how to do this in R first without having to resort to manual linear algebra. R has a function called "poly" that can be used *inside* formula declarations.
+
+Let's first fit the degree 2 model:
+
+```{r}
+degree_2_poly_mod = lm(y ~ poly(x, 2, raw = TRUE))
+head(model.matrix(~ poly(x, 2, raw = TRUE))) #the model matrix for this regression - just to check
+b_poly_2 = coef(degree_2_poly_mod)
+b_poly_2
+summary(degree_2_poly_mod)$r.squared
+```
+
+Let's go on a slight tangent. And look at this regression without using the raw polynomial.
+
+```{r}
+Xmm = model.matrix(~ poly(x, 2))
+head(Xmm) #the model matrix for this regression - just to check
+Xmm[, 1] %*% Xmm[, 2]
+Xmm[, 2] %*% Xmm[, 2]
+Xmm[, 2] %*% Xmm[, 3]
+Xmm[, 3] %*% Xmm[, 3]
+```
+
+Are thse orthogonal polynomials? How is the `poly` function without `raw = TRUE` working to generate a model matrix?
+
+```{r}
+degree_2_orthog_poly_mod = lm(y ~ poly(x, 2))
+b_poly_2 = coef(degree_2_orthog_poly_mod)
+b_poly_2
+summary(degree_2_orthog_poly_mod)$r.squared
+```
+
+Raw or orthogonal does not affect the yhats and Rsq. They are the same as we got before! That's because the colspace is the same in both cases raw or polynomial. We use "raw" polynomials to keep them interpretable and on the same scale as the manual models we were fitting.
+
+Now let's do polynomial of degree 13:
+
+```{r}
+degree_13_poly_mod = lm(y ~ poly(x, 13, raw = TRUE))
+b_poly_13 = coef(degree_13_poly_mod)
+
+plot_function_degree_13 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 + b[10] * x^9  + b[11] * x^10 + b[12] * x^11 + b[13] * x^12 + b[14] * x^13
+}
+
+basic + stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "purple")# + ylim(c(0, 25)) #+ xlim(c(-2, 5.2))
+```
+
+What's happening for small values of $x$ (and a bit for large values)? This is called [Runge's Phenomenon](https://en.wikipedia.org/wiki/Runge%27s_phenomenon) meaning that the boundary activity of high-order polynomials has very large derivatives. Let's go back to the same scale as before and see what's happening:
+
+```{r}
+basic + 
+  coord_cartesian(xlim = c(-2, 5), ylim = c(-3, 25)) + 
+  stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "purple")
+```
+
+#Extrapolation vs Interpolation
+
+Let's take a look at the Galton Data again.
+
+```{r}
+pacman::p_load(HistData, ggplot2)
+data(Galton)
+mod = lm(child ~ parent, Galton)
+b_0 = mod$coefficients[1]
+b_1 = mod$coefficients[2]
+ggplot(Galton, aes(x = parent, y = child)) + 
+  geom_point() + 
+  geom_jitter() +
+  geom_abline(intercept = b_0, slope = b_1, color = "blue", size = 1) +
+  xlim(63.5, 72.5) + 
+  ylim(63.5, 72.5) +
+  coord_equal(ratio = 1)
+```
+
+Let's say I want to predict child's height for parents' average height of 70in. All I do is:
+
+```{r}
+predict(mod, data.frame(parent = 70))
+```
+
+What if I want to predict for a parents' height of 5in. Is there any 12in tall human being? No... it is absurd. But nothing stops you from doing:
+
+```{r}
+predict(mod, data.frame(parent = 5))
+```
+
+That's [actually possible](https://www.guinnessworldrecords.com/news/2012/2/shortest-man-world-record-its-official!-chandra-bahadur-dangi-is-smallest-adult-of-all-time/).
+
+Look at our linear model from Euclid's perspective:
+
+```{r}
+ggplot(Galton, aes(x = parent, y = child)) + 
+  geom_point() + 
+  geom_jitter() +
+  geom_abline(intercept = b_0, slope = b_1, color = "blue", size = 1) +
+  xlim(-20, 120) + 
+  ylim(-20, 120) +
+  coord_equal(ratio = 1)
+```
+
+What is a linear model with $p + 1 = 2$. It's just a line. When geometry was first formalised by Euclid in the Elements, he defined a line to have "breadthless length" with a straight line being a line "which lies evenly with the points on itself". By "breadthless" he meant infinite in either direction. There is no mathematical problem with predicting childrens' heights using negative parents' heights e.g.
+
+```{r}
+predict(mod, data.frame(parent = -5))
+```
+
+But this is absurd. So now we need to talk about a fundamental concept in data science we've been kind of avoiding and one that most people ignore. There are two types of prediction: interpolation and extrapolation. Interpolation is essentially the type of "prediction" we've been talking about this whole class. 
+
+Extrapolation is totally different. It's what happens when you predict outside of the range of the covariate data you've seen in $\mathbb{D}$. Extrapolation is very dangerous - your models only work based on $\mathbb{D}$. Extrapolation is prediction outside of the range you've seen before which means. You better have a good theoretical reason as to why your $\mathbb{H}$ function class will extend outside that range. Because each $\mathbb{H}$ function class will extrapolate very very differently.
+
+
+
+What happens during extrapolation? Let's look at the (a) linear model, (b) polynomial model with degree 2 and (c) polynomial with degree 13.
+
+```{r}
+degree_2_poly_mod = lm(child ~ poly(parent, 2, raw = TRUE), Galton)
+b_poly_2 = coef(degree_2_poly_mod)
+degree_13_poly_mod = lm(child ~ poly(parent, 13, raw = TRUE), Galton)
+b_poly_13 = coef(degree_13_poly_mod)
+b_poly_13[is.na(b_poly_13)] = 0
+
+plot_function_degree_2 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2
+}
+plot_function_degree_13 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 + b[10] * x^9  + b[11] * x^10 + b[12] * x^11 + b[13] * x^12 + b[14] * x^13
+}
+
+# xymin = 65
+# xymax = 71
+xymin = 50
+xymax = 90
+ggplot(Galton, aes(x = parent, y = child)) + 
+  geom_point() + 
+  geom_jitter() +
+  geom_abline(intercept = b_0, slope = b_1, color = "blue") +
+  coord_cartesian(xlim = c(xymin, xymax), ylim = c(xymin, xymax)) +
+  stat_function(fun = plot_function_degree_2, args = list(b = b_poly_2), col = "red", xlim = c(xymin, xymax)) +
+  stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "orange", xlim = c(xymin, xymax))
+```
+
+Polynomial models have *TERRIBLE* extrapolation risk - totally unpredictable. Please do not use them if you think you'll ever extrapolate!!!
+
+# Overfitting with Polynomials
+
+Can we achieve $R^2 = 100\%$ using polynomial regression? Yes. Here's an example in one dimension. These are called "interpolation polynomials". In one dimension, as long as the $x$ values are distinct, $n$ data point can be fit by a $n - 1$ degree polynomial. Here's an example with a few data points:
+
+```{r}
+set.seed(1003)
+n = 5
+beta_0 = 1
+beta_1 = 0
+beta_2 = 1
+x = runif(n)
+
+h_star_x = beta_0 + beta_1 * x + beta_2 * x^2
+y = h_star_x + rnorm(n)
+#scatterplot it
+df = data.frame(x = x, y = y, h_star_x = h_star_x)
+basic = ggplot(df, aes(x, y)) +
+  geom_point()
+basic
+```
+
+Now fit polynomial models:
+
+```{r}
+degree_4_poly_mod = lm(y ~ poly(x, 5, raw = TRUE))
+b_poly_4 = coef(degree_4_poly_mod)
+
+plot_function_degree_4 = function(x, b){
+  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4
+}
+
+basic + stat_function(fun = plot_function_degree_4, args = list(b = b_poly_4), col = "purple")
+```
+
+Perfect fit!
+
+```{r}
+summary(degree_4_poly_mod)$r.squared
+```
+
+This is the same thing we've seen before! If $n = p + 1$, then the design matrix is square and there is no need to project onto a lower dimensional subspace. To estimate the linear model, one only needs to solve $n$ equations with $n$ unknowns.
+
+My recommendations:
+1) Keep polynomial degree low. Preferably 2. Anything past 2 is not interpretable anyway. We didn't talk about "interpretability" of models yet, but you get the idea.
+2) Be very careful not to extrapolate: make sure future predictions have the measurements within range of the training data $\mathbb{D}$. Extrapolations are going to be very, very inaccurate. Polynomial regressions I'm sure have gotten data scientists fired before.
+
+
+

@@ -1,5 +1,5 @@
 ---
-title: "Practice Lecture 8 MATH 390.4 Queens College"
+title: "Practice Lecture 8 MATH 342W Queens College"
 author: "Professor Adam Kapelner"
 date: "February 24, 2021"
 ---
