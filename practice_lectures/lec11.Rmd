@@ -1,5 +1,5 @@
 ---
-title: "Practice Lecture 11 MATH 390.4 Queens College"
+title: "Practice Lecture 11 MATH 342W Queens College"
 author: "Professor Adam Kapelner"
 date: "March 8, 2021"
 ---
@@ -73,7 +73,7 @@ head(X %*% b)
 
 Nope - this is not the same! Why not?
 
-Each dimension gives one piece of SSR and thus one piece of R^2 i.e. SSR = SSR_1 + ... + SSR_p
+Each dimension gives one piece of SSR and thus one piece of R^2 i.e. SSR = SSR_1 + ... + SSR_p and R^2 = R^2_1 + ... + R^2_p
 
 Our definition of SSR removed the ybar i.e. the contribution of the intercept. So we will do so here. That is the first column of $Q$. Now we add up all the features besides the intercept
 
@@ -85,13 +85,12 @@ for (j in 2 : p_plus_one){
   partial_SSRs[j] = sum(yhat_j^2)
 }
 round(partial_SSRs)
+SSR
 sum(partial_SSRs, na.rm = TRUE)
 SST
 partial_Rsqs = partial_SSRs / SST
 round(partial_Rsqs, 2)
 sum(partial_Rsqs, na.rm = TRUE)
-
-round(partial_Rsqs / Rsq, 2)
 ```
 
 Some dimensions in this subspace matter more than others. We can do approximately the same regression with less than p features. Let's try this:
@@ -101,9 +100,9 @@ partial_Rsqs_sorted = sort(partial_Rsqs, decreasing = TRUE)
 partial_Rsqs_sorted_cumul = cumsum(partial_Rsqs_sorted)
 partial_Rsqs_sorted_cumul
 #sort Q by Rsq
-Qsorted = Q[, order(partial_Rsqs, na.last = FALSE)]
+Qsorted = Q[, order(partial_Rsqs, na.last = FALSE, decreasing = TRUE)]
 #let's take the first 8
-Qreduced = Qsorted[, 6 : 14]
+Qreduced = Qsorted[, 1 : 8]
 mod = lm(y ~ Qreduced)
 summary(mod)$r.squared
 ```

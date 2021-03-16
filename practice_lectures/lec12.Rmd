@@ -1,5 +1,5 @@
 ---
-title: "Practice Lecture 12 MATH 390.4 Queens College"
+title: "Practice Lecture 12 MATH 342W Queens College"
 author: "Professor Adam Kapelner"
 date: "March 10, 2021"
 ---
@@ -45,11 +45,14 @@ summary(mod)$r.squared
 # Random correlations are non-zero
 
 ```{r}
+set.seed(1984)
 n = 100
 x = rnorm(n)
 x = x - mean(x)
 y = rnorm(n)
 y = y - mean(y)
+x
+y
 ```
 
 In this setup, $x$ and $y$ are centered Gaussian random vectors. Are they orthogonal?
@@ -59,11 +62,7 @@ x %*% y
 theta_in_rad = acos(x %*% y / sqrt(sum(x^2) * sum(y^2)))
 theta_in_rad
 theta_in_rad * 180 / pi
-
-
-theta_in_rad = acos(X[, 65] %*% y / sqrt(sum(X[, 65]^2) * sum(y^2)))
-theta_in_rad
-theta_in_rad * 180 / pi
+abs(90 - theta_in_rad * 180 / pi)
 ```
 
 Nope... what about correlated?
@@ -84,7 +83,7 @@ mod = lm(y ~ x)
 coef(mod)
 ```
 
-Slope is about -0.8 which is small but non-zero.
+Slope is about 0.09 which is small but non-zero.
 
 What is $R^2$? Since $x$ and $y$ are nearly orthogonal... a projection onto the colspace of $X$ gets nearly annhilated.
 
@@ -100,7 +99,7 @@ but not entirely. Lesson learned: random noise can be correlated with the respon
 As p increases, $R^2$ goes up. Here's a nice exercise:
 
 ```{r}
-n = 100
+n = 200
 y = rnorm(n)
 Rsqs = array(NA, n)
 
@@ -116,6 +115,9 @@ for (p_plus_one in 2 : n){
   X = cbind(X, rnorm(n))
   Rsqs[p_plus_one] = summary(lm(y ~ X))$r.squared
 }
+all(diff(Rsqs) > 0) #additional Rsq per new feature is positive
+mean(diff(Rsqs)) #added Rsq per new feature
+mean(diff(Rsqs)) * (n - 1) #check to ensure it's 100%
 ```
 
 Now let's plot it and see what happens:
@@ -130,13 +132,9 @@ With each additional predictor, what happens to $R^2$?
 
 ```{r}
 pacman::p_load(latex2exp)
-base + geom_line(aes(x = p_plus_one, y = c(0, diff(Rsq)))) + xlab("p + 1") + ylab(TeX("$\\Delta R^2$"))
-```
-
-$R^2$ always increases:
-
-```{r}
-all(diff(Rsqs) > 0)
+base + 
+  geom_line(aes(x = p_plus_one, y = c(0, diff(Rsq)))) + xlab("p + 1") + ylab(TeX("$\\Delta R^2$")) +
+  geom_hline(yintercept = mean(diff(Rsqs)), col = "blue")
 ```
 
 How can this possibly be?? The $x$'s are not related to $y$ whatsoever!!
@@ -154,6 +152,7 @@ This is called overfitting.
 Let's see how overfitting increases generalized estimation error.
 
 ```{r}
+set.seed(1)
 bbeta = c(1, 2, 3, 4)
 
 #build training data
@@ -163,7 +162,7 @@ y = X %*% bbeta + rnorm(n, 0, 0.3)
 #\amthbb{D}
 
 #build test data
-n_star = 100
+n_star = 1000
 X_star = cbind(1, rnorm(n_star), rnorm(n_star), rnorm(n_star))
 y_star = X_star %*% bbeta + rnorm(n_star, 0, 0.3)
 
@@ -177,36 +176,27 @@ for (j in 5 : n){
   y_hat = X %*% all_betas[j, 1 : j]
   in_sample_rmse_by_p[j] = sqrt(mean((y - y_hat)^2))
 }
-plot(1 : n, in_sample_rmse_by_p)
+ggplot(data.frame(num_features = 1 : n, in_sample_rmse_by_p = in_sample_rmse_by_p)) + 
+  geom_point(aes(x = num_features, y = in_sample_rmse_by_p))
 
 
-all_betas[4 : n, 1 : 4]
+all_betas[4 : n, 1 : 10]
 b_error_by_p = rowSums((all_betas[, 1 : 4] - matrix(rep(bbeta, n), nrow = n, byrow = TRUE))^2)
-plot(1 : n, b_error_by_p)
+ggplot(data.frame(num_features = 1 : n, b_error_by_p = b_error_by_p)) + 
+  geom_point(aes(x = num_features, y = b_error_by_p))
 
-#look at out of sample error in the case of only the first four features
-oos_rmse_by_p = array(NA, n)
-for (j in 4 : n){
-  y_hat_star = X_star %*% all_betas[j, 1 : 4]
-  oos_rmse_by_p[j] = sqrt(mean((y_star - y_hat_star)^2))
-}
-plot(1 : n, oos_rmse_by_p)
-
-#look at out of sample error in the case of the random features too
+#look at out of sample error with random features too
 oos_rmse_by_p = array(NA, n)
 for (j in 5 : n){
   X_star = cbind(X_star, rnorm(n))
   y_hat_star = X_star %*% all_betas[j, 1 : j]
   oos_rmse_by_p[j] = sqrt(mean((y_star - y_hat_star)^2))
 }
-plot(1 : n, oos_rmse_by_p, ylim = c(0, 2))
+ggplot(data.frame(num_features = 1 : n, oos_rmse_by_p = oos_rmse_by_p)) + 
+  geom_point(aes(x = num_features, y = oos_rmse_by_p))
 ```
 
-# Review of Overfitting
-
-Because overfitting is so important and since we had a long break since last class, it is worth reviewing it even though it may be boring by this time. We'll try to see it from another angle here.
-
-Let's generate a linear model ($f = h^* \in \mathcal{H}$) and let $\epsilon$ be random noise (the error due to ignorance) for $\mathbb{D}$ featuring $n = 2$.
+Let's look at overfitting from another angle. Let's generate a linear model ($f = h^* \in \mathcal{H}$) and let $\epsilon$ be random noise (the error due to ignorance) for $\mathbb{D}$ featuring $n = 2$.
 
 This simulation is random, but to ensure it looks the same to me right now as it does in class (and to you at home), let's "set the seed" so it is deterministic.
 
@@ -304,7 +294,7 @@ sd(epsilon_new)
 How did we get in this mess? We can see from the picture we are using the grey line as $g$ but we should be using the green line $h^*$. We are using the grey line because we used the original $\epsilon$ to fit. BAD idea - won't generalize to the future.
 
 ```{r}
-rm(list = ls()) #same as broom icon
+rm(list = ls())
 ```
 
 The problem is bad for $n = 2$. But is it always bad? Let's take a look at $n = 100$ with a strong linear relationship with one predictor. 
@@ -373,7 +363,7 @@ p_fake = 98
 set.seed(1984)
 X = data.frame(matrix(c(x, rnorm(n * p_fake)), ncol = 1 + p_fake, nrow = n))
 mod = lm(y ~ ., X)
-coef(mod)
+t(t(coef(mod)))
 y_hat = predict(mod, X)
 s_e_in_sample = sd(y - y_hat)
 
@@ -459,173 +449,15 @@ oos_residuals = y_test - y_hat_oos
 sd(oos_residuals)
 ```
 
+
+
 MUCH worse!! Why? We overfit big time...
 
 Can we go back now and fit a new model and see how we did? NO...
 
 So how are we supposed to fix a "bad" model? We can't unless we do something smarter. We'll get there.
 
-# Nonlinear Linear Regression: Polynomial Regression
 
-Let's generate a polynomial model of degree 2 ($f = h^* \in \mathcal{H}$) and let $\epsilon$ be random noise (the error due to ignorance) for $\mathbb{D}$ featuring $n = 2$.
 
-```{r}
-set.seed(1003)
-n = 25
-beta_0 = 1
-beta_1 = 0
-beta_2 = 1
-x = runif(n, -2, 5)
-#best possible model
-h_star_x = beta_0 + beta_1 * x + beta_2 * x^2
+correct the insample RMSE demo above...
 
-#actual data differs due to information we don't have
-epsilon = rnorm(n)
-y = h_star_x + epsilon
-
-#scatterplot it
-df = data.frame(x = x, y = y, h_star_x = h_star_x)
-basic = ggplot(df, aes(x, y)) +
-  geom_point()
-basic
-```
-
-Let's try to estimate with a line:
-
-```{r}
-linear_mod = lm(y ~ x)
-b_linear = summary(linear_mod)$coef
-basic + geom_abline(intercept = b_linear[1], slope = b_linear[2], col = "red")
-```
-
-The relationship is "underfit". $\mathcal{H}$ is not rich enough right now to express something close to $f(x)$. But it is better than the null model!
-
-Now let's do a polynomial regression of degree two. Let's do so manually:
-
-```{r}
-X = as.matrix(cbind(1, x, x^2))
-b = solve(t(X) %*% X) %*% t(X) %*% y
-b
-c(beta_0, beta_1, beta_2)
-```
-
-These are about the same as the $\beta_0, \beta_1$ and $\beta_2$ as defined in $f(x)$ the true model. In order to graph this, we can no longer use the routine `geom_abline`, we need to use `stat_function`.
-
-```{r}
-plot_function_degree_2 = function(x, b){
-  b[1] + b[2] * x + b[3] * x^2
-}
-
-basic + stat_function(fun = plot_function_degree_2, args = list(b = b), col= "darkgreen")
-```
-
-Now let's try polynomial of degree 3:
-
-```{r}
-X = as.matrix(cbind(1, x, x^2, x^3))
-b = solve(t(X) %*% X) %*% t(X) %*% y
-b
-
-plot_function_degree_3 = function(x, b){
-  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3
-}
-
-basic + stat_function(fun = plot_function_degree_3, args = list(b = b), col= "darkgreen")
-```
-Still the same. Why? The $x^3$ term is like adding one "nonsense" predictor. One nonsense predictor marginally affects $R^2$ but it doesn't matter too much.
-
-Now let's try polynomial of degree 8:
-
-```{r}
-X = as.matrix(cbind(1, x, x^2, x^3, x^4, x^5, x^6, x^7, x^8))
-b = solve(t(X) %*% X) %*% t(X) %*% y
-b
-
-plot_function_degree_8 = function(x, b){
-  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 
-}
-
-basic + stat_function(fun = plot_function_degree_8, args = list(b = b), col= "darkgreen")
-```
-
-We are seeing now a little bit of "overfitting" in the edge(s). We now have $p=11$ and $n=100$. We can do a lot worse!
-
-Let's learn how to do this in R first without having to resort to manual linear algebra. R has a function called "poly" that can be used *inside* formula declarations.
-
-Let's first fit the degree 2 model:
-
-```{r}
-degree_2_poly_mod = lm(y ~ poly(x, 2, raw = TRUE))
-head(model.matrix(~ poly(x, 2, raw = TRUE))) #the model matrix for this regression - just to check
-b_poly_2 = coef(degree_2_poly_mod)
-b_poly_2
-summary(degree_2_poly_mod)$r.squared
-```
-
-Let's go on a slight tangent. And look at this regression without using the raw polynomial.
-
-```{r}
-Xmm = model.matrix(~ poly(x, 10))
-head(Xmm) #the model matrix for this regression - just to check
-Xmm[, 1] %*% Xmm[, 2]
-Xmm[, 2] %*% Xmm[, 2]
-Xmm[, 2] %*% Xmm[, 3]
-Xmm[, 3] %*% Xmm[, 3]
-```
-
-Are thse orthogonal polynomials? How is the `poly` function without `raw = TRUE` working to generate a model matrix?
-
-```{r}
-degree_2_orthog_poly_mod = lm(y ~ poly(x, 2))
-b_poly_2 = coef(degree_2_orthog_poly_mod)
-b_poly_2
-summary(degree_2_orthog_poly_mod)$r.squared
-```
-
-Why is this a good idea to use orthogonal polynomials?
-
-Same as we got before! We use "raw" polynomials to keep them interpretable and on the same scale as the manual models we were fitting.
-
-Now let's do polynomial of degree 13:
-
-```{r}
-degree_13_poly_mod = lm(y ~ poly(x, 13, raw = TRUE))
-b_poly_13 = coef(degree_13_poly_mod)
-
-plot_function_degree_13 = function(x, b){
-  b[1] + b[2] * x + b[3] * x^2 + b[4] * x^3 + b[5] * x^4 + b[6] * x^5 + b[7] * x^6 + b[8] * x^7 + b[9] * x^8 + b[10] * x^9  + b[11] * x^10 + b[12] * x^11 + b[13] * x^12 + b[14] * x^13
-}
-
-basic + stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "purple")# + ylim(c(0, 25)) #+ xlim(c(-2, 5.2))
-```
-
-What's happening for small values of $x$ (and a bit for large values)? This is called [Runge's Phenomenon](https://en.wikipedia.org/wiki/Runge%27s_phenomenon) meaning that the boundary activity of high-order polynomials has very large derivatives. Let's go back to the same scale as before and see what's happening:
-
-```{r}
-basic + 
-  coord_cartesian(xlim = c(-2, 5), ylim = c(-3, 25)) + 
-  stat_function(fun = plot_function_degree_13, args = list(b = b_poly_13), col = "purple")
-```
-
-## Eigendecomposition in R
-
-```{r}
-B = array(seq(1, 4), dim = c(2, 2))
-B
-eigen_decomp = eigen(B)
-V = eigen_decomp$vectors
-V
-v1 = V[, 1, drop = FALSE]
-v2 = V[, 2, drop = FALSE]
-lambdas = eigen_decomp$values
-lambdas
-lambda1 = lambdas[1]
-lambda2 = lambdas[2]
-B %*% v1
-lambda1 * v1
-B %*% v2 
-lambda2 * v2
-B %*% v2 == lambda2 * v2 #why not?
-#diagonolization
-V %*% diag(lambdas) %*% solve(V)
-```
