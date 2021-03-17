@@ -1,0 +1,848 @@
+---
+title: "Practice Lecture 15 MATH 342W Queens College"
+author: "Professor Adam Kapelner"
+date: "March 22, 2021"
+---
+
+## For MA students only: Eigendecomposition in R and the Projection Matrix
+
+```{r}
+B = array(seq(1, 4), dim = c(2, 2))
+B
+eigen_decomp = eigen(B)
+V = eigen_decomp$vectors
+V
+v1 = V[, 1, drop = FALSE]
+v2 = V[, 2, drop = FALSE]
+lambdas = eigen_decomp$values
+lambdas
+lambda1 = lambdas[1]
+lambda2 = lambdas[2]
+B %*% v1
+lambda1 * v1
+B %*% v2 
+lambda2 * v2
+B %*% v2 == lambda2 * v2 #why not?
+#diagonolization
+V %*% diag(lambdas) %*% solve(V)
+```
+
+Let's take a look at a projection matrix
+
+```{r}
+X = model.matrix(medv ~ ., MASS::Boston)
+head(X)
+H = X %*% solve(t(X) %*% X) %*% t(X)
+dim(H)
+eigen_decomp = eigen(H)
+lambdas = eigen_decomp$values
+head(lambdas, 50)
+lambdas = as.numeric(eigen_decomp$values) #coerce to real numbers (good enough approximation)
+head(lambdas, 50)
+lambdas_rounded = round(lambdas, 10)
+head(lambdas_rounded, 50)
+table(lambdas_rounded)
+sum(lambdas_rounded) #i.e. the rank(H) = # cols in X
+```
+
+It turns out all eigenvalues of a projection matrix are either 0 or 1. What are the eigenvectors? Only the first ncol(X) = 14 reconstruct the space. Are they the same as the X columns?
+
+```{r}
+V = eigen_decomp$vectors
+dim(V)
+V = matrix(as.numeric(V), ncol = ncol(V))
+dim(V)
+V[1 : 20, 1 : ncol(X)]
+
+V_X_angles = matrix(NA, ncol(X), ncol(X))
+for (i in 1 : ncol(X)){
+  for (j in 1 : ncol(X)){
+    if (j > i){
+      V_X_angles[i, j] = acos(V[, i] %*% X[, j] / sqrt(sum(V[, i]^2) * sum(X[, j]^2))) * 180 / pi
+    }
+  }
+}
+V_X_angles
+```
+
+No... and they don't need to be. They just need to represent the same space i.e. their columns need to span the same 14-dimensional subspace. You can check this by just comparing the orthogonal projection matrix which is unique for each subspace.
+
+```{r}
+V_X = V[, 1 : ncol(X)]
+H_V = V_X %*% solve(t(V_X) %*% V_X) %*% t(V_X)
+dim(H_V)
+testthat::expect_equal(c(H_V), c(H))
+```
+
+And they're the same as expected.
+
+# Popular Add-on Packages to R
+
+## Piping
+
+Take a look at this one-liner:
+
+```{r}
+set.seed(1984)
+mean(head(round(sample(rnorm(1000)), digits = 2)))
+```
+
+This is hard to read. Of course we can make it easier by using breaklines e.g.
+
+```{r}
+mean(
+  head(
+    round(
+      sample(
+        rnorm(1000)
+      ), digits = 2)
+    )
+)
+```
+
+But it doesn't make it much easier to read. And it probably makes it harder to write.
+
+Enter an idea taken from unix / linux. Output of one function is input to next function. It is the inverse of the usual "order of operations". Let's see how this works.
+
+We first load the piping library:
+
+```{r}
+pacman::p_load(magrittr) 
+```
+
+The package is named after Rene Magritte, the Belgian surrealist artist because he wrote [(Ceci n'est pas un pipe)](https://en.wikipedia.org/wiki/The_Treachery_of_Images) on a painting of a pipe.
+
+In pipe format this would look like:
+
+```{r}
+set.seed(1984)
+rnorm(1000) %>% #the pipe operator
+  sample %>% 
+  round(digits = 2) %>% #the first argument is passed in automatically.
+  head %>%
+  mean
+```
+
+That's it! There's nothing more to it other than a gain in readability.
+
+What if we wanted to do something like `mean(rnorm(1000) + 1)`? This `rnorm(1000) %>% +1 %>% mean` doesn't work because I imagine because the basic arithmetic operators couldn't be parsed like normal while there was a pipe. So they invented special pipe functions for this:
+
+```{r}
+rnorm(1000) %>% add(1) %>% mean
+```
+
+There are other exceptions to the rule too which you'll figure out if you adopt the pipe.
+
+Unfortunately... the world at large hasn't completely accepted this as a way to write R. So feel free to use for yourself. But be carefuly when using this style with others. 
+
+Also note the code you write with pipes will be slower than the normal syntax.
+
+# The Grammar of graphics and ggplot
+
+First load the package and the dataset of interest as a dataframe:
+
+```{r}
+pacman::p_load(ggplot2, quantreg)
+cars = MASS::Cars93 #dataframe
+```
+
+ggplot is based on the "Grammar of Graphics", a concept invented by the Statistician / Computer Scientist Leland Wilkinson who worked on SPSS, Tableau and now he works at H20, software that analyzes big data. The reference of interest is [here](http://papers.rgrossman.com/proc-094.pdf). He drew on ideas from John Tukey (one of the great statistician of the previous generation) while he was at Bell Labs, Andreas Buja (one of my professors at Penn) and Jerome Friedman (the professor that taught my data mining course at Stanford - remember the diamonds story?) 
+
+It is a language that allows us to describe the components of a graphic. Previously, graphics were done in one shot and it was clunky. ggplot is a library written by Hadley Wickham based on this concept. Wickham is probably the most famous person in statistical computing today. He has commit rights in R and is one of the architects of RStudio. He calls grammar of graphics "graphical poems". Here are the basic components:
+
+* an underlying data frame
+* an "aesthetic" that maps visualization axes in the eventual plot(s) to variables in the data frame
+* a "layer" which is composed of
+  - a geometric object
+  - a statistical transformation
+  - a position adjustment
+* a "scale" for each aesthetic
+* a "coordinate" system for each aesthetic
+* optional "facets" (more graphics)
+* optional "labels" for the title, axes title, points, etc.
+
+Don't worry - everything has "smart defaults" in Wickham's implementation so you don't have to worry about most things. We will explore some of the features below. Here's a good [cheat sheet](https://www.rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf).
+
+ggplot is layered where each component is an object. The objects are added to each other since the "+" operator is overloaded to accept these additions. This is nice because each component can be saved and reused. The following initialized the graphics:
+
+```{r}
+ggplot(cars)
+```
+
+Nothing happened - except the plot window went gray (the smart default). This is already rendering a graphic, but since it hasn't been given any of the required information, it has nothing to display. Next we create an aesthetics indicating a one-way plot (one variable only).
+
+```{r}
+ggplot(cars) + 
+  aes(Price)
+```
+
+Notice how it can understand the variable name as an object name.
+
+Since we've given it an aesthetics object, it now knows which variable is the x axis (default). It already knows the ranges of the variable (a smart default) and a default scale and coordinate system (smart defaults).
+
+Usually this is done in one step by passing the aesthetics object into the ggplot:
+
+```{r}
+ggplot(cars, aes(Price))
+```
+
+Now we need to pick a layer by specifying a geometry. This is a type of plot. Since the predictor type of price is continuous, let's pick the "histogram" using the `geom_histogram` function:
+
+```{r}
+ggplot(cars, aes(Price)) +
+  geom_histogram()
+```
+
+This can be customized:
+
+```{r}
+ggplot(cars, aes(Price)) +
+  geom_histogram(binwidth = 1, col = "darkgreen", fill = "blue", alpha = 0.4)
+```
+
+Want to save it for your latex?
+
+```{r}
+ggsave("plot.png")
+system("open plot.png")
+ggsave("plot.pdf")
+system("open plot.pdf")
+```
+
+Here are some other options besides the histogram:
+
+```{r}
+ggplot(cars, aes(Price)) +
+  geom_dotplot()
+ggplot(cars, aes(Price)) +
+  geom_area(stat = "bin", binwidth = 2)
+ggplot(cars, aes(Price)) +
+  geom_freqpoly()
+ggplot(cars, aes(Price)) +
+  geom_density(fill = "green", alpha = 0.4)
+
+summary(cars)
+```
+
+
+Can we compare price based on different conditions? Yes, we can subset the data and use color and alpha:
+
+```{r}
+ggplot(cars, aes(Price)) +
+  geom_density(data = subset(cars, Man.trans.avail == "Yes"), col = "grey", fill = "darkgreen", alpha = 0.4) +
+  geom_density(data = subset(cars, Man.trans.avail == "No"), col = "grey", fill = "red", alpha = 0.4)
+```
+
+Sidebar: why are cars that have manual transmissions available cheaper?
+
+We can look at this also using a histogram of the conditional distributions:
+
+```{r}
+ggplot(cars, aes(Price)) +
+  geom_histogram(data = subset(cars, Man.trans.avail == "Yes"), binwidth = 1, col = "grey", fill = "darkgreen", alpha = 0.4) +
+  geom_histogram(data = subset(cars, Man.trans.avail == "No"), binwidth = 1, col = "grey", fill = "red", alpha = 0.4)
+```
+
+What if the variable is not continuous e.g. Cylinders? We can use a bar graph / bar plot.
+
+```{r}
+ggplot(cars, aes(Cylinders)) +
+  geom_bar()
+```
+
+This is essential frequency by level of the categorical variable.
+
+Now let's move on to looking at one variable versus another variable. For example price by engine power:
+
+```{r}
+ggplot(cars, aes(x = Horsepower, y = Price))
+```
+
+Since we've given it an aesthetics object, it now knows which variable is the x axis and which variable is the y axis. It already knows the ranges of the variables (a smart default) and a default scale and coordinate system (smart defaults).
+
+Just as before, now we need to pick a layer by specifying a geometry. This is a type of plot. Let's pick the "scatterplot" using the `geom_point` function:
+
+```{r}
+ggplot(cars, aes(x = Horsepower, y = Price)) +
+  geom_point()
+```
+
+Now we have a nice scatterplot. This function uses the inherited data, the inherited aesthetics. Since this "geometry" is a "layer", we can pass in options to the layer.
+
+```{r}
+base_and_aesthetics = ggplot(cars, aes(x = Horsepower, y = Price))
+base_and_aesthetics + geom_point(col = "red", fill = "green", shape = 23, size = 3, alpha = 0.3)
+```
+
+Let's handle names of axes, title and ranges:
+
+```{r}
+base_and_aesthetics_with_titles = base_and_aesthetics +
+  ggtitle("Average Car Price vs. Engine Power", subtitle = "in the Cars93 dataset") +
+  ylab("Price (in $1000's)")
+base_and_aesthetics_with_titles +
+  geom_point() +
+  xlim(0, 400) +
+  ylim(0, 50)
+  
+```
+
+Let's transform the variables:
+
+```{r}
+base_and_aesthetics_with_titles +
+  geom_point() +
+  scale_x_continuous(trans = "log2")
+```
+
+Each unit increase on the x-axis now represent a doubling increase in x (although the whole scale only spans 3 units). But look at how the grid didn't keep up. Let's fix this:
+
+```{r}
+base_and_aesthetics_with_titles +
+  geom_point() +
+  scale_x_continuous(trans = "log2", breaks = round(seq(0, max(cars$Horsepower), length.out = 6)))
+```
+
+We can do the same to the y axis:
+
+```{r}
+base_and_aesthetics_with_titles +
+  geom_point() +
+  scale_y_continuous(trans = "log10")
+  scale_x_continuous(trans = "log10", breaks = round(seq(0, max(cars$Horsepower), length.out = 6)))
+```
+
+Let's look at some more geometries.
+
+```{r}
+base_and_aesthetics_with_titles +
+  geom_point() +
+  geom_smooth()
+```
+
+Here, I've added two geometries on the same aesthetic! This attempts to explain the relationship $f(x)$ using smoothing. Let's go for more.
+
+```{r}
+base_and_aesthetics_with_titles +
+  geom_point() +
+  geom_smooth() +
+  geom_rug()
+```
+
+This allows us to also see the marginal distributions of the two variables.
+
+```{r}
+base_and_aesthetics_with_titles +
+  geom_point() +
+  geom_smooth() +
+  geom_quantile(col = "red") +
+  geom_rug()
+```
+
+This fits a line and tries to indicate statistical significance of the line. We have *not* covered any statistics in this class yet (ironic!) ... so ignore how the window is generated.
+
+Can we display more than two dimensions? Yes. Let's indicate a third dimension with shape (only works with factors).
+
+```{r}
+base_and_aesthetics_with_titles = base_and_aesthetics_with_titles +
+  ggtitle("Average Car Price by Power and Transmission")
+base_and_aesthetics_with_titles +
+  geom_point(aes(shape = Man.trans.avail)) +
+  geom_smooth() +
+  geom_rug()
+```
+
+Can we display more than three dimensions? Yes. Let's indicate a fourth dimension with color.
+
+```{r}
+base_and_aesthetics_with_titles = base_and_aesthetics_with_titles +
+  ggtitle("Average Car Price by Power, Transmission & Drivetrain")
+base_and_aesthetics_with_titles +
+  geom_point(aes(shape = Man.trans.avail, col = DriveTrain)) +
+  geom_smooth() +
+  geom_rug()
+```
+
+Can we go to a fifth dimension? Maybe?
+
+```{r}
+base_and_aesthetics_with_titles = base_and_aesthetics_with_titles +
+  ggtitle("Average Car Price by Power, Transmission & Drivetrain")
+base_and_aesthetics_with_titles +
+  geom_point(aes(shape = Man.trans.avail, col = DriveTrain, size = Weight), alpha = 0.5) + #size?
+  geom_smooth() +
+  geom_rug()
+```
+
+A seventh? We can use text labels adjacent to the scatterplot's points.
+
+```{r}
+base_and_aesthetics_with_titles = base_and_aesthetics_with_titles +
+  ggtitle("Average Car Price by Power, Transmission, Drivetrain,  Weight & #Cylinders")
+base_and_aesthetics_with_titles +
+  geom_point(aes(shape = Man.trans.avail, col = DriveTrain, alpha = Weight)) + #size?
+  geom_text(aes(label = Cylinders), vjust = 1.5, col = "darkgrey", lineheight = 0.3, size = 3) +
+  geom_smooth() +
+  geom_rug()
+```
+
+Getting difficult to see what's going on.
+
+Let's move away from the scatterplot to just density estimation:
+
+```{r}
+base_and_aesthetics_with_titles = base_and_aesthetics_with_titles +
+  ggtitle("Average Car Price by Power") #reset the title
+base_and_aesthetics_with_titles +
+  geom_density2d()
+```
+
+Other alternatives:
+
+```{r}
+base_and_aesthetics_with_titles +
+  geom_bin2d(binwidth = c(8, 3))
+pacman::p_load(hexbin)
+base_and_aesthetics_with_titles +
+  geom_hex()
+```
+
+This is like a two-dimensional histogram where the bar / hexagon heights are seen with color.
+
+What if the x-axis is categorical for example Cylinders versus price? Typical is the "box and whiskers" plot:
+
+```{r}
+ggplot(cars, aes(x = Cylinders, y = Price)) +
+  geom_boxplot()
+```
+
+Clear relationship!
+
+How about multiple subplots based on the subsetting we did in the histograms? This is called "faceting". Here are two bivariate visualizations laid horizontally:
+
+```{r}
+ggplot(cars, aes(x = Horsepower, y = Price)) +
+  geom_point() +
+  geom_smooth() +
+  facet_grid(. ~ Man.trans.avail)
+```
+
+Or alternatively, vertically:
+
+```{r}
+ggplot(cars, aes(x = Horsepower, y = Price)) +
+  geom_point() +
+  geom_smooth() +
+  facet_grid(Man.trans.avail ~ .)
+```
+
+And we can even double-subset:
+
+```{r}
+ggplot(cars, aes(x = Horsepower, y = Price)) +
+  geom_point() +
+  facet_grid(Man.trans.avail ~ Origin)
+```
+
+And we can even triple-subset or more:
+
+```{r}
+cars$MedWeight = ifelse(cars$Weight > median(cars$Weight), ">MedWeight", "<MedWeight")
+ggplot(cars, aes(x = Horsepower, y = Price)) +
+  geom_point() +
+  facet_grid(Man.trans.avail ~ Origin + MedWeight, scales = "free")
+```
+
+These three varibles seem somewhat independent.
+
+There are other primitives like `geom_abline` which graphs a line and `geom_segment` we will see today. Note that if you want plots rendered within functions or loops you have to explicitly call the `plot` function:
+
+```{r}
+for (nsim in 1 : 3){
+  graphics_obj = ggplot(data.frame(x = rnorm(1000))) + 
+    geom_histogram(aes(x))
+  graphics_obj
+}
+```
+
+versus:
+
+```{r}
+for (nsim in 1 : 3){
+  graphics_obj = ggplot(data.frame(x = rnorm(1000))) + geom_histogram(aes(x))
+  plot(graphics_obj)
+}
+```
+
+
+Lastly, ggplot offers lots of nice customization themes:
+
+```{r}
+graphics_obj = base_and_aesthetics_with_titles +
+  geom_point() +
+  geom_smooth() +
+  geom_quantile(col = "red") +
+  geom_rug()
+graphics_obj + theme_bw()
+graphics_obj + theme_dark()
+graphics_obj + theme_classic()
+
+```
+
+Packages offer even more:
+
+```{r}
+pacman::p_load(forcats, lazyeval, ggthemes)
+graphics_obj + theme_economist()
+graphics_obj + theme_stata()
+graphics_obj + theme_tufte()
+```
+
+and of course, the whimsical one and only:
+
+
+```{r}
+pacman::p_load(xkcd, extrafont)
+download.file("http://simonsoftware.se/other/xkcd.ttf", dest = "xkcd.ttf", mode = "wb")
+#MAC
+# system("mv xkcd.ttf /Library/Fonts")
+# font_import(path = "/Library/Fonts", pattern = "xkcd", prompt = FALSE)
+# fonts()
+# fonttable()
+# loadfonts()
+#WINDOWS
+font_import(path = ".", pattern = "xkcd", prompt = FALSE)
+fonts()
+fonttable()
+
+loadfonts(device="win")
+
+graphics_obj + theme_xkcd()
+```
+
+# C++ and R
+
+R goes back to 1995 when it was adapted from S (written in 1976 by John Chambers at Bell Labs) with minor modifications. The core of base R is written in C and Fortran. These two languages are the fastest known languages (how to measure "fastest" is a huge debate). Thus, base R is very fast. For instance the `sort` function is as fast as C/Fortran since it immediately calls compiled C/Fortran routines.
+
+However, R code itself that you write is "interpreted" which means it is not compiled until you run it. And it has to compile on-the-fly, making it very slow. Prior to v3.4 (April, 2017) it was even slower since the code wasn't JIT compiled. All this "real CS" stuff you can learn in another class..
+
+One notable place to observe this slowness relative to other languages is in looping. For example:
+
+
+```{r}
+f = function(){
+  SIZE = 1e7
+  v = array(NA, SIZE)
+  for (i in 1 : SIZE){
+    v[i] = i
+  }
+  v
+}
+
+v = f()
+```
+
+How long does this take?
+
+```{r}
+# install.packages("Rcpp")
+pacman::p_load_current_gh("hadley/lineprof")
+lineprof(f())
+
+system.time({
+  f()
+})
+#on my office computer for SIZE = 10,000,000:
+# user  system elapsed 
+# 7.13    0.20    7.35 
+```
+
+Take a simple function that computes square roots on each element:
+
+```{r}
+sqrt_vector = function(v){
+  v_new = array(NA, length(v))
+  for (i in 1 : length(v)){
+    v_new[i] = sqrt(v[i])
+  }
+  v_new
+}
+
+system.time({
+  sqrt_vector(v)
+})
+```
+
+Does the apply function help?
+
+```{r}
+system.time({
+  apply(v, MARGIN = 1, FUN = sqrt)
+})
+```
+
+Strange that this takes so long? So it doesn't help... it hurts.
+
+How much faster in C++ should this be?
+
+Enter the `Rcpp` package - a way to compile little bits (or lotta bits) of C++ on the fly.
+
+```{r}
+pacman::p_load(Rcpp)
+```
+
+
+Let's write this for loop function to sqrt-ize and compile it and then save it into our namespace to be called like a regular function.
+
+```{r}
+cppFunction('
+  NumericVector sqrt_vector_cpp(NumericVector v) {
+    int n = v.size();
+    NumericVector v_new(n);
+    for (int i = 0; i < n; i++) { //indices from 0...n-1 not 1...n!
+      v_new[i] = sqrt(v[i]);
+    }
+    return v_new;
+  }
+')
+```
+
+What do these two functions look like?
+
+```{r}
+sqrt_vector
+sqrt_vector_cpp
+```
+
+One shows the R code and then says it is bytecode-compiled (go to an advanced CS class). The other just says we `.Call` some C++ function in a certain address and the argument to be inputted.
+
+What is the gain in runtime?
+
+```{r}
+system.time({
+  sqrt_vector_cpp(v)
+})
+```
+
+WOW. 10x!!! Can't beat that with a stick...
+
+Let's do a not-so-contrived example...
+
+Matrix distance... Let's compute the distances of all pairs of rows in a dataset. I will try to code the R as efficiently as possible by using vector subtraction so there is only two for loops. The C++ function will have an additional loop to iterate over the features in the observations.
+
+```{r}
+#a subset of the diamonds data
+X_diamonds = as.matrix(ggplot2::diamonds[1 : 3000, c("carat", "depth", "table", "x", "y", "z")])
+
+compute_distance_matrix = function(X){
+  n = nrow(X)
+  D = matrix(NA, n, n)
+  for (i_1 in 1 : (n - 1)){
+    for (i_2 in (i_1 + 1) : n){
+      D[i_1, i_2] = sqrt(sum((X[i_1, ] - X[i_2, ])^2))
+    }
+  }
+  D
+}
+
+cppFunction('
+  NumericMatrix compute_distance_matrix_cpp(NumericMatrix X) {
+    int n = X.nrow();
+    int p = X.ncol();
+    NumericMatrix D(n, n);
+    std::fill(D.begin(), D.end(), NA_REAL);
+
+    for (int i_1 = 0; i_1 < (n - 1); i_1++){
+      //Rcout << "computing for row #: " << (i_1 + 1) << "\\n";
+      for (int i_2 = i_1 + 1; i_2 < n; i_2++){
+        double sqd_diff = 0;
+        for (int j = 0; j < p; j++){
+          sqd_diff += pow(X(i_1, j) - X(i_2, j), 2); //by default the cmath library in std is loaded
+        }
+        D(i_1, i_2) = sqrt(sqd_diff); //by default the cmath library in std is loaded
+      }
+    }
+    return D;
+  }
+')
+```
+
+```{r}
+system.time({
+  D = compute_distance_matrix(X_diamonds)
+})
+round(D[1 : 5, 1 : 5], 2)
+```
+
+Slow...
+
+```{r}
+system.time({
+  D = compute_distance_matrix_cpp(X_diamonds)
+})
+round(D[1 : 5, 1 : 5], 2)
+```
+
+Absolutely lightning... 100x faster on my laptop than R's runtime.
+
+Writing functions as strings that compile is annoying. It is better to have separate files. For instance...
+
+```{r}
+sourceCpp("distance_matrix.cpp")
+```
+
+Here are a list of the data structures in Rcpp: https://teuder.github.io/rcpp4everyone_en/070_data_types.html#vector-and-matrix
+
+Another place where C++ pays the rent is recursion. Here is a quicksort implementation in R taken from 
+
+```{r}
+quicksort_R <- function(arr) {
+  # Pick a number at random.
+  mid <- sample(arr, 1)
+
+  # Place-holders for left and right values.
+  left <- c()
+  right <- c()
+  
+  # Move all the smaller values to the left, bigger values to the right.
+  lapply(arr[arr != mid], function(d) {
+    if (d < mid) {
+      left <<- c(left, d)
+    }
+    else {
+      right <<- c(right, d)
+    }
+  })
+  
+  if (length(left) > 1) {
+    left <- quicksort_R(left)
+  }
+  
+  if (length(right) > 1) {
+    right <- quicksort_R(right)
+  }
+  
+  # Finally, return the sorted values.
+  c(left, mid, right)
+}
+```
+
+Let's create a random array to test these sorts on:
+
+```{r}
+n = 5e5
+x = rnorm(n)
+```
+
+
+Let's profile the pure R sort function:
+
+```{r}
+system.time({
+  x_sorted_pure_R = quicksort_R(x)
+})
+```
+
+Let's profile R's `sort` function.
+
+```{r}
+system.time({
+  x_sorted_base_R = sort(x)
+})
+```
+
+Let's just ensure our method worked...
+
+```{r}
+pacman::p_load(testthat)
+expect_equal(x_sorted_pure_R, x_sorted_base_R)
+```
+
+Basically infinitely faster. Let's make our own C++ implementation.
+
+```{r}
+sourceCpp("quicksort.cpp")
+```
+
+and profile it:
+
+```{r}
+system.time({
+  x_sorted_cpp = quicksort_cpp(x)
+})
+```
+
+Let's just ensure this method worked...
+
+```{r}
+pacman::p_load(testthat)
+expect_equal(x_sorted_cpp, x_sorted_base_R)
+```
+
+Why is our C++ slower than `sort`. Because `sort` is also in C++ or Fortran and it's been likely optimized and reoptimized up to wazoo for decades. Also, Rcpp's data structures may be slower than base R's data structures. There may be some speed lost to translating to `NumericVector` from `double[]` or something like that.
+
+Can you call R from Rcpp? You bet:
+
+```{r}
+cppFunction('
+  NumericVector rnorm_cpp_R(int n, double mean, double sd){
+      // get a pointer to R\'s rnorm() function
+      Function f("rnorm");   
+  
+      // Next code is interpreted as rnorm(n, mean, sd)
+      return f(n, Named("sd")=sd, _["mean"]=mean);
+  }
+')
+
+rnorm_cpp_R(5, 1, .01)
+```
+
+A few math functions are implemented for you already:
+
+```{r}
+evalCpp('R::qnorm(0.5, 0, 1, 1, 0)')
+```
+
+Further, there are many common functions that are already wrapped for you via "Rcpp-sugar" which was the Rcpp's author's attempt to make Rcpp a whole lot easier, see [here](http://dirk.eddelbuettel.com/code/rcpp/Rcpp-sugar.pdf).
+
+```{r}
+evalCpp('rnorm(10, 100, 3)')
+```
+
+If you want blazing fast linear algebra, check out package `RcppArmadillo` which is a wrapper around Apache's Armadillo (namespace is "arma" in the code), an optimized linear algebra package in C++. Here is an example taken from [here](https://scholar.princeton.edu/sites/default/files/q-aps/files/slides_day4_am.pdf):
+
+```{r}
+pacman::p_load(RcppArmadillo, microbenchmark, testthat)
+
+cppFunction('
+  arma::mat ols_cpp(arma::mat X, arma::mat y){
+    arma::mat Xt = X.t();
+    return solve(Xt * X, Xt * y);
+  }
+', depends = "RcppArmadillo")
+
+n = 500
+D = data.frame(int = rep(1, n), x1 = rnorm(n), x2 = rnorm(n), x3 = rnorm(n), y = rnorm(n))
+X = as.matrix(D[, 1 : 4])
+y = as.matrix(D[, 5])
+
+#does the function work?
+expect_equal(as.numeric(ols_cpp(X, y)), as.numeric(solve(t(X) %*% X) %*% t(X) %*% y))
+
+microbenchmark(
+  R_via_lm = lm(y ~ 0 + ., data = D),
+  R_matrix_multiplication = solve(t(X) %*% X) %*% t(X) %*% y,
+  cpp = ols_cpp(X, y),
+    times = 100
+)
+```
+
+About 4x faster than R's optimized linear algebra routines. Supposedly it can go even faster if you enable parallelization within Armadillo. I couldn't get that demo to work.
+
+Here are the places where Rcpp should be used (from https://teuder.github.io/rcpp4everyone_en/010_Rcpp_merit.html)
+
+* Loop operations in which later iterations depend on previous iterations.
+* Accessing each element of a vector/matrix.
+* Recurrent function calls within loops.
+* Changing the size of vectors dynamically.
+* Operations that need advanced data structures and algorithms (we don't do this in this class).

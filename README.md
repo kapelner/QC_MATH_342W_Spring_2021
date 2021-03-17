@@ -6,6 +6,9 @@ This is the course homepage for Math 342W (and Masters level 650.4) at Queens Co
 
 My lectures can be listened to as youtube tracks and lecture notes are also scanned in as PDF files contributed by students and myself.
 
+* Lecture 14 video on slack
+  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec13.Rmd)
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec13kap.pdf) 
 * Lecture 13 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec13.Rmd)
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec13kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec13kim.pdf) [(Brendan Gubbins)](https://github.com/brendangubbins/QC_MATH_342W_Spring_2021/blob/master/lectures/lec13gubbins.pdf)
