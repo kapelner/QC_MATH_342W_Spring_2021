@@ -76,6 +76,176 @@ testthat::expect_equal(c(H_V), c(H))
 
 And they're the same as expected.
 
+# The rest of the Midterm Review Lab
+
+Run everything relevant from before:
+
+```{r}
+pacman::p_load(ggplot2)
+diamonds$cut =      factor(diamonds$cut, ordered = FALSE)
+diamonds$color =    factor(diamonds$color, ordered = FALSE)
+diamonds$clarity =  factor(diamonds$clarity, ordered = FALSE)
+diamonds = diamonds[diamonds$carat <= 2 & diamonds$x != 0 & diamonds$y != 0 & diamonds$z != 0 & diamonds$depth != 0 & diamonds$table != 0,]
+diamonds$ln_price = log(diamonds$price)
+diamonds$ln_carat = log(diamonds$carat)
+diamonds$ln_x = log(diamonds$x)
+diamonds$ln_y = log(diamonds$y)
+diamonds$ln_z = log(diamonds$z)
+diamonds$ln_depth = log(diamonds$depth)
+diamonds$ln_table = log(diamonds$table)
+n = nrow(diamonds)
+set.seed(1984)
+diamonds = diamonds[sample(1 : n), ]
+```
+
+
+Note: I will now model price, not ln_price as ln_price yields residuals that are orders of magnitude. Fitting a good ln_price model will take more time.
+
+```{r}
+#Model A
+model_A_formula = price ~ ln_carat
+mod = lm(model_A_formula, diamonds)
+summary(mod)$sigma
+mod$rank
+#Model B
+model_B_formula = price ~ ln_carat * clarity 
+mod = lm(model_B_formula, diamonds)
+summary(mod)$sigma
+mod$rank
+#Model C
+model_C_formula = price ~ ln_carat * (clarity + cut + color)
+mod = lm(model_C_formula, diamonds)
+summary(mod)$sigma
+mod$rank
+#Model D
+model_D_formula = price ~ (ln_carat + ln_x + ln_y + ln_z + ln_depth + ln_table) * (clarity + cut + color)
+mod = lm(model_D_formula, diamonds)
+summary(mod)$sigma
+mod$rank
+#Model E
+model_E_formula = price ~ (ln_carat + ln_x + ln_y + ln_z + ln_depth + ln_table + carat + x + y + z + depth + table) * (clarity + cut + color)
+mod = lm(model_E_formula, diamonds)
+summary(mod)$sigma
+mod$rank
+```
+
+Big win on E... the reason I think is that now we have a flexible curve for each continuous feature and that curve changes with all the categorical features.
+
+Create model (F) which is the same as before except also include also third degree polynomials of the continuous features interacted with the categorical features and gauge performance against (E). By this time you're getting good with R's formula syntax!
+
+
+```{r}
+#Model F
+model_F_formula = price ~ 
+        (ln_carat + ln_x + ln_y + ln_z + ln_depth + ln_table + poly(carat, 3) + poly(x, 3) + poly(y, 3) + poly(z, 3) + poly(depth, 3) + poly(table, 3)) * (cut + color + clarity)
+mod = lm(model_F_formula, diamonds)
+summary(mod)$sigma
+mod$rank
+```
+
+Can you think of any other way to expand the candidate set curlyH? Discuss.
+
+We now have a very flexible curve for each continuous feature and that curve is fit individually for each level of all categories. We could indeed go further by allowing the levels among cut, color and clarity to interact and further allowing the continous features to interact. 
+
+There is another strategy to increase the complexity of H without using function transforms of the features and interactions... we will have to see after winter break...
+
+We should probably assess oos performance now. Sample 2,000 diamonds and use these to create a training set of 1,800 random diamonds and a test set of 200 random diamonds. Define K and do this splitting:
+
+```{r}
+K = 10
+n_sub = 2000
+set.seed(1984)
+test_indicies = sample(1 : n, 1 / K * n_sub)
+train_indicies = sample(setdiff(1 : n, test_indicies), (K - 1) / K * n_sub)
+all_other_indicies = setdiff(1 : n, c(test_indicies, train_indicies))
+```
+
+Compute in and out of sample performance for models A-F. Use s_e as the metric (standard error of the residuals). Create a list with keys A, B, ..., F to store these metrics. Remember the performances here will be worse than before since before you're using nearly 52,000 diamonds to build a model and now it's only 1,800! 
+
+Note: I'll only do F here. You can do A-E at home.
+
+```{r}
+oos_se = list()
+for (model_idx in LETTERS[1 : 6]){
+  mod = lm(eval(parse(text = paste0("model_", model_idx, "_formula"))), diamonds[train_indicies, ])
+  summary(mod)$sigma
+  oos_se[[model_idx]] = sd(diamonds$price[test_indicies] - predict(mod, diamonds[test_indicies, ]))
+}
+oos_se
+```
+
+Something is clearly busted with model F. Probably Runge's phenomenon?? Let's not use it anymore...
+
+You computed oos metrics only on n_* = 200 diamonds. What problem(s) do you expect in these oos metrics?
+
+They are highly variable.
+
+To do the K-fold cross validation we need to get the splits right and crossing is hard. I've developed code for this already. Run this code.
+
+```{r}
+set.seed(1984)
+temp = rnorm(n_sub)
+folds_vec = cut(temp, breaks = quantile(temp, seq(0, 1, length.out = K + 1)), include.lowest = TRUE, labels = FALSE)
+head(folds_vec, 200)
+```
+
+Comment on what it does and how to use it to do a K-fold CV:
+
+This cold tells you which index is inside of which fold's test set.
+
+Do the K-fold cross validation for all models and compute the overall s_e and s_s_e. 
+
+```{r}
+oos_se = list()
+oos_s_se = list()
+for (model_idx in LETTERS[1 : 5]){
+  e_vec_k = list() #for each one
+  for (k in 1 : K){
+    test_indicies_k = which(folds_vec == k)
+    train_indicies_k = which(folds_vec != k)
+    mod = lm(eval(parse(text = paste0("model_", model_idx, "_formula"))), diamonds[train_indicies_k, ])
+    e_vec_k[[k]] = sd(diamonds$price[test_indicies_k] - predict(mod, diamonds[test_indicies_k, ]))
+  }
+  oos_se[[model_idx]] = mean(unlist(e_vec_k)) #note: not exactly the overall sd, but close enough
+  oos_s_se[[model_idx]] = sd(unlist(e_vec_k))
+}
+res = rbind(unlist(oos_se), unlist(oos_s_se))
+rownames(res) = c("avg", "sd")
+res
+```
+
+Does K-fold CV help reduce variance in the oos s_e? Discuss.
+
+Yes because it is an average.
+
+Imagine using the entire rest of the dataset besides the 2,000 training observations divvied up into slices of 200. Measure the oos error for each slice and also plot it.
+
+```{r}
+n_step = 1 / K * n_sub
+oos_se = list()
+starting_ks = seq(from = 1, to = (length(all_other_indicies) - n_step), by = n_step)
+for (model_idx in LETTERS[1 : 5]){
+  mod = lm(eval(parse(text = paste0("model_", model_idx, "_formula"))), diamonds[train_indicies, ])
+  e_vec_k = list() #for each one
+  for (k in 1 : length(starting_ks)){
+    diamonds_k = diamonds[all_other_indicies[starting_ks[k] : (starting_ks[k] + n_step - 1)], ]
+    e_vec_k[[k]] = sd(diamonds_k$price - predict(mod, diamonds_k))
+  }
+  oos_se[[model_idx]] = unlist(e_vec_k)
+}
+do.call(rbind.data.frame, oos_se)
+
+pacman::p_load(reshape2)
+
+
+ggplot(reshape2::melt(oos_se)) + geom_boxplot(aes(x = L1, y = value))
+ggplot(reshape2::melt(oos_se)) + geom_boxplot(aes(x = L1, y = value)) + ylim(0, 5000)
+```
+
+What do we learn from this? It is very risky. What exactly is going wrong? I'm not sure. Part of the agony of data science is the "debugging" just like when debuggin software. But here the errors can be in the modeling too! Lesson: be careful about lots of transformed variables and interactions. Luckily we won't be dealing with these much longer since there are less risky ways of creating a transformed basis of Xraw.
+
+
+
 # Popular Add-on Packages to R
 
 ## Piping

@@ -47,7 +47,7 @@ ggplot(diamonds, aes(x = carat, y = price)) +
   geom_point()
 ```
 
-Create a model of price ~ carat and gauge its performance.
+Create a linear model of price ~ carat and gauge its performance using s_e.
 
 ```{r}
 #TO-DO
@@ -102,27 +102,26 @@ Would ln_price ~ carat be a better fitting model than price ~ carat? Why or why 
 
 #TO-DO
 
-Verify this by computing R^2 and RMSE of this new model. Make sure these metrics can be compared apples-to-apples with the previous.
+Verify this by computing s_e of this new model. Make sure these metrics can be compared apples-to-apples with the previous.
 
 ```{r}
 #TO-DO
 ```
 
-We just compared in-sample statistics to draw a conclusion on which model has better performance. But in-sample statistics can lie! Why is what we did valida?
+We just compared in-sample statistics to draw a conclusion on which model has better performance. But in-sample statistics can lie! Why is what we did valid?
 
 #TO-DO
 
 Plot ln_price vs ln_carat.
 
 ```{r}
-#TO-DO
 ggplot(diamonds, aes(x = ln_carat, y = ln_price)) + 
   geom_point()
 ```
 
 Would ln_price ~ ln_carat be the best fitting model than the previous three we considered? Why or why not?
 
-Verify this by computing R^2 and RMSE of this new model. Make sure these metrics can be compared apples-to-apples with the previous.
+Verify this by computing s_e of this new model. Make sure these metrics can be compared apples-to-apples with the previous.
 
 ```{r}
 #TO-DO
@@ -131,6 +130,7 @@ Verify this by computing R^2 and RMSE of this new model. Make sure these metrics
 Compute b, the OLS slope coefficients for this new model of ln_price ~ ln_carat.
 
 ```{r}
+#Model A
 #TO-DO
 ```
 
@@ -153,9 +153,8 @@ From now on, we will be modeling ln_price (not raw price) as the prediction targ
 Create a model (B) of ln_price on ln_carat interacted with clarity and compare its performance with the model (A) ln_price ~ ln_carat.
 
 ```{r}
-#Model A
-#TO-DO
 #Model B
+#TO-DO
 ```
 
 Which model does better? Why?
