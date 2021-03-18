@@ -27,7 +27,7 @@ B %*% v2 == lambda2 * v2 #why not?
 V %*% diag(lambdas) %*% solve(V)
 ```
 
-Let's take a look at a projection matrix
+Let's take a look at a projection matrix:
 
 ```{r}
 X = model.matrix(medv ~ ., MASS::Boston)
@@ -133,9 +133,7 @@ rnorm(1000) %>% add(1) %>% mean
 
 There are other exceptions to the rule too which you'll figure out if you adopt the pipe.
 
-Unfortunately... the world at large hasn't completely accepted this as a way to write R. So feel free to use for yourself. But be carefuly when using this style with others. 
-
-Also note the code you write with pipes will be slower than the normal syntax.
+Unfortunately... the world at large hasn't completely accepted this as a way to write R. So feel free to use for yourself. But be careful when using this style with others. There are places where everyone uses the pipes (we will see this when we get to dplyr). Also note the code you write with pipes will be slower than the normal syntax.
 
 # The Grammar of graphics and ggplot
 
@@ -146,7 +144,7 @@ pacman::p_load(ggplot2, quantreg)
 cars = MASS::Cars93 #dataframe
 ```
 
-ggplot is based on the "Grammar of Graphics", a concept invented by the Statistician / Computer Scientist Leland Wilkinson who worked on SPSS, Tableau and now he works at H20, software that analyzes big data. The reference of interest is [here](http://papers.rgrossman.com/proc-094.pdf). He drew on ideas from John Tukey (one of the great statistician of the previous generation) while he was at Bell Labs, Andreas Buja (one of my professors at Penn) and Jerome Friedman (the professor that taught my data mining course at Stanford - remember the diamonds story?) 
+ggplot is based on the "Grammar of Graphics", a concept invented by the Statistician / Computer Scientist Leland Wilkinson who worked on SPSS, Tableau and now he works at H20, software that analyzes big data. The reference of interest is [here](http://papers.rgrossman.com/proc-094.pdf). He drew on ideas from John Tukey (one of the great statistician of the previous generation) while he was at Bell Labs, Andreas Buja (one of my professors at Penn) and Jerome Friedman (the professor that taught my data mining course when I was in college at Stanford). 
 
 It is a language that allows us to describe the components of a graphic. Previously, graphics were done in one shot and it was clunky. ggplot is a library written by Hadley Wickham based on this concept. Wickham is probably the most famous person in statistical computing today. He has commit rights in R and is one of the architects of RStudio. He calls grammar of graphics "graphical poems". Here are the basic components:
 
