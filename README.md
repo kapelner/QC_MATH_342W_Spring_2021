@@ -6,6 +6,8 @@ This is the course homepage for Math 342W (and Masters level 650.4) at Queens Co
 
 My lectures can be listened to as youtube tracks and lecture notes are also scanned in as PDF files contributed by students and myself.
 
+* Lecture 15 video on slack
+  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec15.Rmd)
 * Lecture 14 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec14.Rmd)
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec14kap.pdf) [(Enoch Kim)](https://github.com/derpnoch/QC_MATH_342W_Spring_2021/blob/master/lectures/lec14kim.pdf) [(Kennly Weerasinghe)](https://github.com/wskennly/QC_MATH_342W_Spring_2021/blob/master/lectures/lec14weerasinghe.pdf)
@@ -74,7 +76,7 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 * Homework 0 [(syllabus, page 7)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/syllabus/syllabus.pdf?raw=true) (due 1/31)
 
 ## Writing Assignments
-<!---->
+
 * Final Project [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/final_project.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/final_project.pdf) (due 5/24 by email)
 * Modeling Essay [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/modeling_essay.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/modeling_essay.pdf) (draft due 3/21, revision due 4/25) [(example essay)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/modeling_essay_example.pdf)
 

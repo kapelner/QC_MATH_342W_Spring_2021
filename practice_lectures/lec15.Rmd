@@ -33,6 +33,7 @@ Let's take a look at a projection matrix:
 X = model.matrix(medv ~ ., MASS::Boston)
 head(X)
 H = X %*% solve(t(X) %*% X) %*% t(X)
+H[1:5,1:5]
 dim(H)
 eigen_decomp = eigen(H)
 lambdas = eigen_decomp$values
@@ -45,14 +46,31 @@ table(lambdas_rounded)
 sum(lambdas_rounded) #i.e. the rank(H) = # cols in X
 ```
 
-It turns out all eigenvalues of a projection matrix are either 0 or 1. What are the eigenvectors? Only the first ncol(X) = 14 reconstruct the space. Are they the same as the X columns?
+It turns out all eigenvalues of a projection matrix are either 0 or 1. Why is this? It makes sense since:
+
+H 1-vec = 1-vec
+H x_{dot 1} = x_{dot 1}
+H x_{dot 2} = x_{dot 2}
+.
+.
+.
+H x_{dot p} = x_{dot p}
+
+All these p+1 eigenvalues of H are 1 and there are p+1 of them. Further,
+
+```{r}
+sum(diag(H))
+```
+
+The trace (sum of the diagonal entries) is also = p+1 i.e. the rank[X]. This is true since the trace of a matrix is always equal to the sum of the eigenvalues since tr(H) = tr(V^-1 D V) = tr(V^-1 V D) = tr(D) = sum lambda_i which in this case is rank[X].
+
+What are the eigenvectors? Only the first ncol(X) = 14 reconstruct the space. Are they the same as the X columns?
 
 ```{r}
 V = eigen_decomp$vectors
-dim(V)
 V = matrix(as.numeric(V), ncol = ncol(V))
 dim(V)
-V[1 : 20, 1 : ncol(X)]
+V[1 : 5, 1 : ncol(X)]
 
 V_X_angles = matrix(NA, ncol(X), ncol(X))
 for (i in 1 : ncol(X)){
@@ -102,29 +120,32 @@ diamonds = diamonds[sample(1 : n), ]
 Note: I will now model price, not ln_price as ln_price yields residuals that are orders of magnitude. Fitting a good ln_price model will take more time.
 
 ```{r}
+#All model formulas for reuse later
+model_formulas = list(
+  A = price ~ ln_carat,
+  B = price ~ ln_carat * clarity,
+  C = price ~ ln_carat * (clarity + cut + color),
+  D = price ~ (ln_carat + ln_x + ln_y + ln_z + ln_depth + ln_table) * (clarity + cut + color),
+  E = price ~ (ln_carat + ln_x + ln_y + ln_z + ln_depth + ln_table + carat + x + y + z + depth + table) * (clarity + cut + color)
+)
 #Model A
-model_A_formula = price ~ ln_carat
-mod = lm(model_A_formula, diamonds)
+mod = lm(model_formulas[["A"]], diamonds)
 summary(mod)$sigma
 mod$rank
 #Model B
-model_B_formula = price ~ ln_carat * clarity 
-mod = lm(model_B_formula, diamonds)
+mod = lm(model_formulas[["B"]], diamonds)
 summary(mod)$sigma
 mod$rank
 #Model C
-model_C_formula = price ~ ln_carat * (clarity + cut + color)
-mod = lm(model_C_formula, diamonds)
+mod = lm(model_formulas[["C"]], diamonds)
 summary(mod)$sigma
 mod$rank
 #Model D
-model_D_formula = price ~ (ln_carat + ln_x + ln_y + ln_z + ln_depth + ln_table) * (clarity + cut + color)
-mod = lm(model_D_formula, diamonds)
+mod = lm(model_formulas[["D"]], diamonds)
 summary(mod)$sigma
 mod$rank
-#Model E
-model_E_formula = price ~ (ln_carat + ln_x + ln_y + ln_z + ln_depth + ln_table + carat + x + y + z + depth + table) * (clarity + cut + color)
-mod = lm(model_E_formula, diamonds)
+#Model E 
+mod = lm(model_formulas[["E"]], diamonds)
 summary(mod)$sigma
 mod$rank
 ```
@@ -136,9 +157,9 @@ Create model (F) which is the same as before except also include also third degr
 
 ```{r}
 #Model F
-model_F_formula = price ~ 
+model_formulas[["F"]] = price ~ 
         (ln_carat + ln_x + ln_y + ln_z + ln_depth + ln_table + poly(carat, 3) + poly(x, 3) + poly(y, 3) + poly(z, 3) + poly(depth, 3) + poly(table, 3)) * (cut + color + clarity)
-mod = lm(model_F_formula, diamonds)
+mod = lm(model_formulas[["F"]], diamonds)
 summary(mod)$sigma
 mod$rank
 ```
@@ -149,36 +170,35 @@ We now have a very flexible curve for each continuous feature and that curve is 
 
 There is another strategy to increase the complexity of H without using function transforms of the features and interactions... we will have to see after winter break...
 
-We should probably assess oos performance now. Sample 2,000 diamonds and use these to create a training set of 1,800 random diamonds and a test set of 200 random diamonds. Define K and do this splitting:
+We should probably assess oos performance now. Sample 4,000 diamonds and use these to create a training set of 3,600 random diamonds and a test set of 400 random diamonds. Define K and do this splitting:
 
 ```{r}
 K = 10
-n_sub = 2000
+n_sub = 4000
 set.seed(1984)
-test_indicies = sample(1 : n, 1 / K * n_sub)
-train_indicies = sample(setdiff(1 : n, test_indicies), (K - 1) / K * n_sub)
+n_test = 1 / K * n_sub
+n_train = n_sub - n_test
+test_indicies = sample(1 : n, n_test)
+train_indicies = sample(setdiff(1 : n, test_indicies), n_train)
 all_other_indicies = setdiff(1 : n, c(test_indicies, train_indicies))
 ```
 
-Compute in and out of sample performance for models A-F. Use s_e as the metric (standard error of the residuals). Create a list with keys A, B, ..., F to store these metrics. Remember the performances here will be worse than before since before you're using nearly 52,000 diamonds to build a model and now it's only 1,800! 
-
-Note: I'll only do F here. You can do A-E at home.
+Compute in and out of sample performance for models A-F. Use s_e as the metric (standard error of the residuals). Create a list with keys A, B, ..., F to store these metrics. Remember the performances here will be worse than before since before you're using nearly 52,000 diamonds to build a model and now it's only 3600.
 
 ```{r}
 oos_se = list()
+all_models_train = list()
 for (model_idx in LETTERS[1 : 6]){
-  mod = lm(eval(parse(text = paste0("model_", model_idx, "_formula"))), diamonds[train_indicies, ])
-  summary(mod)$sigma
-  oos_se[[model_idx]] = sd(diamonds$price[test_indicies] - predict(mod, diamonds[test_indicies, ]))
+  all_models_train[[model_idx]] = lm(model_formulas[[model_idx]], diamonds[train_indicies, ])
+  summary(all_models_train[[model_idx]])$sigma
+  oos_se[[model_idx]] = sd(diamonds$price[test_indicies] - predict(all_models_train[[model_idx]], diamonds[test_indicies, ]))
 }
 oos_se
 ```
 
-Something is clearly busted with model F. Probably Runge's phenomenon?? Let's not use it anymore...
+You computed oos metrics only on n_* = 400 diamonds. What problem(s) do you expect in these oos metrics?
 
-You computed oos metrics only on n_* = 200 diamonds. What problem(s) do you expect in these oos metrics?
-
-They are highly variable.
+They are variable. And something is wrong with F! Possibly Runge's phenomenon?
 
 To do the K-fold cross validation we need to get the splits right and crossing is hard. I've developed code for this already. Run this code.
 
@@ -186,24 +206,24 @@ To do the K-fold cross validation we need to get the splits right and crossing i
 set.seed(1984)
 temp = rnorm(n_sub)
 folds_vec = cut(temp, breaks = quantile(temp, seq(0, 1, length.out = K + 1)), include.lowest = TRUE, labels = FALSE)
-head(folds_vec, 200)
+head(folds_vec, 100)
 ```
 
 Comment on what it does and how to use it to do a K-fold CV:
 
-This cold tells you which index is inside of which fold's test set.
+This code tells you which index is inside of which fold's test set.
 
 Do the K-fold cross validation for all models and compute the overall s_e and s_s_e. 
 
 ```{r}
 oos_se = list()
 oos_s_se = list()
-for (model_idx in LETTERS[1 : 5]){
+for (model_idx in LETTERS[1 : 6]){
   e_vec_k = list() #for each one
   for (k in 1 : K){
     test_indicies_k = which(folds_vec == k)
     train_indicies_k = which(folds_vec != k)
-    mod = lm(eval(parse(text = paste0("model_", model_idx, "_formula"))), diamonds[train_indicies_k, ])
+    mod = lm(model_formulas[[model_idx]], diamonds[train_indicies_k, ])
     e_vec_k[[k]] = sd(diamonds$price[test_indicies_k] - predict(mod, diamonds[test_indicies_k, ]))
   }
   oos_se[[model_idx]] = mean(unlist(e_vec_k)) #note: not exactly the overall sd, but close enough
@@ -216,37 +236,115 @@ res
 
 Does K-fold CV help reduce variance in the oos s_e? Discuss.
 
-Yes because it is an average.
+Yes because it is an average so its standard error is approximately s_e / sqrt(K). It's only approximate since this is the formula for the std err or independent samples and the K oos samples are not exactly independent.
 
-Imagine using the entire rest of the dataset besides the 2,000 training observations divvied up into slices of 200. Measure the oos error for each slice and also plot it.
+Model F seems more varialbe than all of them. Why? Possibly Runge's phenomenon?
+
+Imagine using the entire rest of the dataset besides the 4,000 training observations divvied up into slices of 400. Measure the oos error for each slice and also plot it.
 
 ```{r}
 n_step = 1 / K * n_sub
 oos_se = list()
+ses = list()
 starting_ks = seq(from = 1, to = (length(all_other_indicies) - n_step), by = n_step)
-for (model_idx in LETTERS[1 : 5]){
-  mod = lm(eval(parse(text = paste0("model_", model_idx, "_formula"))), diamonds[train_indicies, ])
-  e_vec_k = list() #for each one
+for (model_idx in LETTERS[1 : 6]){
+  se_k = list() #for each one
   for (k in 1 : length(starting_ks)){
     diamonds_k = diamonds[all_other_indicies[starting_ks[k] : (starting_ks[k] + n_step - 1)], ]
-    e_vec_k[[k]] = sd(diamonds_k$price - predict(mod, diamonds_k))
+    se_k[[k]] = sd(diamonds_k$price - predict(all_models_train[[model_idx]], diamonds_k))
   }
-  oos_se[[model_idx]] = unlist(e_vec_k)
+  ses[[model_idx]] = se_k
+  oos_se[[model_idx]] = unlist(se_k)
 }
-do.call(rbind.data.frame, oos_se)
 
 pacman::p_load(reshape2)
-
-
-ggplot(reshape2::melt(oos_se)) + geom_boxplot(aes(x = L1, y = value))
-ggplot(reshape2::melt(oos_se)) + geom_boxplot(aes(x = L1, y = value)) + ylim(0, 5000)
+ggplot(reshape2::melt(oos_se)) + geom_boxplot(aes(x = L1, y = value)) + xlab("model")
+ggplot(reshape2::melt(oos_se)) + geom_boxplot(aes(x = L1, y = value)) + xlab("model") + ylim(0, 5000)
 ```
 
-What do we learn from this? It is very risky. What exactly is going wrong? I'm not sure. Part of the agony of data science is the "debugging" just like when debuggin software. But here the errors can be in the modeling too! Lesson: be careful about lots of transformed variables and interactions. Luckily we won't be dealing with these much longer since there are less risky ways of creating a transformed basis of Xraw.
+What do we learn from this? Model F is very risky. What exactly is going wrong? Part of the agony of data science is the "debugging" just like when debugging software. But here the errors can be in the modeling too! 
 
+```{r}
+max(unlist(ses[["F"]]))
+k_BAD = which.max(unlist(ses[["F"]]))
+
+diamonds_BAD = diamonds[all_other_indicies[starting_ks[k_BAD] : (starting_ks[k_BAD] + n_step - 1)], ]
+diamonds_BAD
+
+e_BAD = diamonds_BAD$price - predict(all_models_train[[model_idx]], diamonds_BAD)
+tail(sort(abs(e_BAD)))
+diamonds_BAD[which.max(abs(e_BAD)), ]
+
+
+
+summary(diamonds[train_indicies, ])
+
+
+```
+
+Is it extrapolation? Yes... y = 58.9 and in a cubic function, that would be astronomical. The real mistake is that y = 58.9 is impossible. The data wasn't cleaned. We will have an exercise in that. But this happens all the time and you don't want to be using polynomial functions for this reason since the new data may extrapolate very poorly.
+
+Luckily we won't be dealing with these much longer since there are less risky ways of creating a transformed basis of Xraw.
 
 
 # Popular Add-on Packages to R
+
+## MLR library for CV
+
+"Machine Learning in R" (the `mlr3` package v0.11) is a very popular R library that makes it very simple to build models, do validation, etc. This package was recently rewritten (September, 2019).
+
+```{r}
+pacman::p_load(ggplot2, mlr3verse)
+```
+
+It splits the modeling task into conceptual pieces. The most basic pieces are:
+
+* Instantiate a "task". This consists of supplying a dataframe, identifying a variable that is the output and the type of predictions to be made.
+* Instantiate a "learner". This consists of $\mathcal{A}$ and $\mathcal{H}$. For example: OLS with all raw features.
+* Instantiate a type of validation. For example: 5-fold CV resampling.
+* Execute
+
+Here's what this would look like for our example we just did:
+
+```{r}
+modeling_task = TaskRegr$new(id = "diamonds", backend = diamonds, target = "price") #instantiate the task
+algorithm = lrn("regr.lm") #instantiate the OLS learner algorithm on the diamonds dataset and set y = price
+validation = rsmp("cv", folds = 5) #instantiate the 5-fold CV
+resample(modeling_task, algorithm, validation) #execute
+```
+
+It's squabbling about something insignificant but at least it tells me exactly what I need to do to fix! Let's correct this error and do it again:
+
+```{r}
+diamonds$cut = factor(diamonds$cut, ordered = FALSE)
+diamonds$color = factor(diamonds$color, ordered = FALSE)
+diamonds$clarity = factor(diamonds$clarity, ordered = FALSE)
+modeling_task = TaskRegr$new(id = "diamonds", backend = diamonds, target = "price")
+#note the "new" kind of looks like Java or Python. This is part of the new object-oriented package R6
+#see https://adv-r.hadley.nz/r6.html if you are interested
+res = resample(modeling_task, algorithm, validation) #execute
+#nicely parallelized for performance!
+res
+#not much info here
+```
+We need to provide an error metric of which there are lots:
+
+```{r}
+msrs()
+#see https://mlr3.mlr-org.com/reference/mlr_measures_regr.rmse.html
+#note how they define it without the p in the denominator... more confusion!
+```
+
+Let's see the results:
+
+```{r}
+res$score(msr("regr.rmse"))
+
+mean(res$score(msr("regr.rmse"))$regr.rmse)
+sd(res$score(msr("regr.rmse"))$regr.rmse)
+```
+
+We will return to `mlr` later after we finish our discussion on model selection, stepwise modeling and hyperparameter selection.
 
 ## Piping
 
@@ -254,7 +352,7 @@ Take a look at this one-liner:
 
 ```{r}
 set.seed(1984)
-mean(head(round(sample(rnorm(1000)), digits = 2)))
+mean(head(round(sample(rnorm(1000), 100), digits = 2)))
 ```
 
 This is hard to read. Of course we can make it easier by using breaklines e.g.
@@ -264,9 +362,12 @@ mean(
   head(
     round(
       sample(
-        rnorm(1000)
-      ), digits = 2)
+        rnorm(1000), 
+        100
+      ), 
+      digits = 2
     )
+  )
 )
 ```
 
@@ -277,7 +378,7 @@ Enter an idea taken from unix / linux. Output of one function is input to next f
 We first load the piping library:
 
 ```{r}
-pacman::p_load(magrittr) 
+pacman::p_load(magrittr)
 ```
 
 The package is named after Rene Magritte, the Belgian surrealist artist because he wrote [(Ceci n'est pas un pipe)](https://en.wikipedia.org/wiki/The_Treachery_of_Images) on a painting of a pipe.
@@ -287,7 +388,7 @@ In pipe format this would look like:
 ```{r}
 set.seed(1984)
 rnorm(1000) %>% #the pipe operator
-  sample %>% 
+  sample(100) %>% 
   round(digits = 2) %>% #the first argument is passed in automatically.
   head %>%
   mean
@@ -298,7 +399,9 @@ That's it! There's nothing more to it other than a gain in readability.
 What if we wanted to do something like `mean(rnorm(1000) + 1)`? This `rnorm(1000) %>% +1 %>% mean` doesn't work because I imagine because the basic arithmetic operators couldn't be parsed like normal while there was a pipe. So they invented special pipe functions for this:
 
 ```{r}
-rnorm(1000) %>% add(1) %>% mean
+rnorm(1000) %>% 
+  add(1) %>% 
+  mean
 ```
 
 There are other exceptions to the rule too which you'll figure out if you adopt the pipe.
@@ -365,7 +468,7 @@ This can be customized:
 
 ```{r}
 ggplot(cars, aes(Price)) +
-  geom_histogram(binwidth = 1, col = "darkgreen", fill = "blue", alpha = 0.4)
+  geom_histogram(binwidth = 1, col = "darkred", fill = "blue", alpha = 0.4)
 ```
 
 Want to save it for your latex?
@@ -387,7 +490,7 @@ ggplot(cars, aes(Price)) +
 ggplot(cars, aes(Price)) +
   geom_freqpoly()
 ggplot(cars, aes(Price)) +
-  geom_density(fill = "green", alpha = 0.4)
+  geom_density(fill = "green", alpha = 0.1)
 
 summary(cars)
 ```
@@ -439,7 +542,8 @@ Now we have a nice scatterplot. This function uses the inherited data, the inher
 
 ```{r}
 base_and_aesthetics = ggplot(cars, aes(x = Horsepower, y = Price))
-base_and_aesthetics + geom_point(col = "red", fill = "green", shape = 23, size = 3, alpha = 0.3)
+base_and_aesthetics + 
+  geom_point(col = "red", fill = "green", shape = 23, size = 3, alpha = 0.3)
 ```
 
 Let's handle names of axes, title and ranges:
@@ -476,8 +580,8 @@ We can do the same to the y axis:
 ```{r}
 base_and_aesthetics_with_titles +
   geom_point() +
-  scale_y_continuous(trans = "log10")
-  scale_x_continuous(trans = "log10", breaks = round(seq(0, max(cars$Horsepower), length.out = 6)))
+  scale_y_continuous(trans = "log10")+
+  scale_x_continuous(trans = "log10")
 ```
 
 Let's look at some more geometries.
@@ -687,330 +791,3 @@ loadfonts(device="win")
 
 graphics_obj + theme_xkcd()
 ```
-
-# C++ and R
-
-R goes back to 1995 when it was adapted from S (written in 1976 by John Chambers at Bell Labs) with minor modifications. The core of base R is written in C and Fortran. These two languages are the fastest known languages (how to measure "fastest" is a huge debate). Thus, base R is very fast. For instance the `sort` function is as fast as C/Fortran since it immediately calls compiled C/Fortran routines.
-
-However, R code itself that you write is "interpreted" which means it is not compiled until you run it. And it has to compile on-the-fly, making it very slow. Prior to v3.4 (April, 2017) it was even slower since the code wasn't JIT compiled. All this "real CS" stuff you can learn in another class..
-
-One notable place to observe this slowness relative to other languages is in looping. For example:
-
-
-```{r}
-f = function(){
-  SIZE = 1e7
-  v = array(NA, SIZE)
-  for (i in 1 : SIZE){
-    v[i] = i
-  }
-  v
-}
-
-v = f()
-```
-
-How long does this take?
-
-```{r}
-# install.packages("Rcpp")
-pacman::p_load_current_gh("hadley/lineprof")
-lineprof(f())
-
-system.time({
-  f()
-})
-#on my office computer for SIZE = 10,000,000:
-# user  system elapsed 
-# 7.13    0.20    7.35 
-```
-
-Take a simple function that computes square roots on each element:
-
-```{r}
-sqrt_vector = function(v){
-  v_new = array(NA, length(v))
-  for (i in 1 : length(v)){
-    v_new[i] = sqrt(v[i])
-  }
-  v_new
-}
-
-system.time({
-  sqrt_vector(v)
-})
-```
-
-Does the apply function help?
-
-```{r}
-system.time({
-  apply(v, MARGIN = 1, FUN = sqrt)
-})
-```
-
-Strange that this takes so long? So it doesn't help... it hurts.
-
-How much faster in C++ should this be?
-
-Enter the `Rcpp` package - a way to compile little bits (or lotta bits) of C++ on the fly.
-
-```{r}
-pacman::p_load(Rcpp)
-```
-
-
-Let's write this for loop function to sqrt-ize and compile it and then save it into our namespace to be called like a regular function.
-
-```{r}
-cppFunction('
-  NumericVector sqrt_vector_cpp(NumericVector v) {
-    int n = v.size();
-    NumericVector v_new(n);
-    for (int i = 0; i < n; i++) { //indices from 0...n-1 not 1...n!
-      v_new[i] = sqrt(v[i]);
-    }
-    return v_new;
-  }
-')
-```
-
-What do these two functions look like?
-
-```{r}
-sqrt_vector
-sqrt_vector_cpp
-```
-
-One shows the R code and then says it is bytecode-compiled (go to an advanced CS class). The other just says we `.Call` some C++ function in a certain address and the argument to be inputted.
-
-What is the gain in runtime?
-
-```{r}
-system.time({
-  sqrt_vector_cpp(v)
-})
-```
-
-WOW. 10x!!! Can't beat that with a stick...
-
-Let's do a not-so-contrived example...
-
-Matrix distance... Let's compute the distances of all pairs of rows in a dataset. I will try to code the R as efficiently as possible by using vector subtraction so there is only two for loops. The C++ function will have an additional loop to iterate over the features in the observations.
-
-```{r}
-#a subset of the diamonds data
-X_diamonds = as.matrix(ggplot2::diamonds[1 : 3000, c("carat", "depth", "table", "x", "y", "z")])
-
-compute_distance_matrix = function(X){
-  n = nrow(X)
-  D = matrix(NA, n, n)
-  for (i_1 in 1 : (n - 1)){
-    for (i_2 in (i_1 + 1) : n){
-      D[i_1, i_2] = sqrt(sum((X[i_1, ] - X[i_2, ])^2))
-    }
-  }
-  D
-}
-
-cppFunction('
-  NumericMatrix compute_distance_matrix_cpp(NumericMatrix X) {
-    int n = X.nrow();
-    int p = X.ncol();
-    NumericMatrix D(n, n);
-    std::fill(D.begin(), D.end(), NA_REAL);
-
-    for (int i_1 = 0; i_1 < (n - 1); i_1++){
-      //Rcout << "computing for row #: " << (i_1 + 1) << "\\n";
-      for (int i_2 = i_1 + 1; i_2 < n; i_2++){
-        double sqd_diff = 0;
-        for (int j = 0; j < p; j++){
-          sqd_diff += pow(X(i_1, j) - X(i_2, j), 2); //by default the cmath library in std is loaded
-        }
-        D(i_1, i_2) = sqrt(sqd_diff); //by default the cmath library in std is loaded
-      }
-    }
-    return D;
-  }
-')
-```
-
-```{r}
-system.time({
-  D = compute_distance_matrix(X_diamonds)
-})
-round(D[1 : 5, 1 : 5], 2)
-```
-
-Slow...
-
-```{r}
-system.time({
-  D = compute_distance_matrix_cpp(X_diamonds)
-})
-round(D[1 : 5, 1 : 5], 2)
-```
-
-Absolutely lightning... 100x faster on my laptop than R's runtime.
-
-Writing functions as strings that compile is annoying. It is better to have separate files. For instance...
-
-```{r}
-sourceCpp("distance_matrix.cpp")
-```
-
-Here are a list of the data structures in Rcpp: https://teuder.github.io/rcpp4everyone_en/070_data_types.html#vector-and-matrix
-
-Another place where C++ pays the rent is recursion. Here is a quicksort implementation in R taken from 
-
-```{r}
-quicksort_R <- function(arr) {
-  # Pick a number at random.
-  mid <- sample(arr, 1)
-
-  # Place-holders for left and right values.
-  left <- c()
-  right <- c()
-  
-  # Move all the smaller values to the left, bigger values to the right.
-  lapply(arr[arr != mid], function(d) {
-    if (d < mid) {
-      left <<- c(left, d)
-    }
-    else {
-      right <<- c(right, d)
-    }
-  })
-  
-  if (length(left) > 1) {
-    left <- quicksort_R(left)
-  }
-  
-  if (length(right) > 1) {
-    right <- quicksort_R(right)
-  }
-  
-  # Finally, return the sorted values.
-  c(left, mid, right)
-}
-```
-
-Let's create a random array to test these sorts on:
-
-```{r}
-n = 5e5
-x = rnorm(n)
-```
-
-
-Let's profile the pure R sort function:
-
-```{r}
-system.time({
-  x_sorted_pure_R = quicksort_R(x)
-})
-```
-
-Let's profile R's `sort` function.
-
-```{r}
-system.time({
-  x_sorted_base_R = sort(x)
-})
-```
-
-Let's just ensure our method worked...
-
-```{r}
-pacman::p_load(testthat)
-expect_equal(x_sorted_pure_R, x_sorted_base_R)
-```
-
-Basically infinitely faster. Let's make our own C++ implementation.
-
-```{r}
-sourceCpp("quicksort.cpp")
-```
-
-and profile it:
-
-```{r}
-system.time({
-  x_sorted_cpp = quicksort_cpp(x)
-})
-```
-
-Let's just ensure this method worked...
-
-```{r}
-pacman::p_load(testthat)
-expect_equal(x_sorted_cpp, x_sorted_base_R)
-```
-
-Why is our C++ slower than `sort`. Because `sort` is also in C++ or Fortran and it's been likely optimized and reoptimized up to wazoo for decades. Also, Rcpp's data structures may be slower than base R's data structures. There may be some speed lost to translating to `NumericVector` from `double[]` or something like that.
-
-Can you call R from Rcpp? You bet:
-
-```{r}
-cppFunction('
-  NumericVector rnorm_cpp_R(int n, double mean, double sd){
-      // get a pointer to R\'s rnorm() function
-      Function f("rnorm");   
-  
-      // Next code is interpreted as rnorm(n, mean, sd)
-      return f(n, Named("sd")=sd, _["mean"]=mean);
-  }
-')
-
-rnorm_cpp_R(5, 1, .01)
-```
-
-A few math functions are implemented for you already:
-
-```{r}
-evalCpp('R::qnorm(0.5, 0, 1, 1, 0)')
-```
-
-Further, there are many common functions that are already wrapped for you via "Rcpp-sugar" which was the Rcpp's author's attempt to make Rcpp a whole lot easier, see [here](http://dirk.eddelbuettel.com/code/rcpp/Rcpp-sugar.pdf).
-
-```{r}
-evalCpp('rnorm(10, 100, 3)')
-```
-
-If you want blazing fast linear algebra, check out package `RcppArmadillo` which is a wrapper around Apache's Armadillo (namespace is "arma" in the code), an optimized linear algebra package in C++. Here is an example taken from [here](https://scholar.princeton.edu/sites/default/files/q-aps/files/slides_day4_am.pdf):
-
-```{r}
-pacman::p_load(RcppArmadillo, microbenchmark, testthat)
-
-cppFunction('
-  arma::mat ols_cpp(arma::mat X, arma::mat y){
-    arma::mat Xt = X.t();
-    return solve(Xt * X, Xt * y);
-  }
-', depends = "RcppArmadillo")
-
-n = 500
-D = data.frame(int = rep(1, n), x1 = rnorm(n), x2 = rnorm(n), x3 = rnorm(n), y = rnorm(n))
-X = as.matrix(D[, 1 : 4])
-y = as.matrix(D[, 5])
-
-#does the function work?
-expect_equal(as.numeric(ols_cpp(X, y)), as.numeric(solve(t(X) %*% X) %*% t(X) %*% y))
-
-microbenchmark(
-  R_via_lm = lm(y ~ 0 + ., data = D),
-  R_matrix_multiplication = solve(t(X) %*% X) %*% t(X) %*% y,
-  cpp = ols_cpp(X, y),
-    times = 100
-)
-```
-
-About 4x faster than R's optimized linear algebra routines. Supposedly it can go even faster if you enable parallelization within Armadillo. I couldn't get that demo to work.
-
-Here are the places where Rcpp should be used (from https://teuder.github.io/rcpp4everyone_en/010_Rcpp_merit.html)
-
-* Loop operations in which later iterations depend on previous iterations.
-* Accessing each element of a vector/matrix.
-* Recurrent function calls within loops.
-* Changing the size of vectors dynamically.
-* Operations that need advanced data structures and algorithms (we don't do this in this class).
