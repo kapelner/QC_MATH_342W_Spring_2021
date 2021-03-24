@@ -6,6 +6,7 @@ This is the course homepage for Math 342W (and Masters level 650.4) at Queens Co
 
 My lectures can be listened to as youtube tracks and lecture notes are also scanned in as PDF files contributed by students and myself.
 
+* Review 1 video on slack [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/review1.pdf)
 * Lecture 15 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec15.Rmd)
 * Lecture 14 video on slack
