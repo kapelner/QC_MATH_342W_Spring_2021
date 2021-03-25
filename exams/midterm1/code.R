@@ -15,7 +15,7 @@ y[sample(1 : n, num_diff)] = rbinom(num_diff, 1, 0.5)
 y[x_3 & x_4] = NA
 table(y)
 
-df= na.omit(data.frame(x_1 = x_1, x_2 = x_2, y = as.factor(y)))
+df = na.omit(data.frame(x_1 = x_1, x_2 = x_2, y = as.factor(y)))
 ggplot(df) + 
   geom_point(aes(x = x_1, y = x_2, col = y, shape = y), lwd = 3) #+ ylim(0, 5)
 
@@ -28,10 +28,11 @@ n = 2000
 x_1 = runif(n, 0, 2)
 y1 = 2 * sin(x_1 * 2 * pi) #+ 
 y2 = 1 * sin(10 * 2 * pi * x_1) #+ rnorm(n, 0, 0.2)
-ggplot(data.frame(x = x_1, y1 = y1, y2 = y2, y3 = y1+y2)) + 
-  geom_point(aes(x = x, y = y3)) + ylab("y") #+ 
-  geom_point(aes(x = x, y = y2), col = "red") +
-  geom_point(aes(x = x, y = y1), col = "blue")
+base = ggplot(data.frame(x = x_1, y1 = y1, y2 = y2, y3 = y1+y2)) +
+  aes(x = x, y = y3) +
+  geom_point() + ylab("y")
+base
+base + geom_smooth(method = "lm")
 
 
 #Problem 12
