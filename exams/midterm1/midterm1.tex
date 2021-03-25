@@ -1,0 +1,552 @@
+%\documentclass[12pt]{article}
+\documentclass[12pt,landscape]{article}
+
+
+\include{preamble}
+
+\newcommand{\instr}{\small Your answer will consist of a lowercase string (e.g. \texttt{aebgd}) where the order of the letters does not matter. \normalsize}
+
+\title{Math 342W / 650 Fall \the\year{} \\ Midterm Examination One}
+\author{Professor Adam Kapelner}
+
+\date{Thursday, March 25, \the\year{}}
+
+\begin{document}
+\maketitle
+
+%\noindent Full Name \line(1,0){410}
+
+\thispagestyle{empty}
+
+\section*{Code of Academic Integrity}
+
+\footnotesize
+Since the college is an academic community, its fundamental purpose is the pursuit of knowledge. Essential to the success of this educational mission is a commitment to the principles of academic integrity. Every member of the college community is responsible for upholding the highest standards of honesty at all times. Students, as members of the community, are also responsible for adhering to the principles and spirit of the following Code of Academic Integrity.
+
+Activities that have the effect or intention of interfering with education, pursuit of knowledge, or fair evaluation of a student's performance are prohibited. Examples of such activities include but are not limited to the following definitions:
+
+\paragraph{Cheating} Using or attempting to use unauthorized assistance, material, or study aids in examinations or other academic work or preventing, or attempting to prevent, another from using authorized assistance, material, or study aids. Example: using an unauthorized cheat sheet in a quiz or exam, altering a graded exam and resubmitting it for a better grade, etc.
+\\
+
+\noindent By taking this exam, you acknowledge and agree to uphold this Code of Academic Integrity. \\
+
+%\begin{center}
+%\line(1,0){250} ~~~ \line(1,0){100}\\
+%~~~~~~~~~~~~~~~~~~~~~signature~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ date
+%\end{center}
+
+\normalsize
+
+\section*{Instructions}
+This exam is 100 minutes (variable time per question) and closed-book. You are allowed \textbf{two} 8.5 $\times$ 11'' pages (front and back) of a \qu{cheat sheet}, blank scrap paper and a graphing calculator. Please read the questions carefully. No food is allowed, only drinks. %If the question reads \qu{compute,} this means the solution will be a number otherwise you can leave the answer in \textit{any} widely accepted mathematical notation which could be resolved to an exact or approximate number with the use of a computer. I advise you to skip problems marked \qu{[Extra Credit]} until you have finished the other questions on the exam, then loop back and plug in all the holes. I also advise you to use pencil. The exam is 100 points total plus extra credit. Partial credit will be granted for incomplete answers on most of the questions. \fbox{Box} in your final answers. Good luck!
+
+\pagebreak
+
+\problem\timedsection{8} George Box and Norman Draper in 1987 wrote \qu{All models are wrong but some are useful}. Below are some conceptual questions about this aphorism and modeling in general.
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{12} 
+
+\begin{enumerate}[(a)]
+\item \qu{models are wrong} since their predictions are not exactly equal to the measurements.
+\item In the quote, \qu{models are wrong} since they are approximations.
+\item In the quote, \qu{models are wrong} since they can never be validated.
+\item In the quote, \qu{models are wrong} since they cannot be learned from data.
+\item In the quote, \qu{models are wrong} since some are non-mathematical.
+\item In the quote, \qu{models are wrong} since the prediction target is not well-defined.
+\item In the quote, \qu{some [models] are useful} since they can be validated.
+\item In the quote, \qu{some [models] are useful} since they can be learned from data.
+\item In the quote, \qu{some [models] are useful} since their predictions are \qu{good enough} (where the builder of the model must define exactly what \qu{good enough} means).
+\item In the quote, \qu{some [models] are useful} because they use precise measurements.
+\item In the quote, \qu{some [models] are useful} because they are better to use than a naive guess of what the phenomenon will be in a given setting.
+\item In the quote, \qu{some [models] are useful} because they can perform both regression and binary classification simultaneously.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{7} We examine the famous aphorism \qu{absence makes the heart grow fonder} as $g$, a model for reality. In case you aren't a poet, \qu{fonder} means \qu{more in love}.
+
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{11} 
+
+\begin{enumerate}[(a)]
+\item There is one target of prediction, $y$: the degree of the heart's fondness.
+\item There is one setting, $x$: the amount of absence.
+\item The model as stated is mathematical. 
+\item Comparing a binary metric for the degree of the heart's fondness is to a continuous metric for the degree of the heart's fondness, the more accurate metric for the degree of the heart's fondness is continuous.
+\item The most accurate reading of the aphorism indicates that absence is a binary metric.
+\item The most accurate reading of the aphorism indicates that absence is a continuous metric.
+\item This aphorism describes to the reader all of the $z$'s.
+\item $\delta$ will be very large relative to $f$.
+\item $g$ is monotonic.
+\item $f$ is monotonic.
+\item After establishing metrics and their means of measurement, a mathematical model can be learned from data.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{13} Consider a dataset of $n$ observations. 
+
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{18} ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~Let $\mathcal{X} = \reals$, $\mathcal{Y} = \braces{0,1}$ and the dataset has $n$ unique values of $x$.
+\vspace{-0.1cm}
+\begin{enumerate}[(a)]
+\item Modeling $y$ is called a \qu{binary classification} problem.
+\item $f$ must be monotonic.
+\item $g$ must be monotonic.
+\item $\mathcal{H} = \braces{w x : w \in \reals}$ is a reasonable model candidate set.
+\item $\mathcal{H} = \braces{w_0 + w_1 x : w_0, w_1 \in \reals}$ is a reasonable model candidate set.
+\item $g_0$ is the sample mode of all $y$ observations.
+\item Any model $g$ will have nonzero $\delta$.
+\item This model is likely to have estimation error.
+\item A reasonable error metric for this model is misclassification error.
+\item A reasonable error metric for this model is hinge error.
+\end{enumerate}
+
+For the remaining questions in this problem, let $\mathcal{Y} = \reals$, $\mathcal{X} = \braces{0,1}$ and the dataset has $n$ unique values of $y$.
+
+\begin{enumerate}[(a)]
+\setcounter{enumi}{10}
+\item $\mathcal{H} = \braces{w x : w \in \reals}$ is reasonable regardless of $\mathcal{A}$.
+\item $\mathcal{H} = \braces{w_0 + w_1 x : w_0, w_1 \in \reals}$ is reasonable regardless of $\mathcal{A}$.
+\item $g_0$ is the sample mode of all $y$ observations.
+\item $g$ must be of the form $g(x) = a$ if $x = 0$ and $g(x) = b$ if $x=1$ where $a,b \in \reals$.
+\item Any model $g$ will have nonzero $\delta$.
+\item Any model $g$ will have two parameters (i.e. two degrees of freedom).
+\item To decrease misspecification error, we can collect more data ($n$ increases).
+\item A reasonable error metric for this model is hinge error.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{5} $\mathbb{D}$ is illustrated below:
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width = 6in]{binary.pdf}
+\end{figure}
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{7} 
+
+\begin{enumerate}[(a)]
+\item Modeling $y$ is called a \qu{binary classification} problem.
+\item $p_{raw}=2$
+\item $p_{raw}=3$
+\item The dataset is \qu{linearly separable}.
+\item The perceptron algorithm uses a default $\mathcal{H} = \braces{\indic{w_0 ~+~ w_1 x ~+~ w_2 x_2~\geq~0}: w_0, w_1, w_2 \in \reals}$
+\item The perceptron algorithm with the default $\mathcal{H}$ run with a max number of iterations of $3,000$ will converge.
+\item The perceptron algorithm with the default $\mathcal{H}$ run with a max number of iterations of $3,000$ will provide a $g$ that can be used for prediction.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{8} \ingray{$\mathbb{D}$ is illustrated below} and now consider $\mathcal{H}_{new} = \braces{\indic{[1~x_1~x_1^2~x_2~x_2^2]^\top \w~ \geq~ 0}: \w\in \reals^5}$. $\mathbb{D}$ has $n=1000$ with 672 observations where $y=0$. 
+
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width = 6in]{binary.pdf}
+\end{figure}
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{7} 
+
+\begin{enumerate}[(a)]
+\item In contrast to the default $\mathcal{H}$, $\mathcal{H}_{new}$ now includes polynomial transformations.
+\item $f \in \mathcal{H}_{new}$.
+\item Under $\mathcal{H}_{new}$, we have $g_0(x_1,x_2) = 0$.
+\item A maximum-margin hyperplane model algorithm using $\mathcal{H}_{new}$ will converge to a solution for the five parameters $\w$.
+\item Minimizing the objective function $AHE + \lambda || \w ||^2$ where AHE is average hinge error for the five parameters $\w$ will converge to a solution.
+\item Minimizing the objective function $AHE + \lambda|| [w_1~w_2~w_3~w_4] ||^2$ where AHE denotes the average hinge error for the five parameters $\w$ will converge to a solution.
+\item The value of $\lambda$ in (e) and (f) is  specified before the model is fit.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{5} \ingray{$\mathbb{D}$ is illustrated below and now consider $\mathcal{H}_{new} = \braces{\indic{[1~x_1~x_1^2~x_2~x_2^2]^\top \w~ \geq~ 0}: \w\in \reals^5}$. $\mathbb{D}$ has $n=1000$ with 672 observations where $y=0$. } 
+
+\vspace{-0.4cm}
+\begin{figure}[htp]
+\centering
+\includegraphics[width = 6in]{binary.pdf}\vspace{-0.4cm}
+\end{figure}
+
+\vspace{-0.4cm}\benum\truefalsesubquestionwithpoints{5} 
+
+Consider the situation where you remove the points from $\mathbb{D}$ that would allow for separability using a model from $\mathcal{H}_{new}$, fit a maximum margin hyperplane $g$, then add those points back into $\mathbb{D}$.
+
+Note: only one of (a), (b), (c) is true.
+
+\begin{enumerate}[(a)]
+\item The order of magnitude of the average hinge error in $\mathbb{D}$ for $g$ is $10^{-1}$ in units of $y$.
+\item The order of magnitude of the average hinge error in $\mathbb{D}$ for $g$ is $10^{-2}$ in units of $y$.
+\item The order of magnitude of the average hinge error in $\mathbb{D}$ for $g$ is $10^{-3}$ in units of $y$.
+%\item If this model were to be validated using one holdout test set which is 20\% of $n$, there will be large variance in the out-of-sample misclassification error among many unique training-test splits.
+\item If $K$-fold cross validation were employed where $K=10$, the out of sample misclassification error will be $\approx$ 0.5\%.
+\item If $K$-fold cross validation were employed where $K=5$, the out of sample misclassification error will be $\approx$ 0.5\%.
+\end{enumerate}
+
+%Now for the rest of the questions, fit $g$ using the KNN algorithm where $K=10$.
+%
+%\begin{enumerate}[(a)]
+%\setcounter{enumi}{3}
+%\item 
+%\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{6} $\mathbb{D}$ is illustrated below. $\mathbb{D}$ has $n=1000$ with 672 observations where $y=0$. We now fit $g$ using the KNN algorithm with the default distance metric.
+
+%\vspace{-0.4cm}
+\begin{figure}[htp]
+\centering
+\includegraphics[width = 6in]{binary.pdf}\vspace{-0.4cm}
+\end{figure}
+
+\benum\truefalsesubquestionwithpoints{6}
+
+\begin{enumerate}[(a)]
+\item If $K$ in the KNN algorithm was set to be 1, then there would be zero in-sample misclassification error.
+\item If $K$ in the KNN algorithm was set to be 1, then there would be zero out-of-sample misclassification error.
+\item If $K$ in the KNN algorithm was set to be 7, then there would be zero in-sample misclassification error.
+\item If $K$ in the KNN algorithm was set to be 1, then $g(0.5, 0.5) = 0$.
+\item If $K$ in the KNN algorithm was set to be 1, then $g(2, 0.13) = 0$.
+\item If $K$ in the KNN algorithm was set to be 100, then $g(2, 0.13) = 0$.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{8} Let the random variable $X$ and $Y$ be the models that realized the rows in $\mathbb{D}$. An $n=2,000$ example $\mathbb{D}$ is housed in an \texttt{R} \texttt{data.frame} object called \texttt{Xy}. Below is a plot of this data frame.
+
+%\vspace{-0.4cm}
+\begin{figure}[htp]
+\centering
+\includegraphics[width = 9in]{sine.pdf}\vspace{-0.4cm}
+\end{figure}
+
+\benum\truefalsesubquestionwithpoints{8}
+
+\begin{enumerate}[(a)]
+\item $X$ are $Y$ are correlated.
+\item $X$ are $Y$ are associated.
+\item Running \texttt{cov(Xy\$x, Xy\$y)} in \texttt{R} would return zero.
+\item Running \texttt{coef(lm(y $\sim$ x))} in \texttt{R} would return a vector of dimension two where the values are both near zero.
+\item The model produced by \texttt{lm(y $\sim$ x)} in \texttt{R} suffers mostly from misspecification error.
+\item A linear polynomial model of degree 5 would produce a model with lower out of sample error than the model produced by \texttt{lm(y $\sim$ x)} in \texttt{R}.
+\item A linear polynomial model of degree 5 has risky predictive performance when extrapolating.
+\item It is reasonable to believe that $z \approx x$ and that $t \approx f$ in this case (at least within $\mathcal{X} = \bracks{0,2}$).
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{14} Let $\X = \bracks{\x_{\cdot 0}~|~\x_{\cdot 1}~|~\ldots~|~\x_{\cdot p}} \in \reals^{n \times (p +1)}$, $\rank{\X} = p + 1$, let $\x_i$ denote the $i$th row of the matrix $\X$ and $\y \in \reals^n$. Your modeling task is to model the response using the $n$ observations. All notation is standard from class and we consider:
+
+\beqn
+%\H &=& \XXtXinvXt \\
+\mathcal{H} &=& \braces{\w^\top \x : \w \in \reals^{p+1}} \\
+%h^*(\x) &=& \x\bbeta \\
+\b &=& \displaystyle\argmin_{\w \in \reals^{p + 1}}\braces{(\y - \X\w)^\top (\y - \X\w)} \\
+\hat{y}_i &=& g(\x_i) = \x_i \b
+\eeqn
+
+\benum\truefalsesubquestionwithpoints{15}
+
+\begin{enumerate}[(a)]
+\item The algorithm $\mathcal{A}$ that returns $g$ minimizes $\sum_{i=1}^n e_i^2$.
+\item The algorithm $\mathcal{A}$ that returns $g$ minimizes $\sum_{i=1}^n \mathcal{E}_i^2$.
+\item The algorithm $\mathcal{A}$ that returns $g$ is called \qu{ordinary least squares} (OLS) regression if $\x_{\cdot 0} = \onevec_n$.
+\item The vector $\yhat := \bracks{\hat{y}_1, \ldots, \hat{y}_n}^\top$ is in the span of the columns of $\X$.
+\item If $p$ is substantially less than $n$, there would be no overfitting in this model.
+\item SST = SSR + SSE
+\item If $p=n-1$, then $R^2 = 1$.
+\item This algorithm can accomodate additional columns in $\X$ that are log transformations of original columns in $\x$.
+\item $\rank{\H} = p+1$
+\item $\rank{\H\X} = n$
+\item $\H\Q = \X$
+\item $\colsp{\H} = \colsp{\Q}$
+\item If $\exists j$ such that $\y = \x_{\cdot j}$, then MSE = 0.
+\item $\exists \w \in \mathcal{H}$ where $\w \neq \b$ and this $\w$ provides a higher RMSE.
+\item Consider $\A$, an $n \times (2p+2)$ matrix of $\X$ and $\Q$ column-binded together. $\A$ is full rank.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{7} \ingray{Let $\X = \bracks{\x_{\cdot 0}~|~\x_{\cdot 1}~|~\ldots~|~\x_{\cdot p}} \in \reals^{n \times (p +1)}$, $\rank{\X} = p + 1$, let $\x_i$ denote the $i$th row of the matrix $\X$ and $\y \in \reals^n$. Your modeling task is to model the response using the $n$ observations. All notation is standard from class and we consider:}
+
+\beqn
+%\H &=& \XXtXinvXt \\
+\ingray{\mathcal{H}} &\ingray{=}& \ingray{\braces{\w^\top \x : \w \in \reals^{p+1}}} \\
+%h^*(\x) &=& \x\bbeta \\
+\b &=& \displaystyle\argmin_{\w \in \reals^{p + 1}}\braces{|\y - \X\w|^\top \onevec_n} \\
+\ingray{\hat{y}_i} &\ingray{=}& \ingray{g(\x_i) = \x_i \b}
+\eeqn
+
+\benum\truefalsesubquestionwithpoints{9}
+
+\begin{enumerate}[(a)]
+\item The algorithm $\mathcal{A}$ that returns $g$ minimizes $\sum_{i=1}^n e_i^2$.
+\item The algorithm $\mathcal{A}$ that returns $g$ minimizes $\sum_{i=1}^n \mathcal{E}_i^2$.
+\item The algorithm $\mathcal{A}$ that returns $g$ is called \qu{ordinary least squares} (OLS) regression if $\x_{\cdot 0} = \onevec_n$.
+\item The vector $\yhat := \bracks{\hat{y}_1, \ldots, \hat{y}_n}^\top$ is in the span of the columns of $\X$.
+\item If $p$ is substantially less than $n$, there would be no overfitting in this model.
+\item SST = SSR + SSE
+\item If $p=n-1$, then $R^2 = 1$.
+\item This algorithm can accomodate additional columns in $\X$ that are log transformations of original columns in $\x$.
+\item This algorithm can accomodate additional columns in $\X$ that are first-order interaction transformations of original columns in $\x$.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{8} Consider a continuous response fit by OLS. During lecture we illustrated in-sample $s_e$ and out-of-sample $s_e$ as a function of \qu{model complexity} for a given dataset of size $n$ with $p_{raw} < n$ features. Below are questions related to this illustration. The quantity $K$ is the value that controls the size of the train-test split setting as we discussed in class.
+
+\benum\truefalsesubquestionwithpoints{7}
+
+\begin{enumerate}[(a)]
+\item In-sample $s_e$ converges to zero as the number of features increases to $n$.
+\item Logging $y$ and rerunning the model will not change the in-sample $s_e$ curve.
+\item Out-of-sample $s_e$ is an honest metric of future performance for any valid $K$.
+\item Out-of-sample $s_e$ is always smaller (for any degree of model complexity) if we employ $K$-fold CV.
+\item The out-of-sample $s_e$ curve is smoother if we employ $K$-fold CV if compared to not performing $K$-fold CV.
+\item If you were to begin with $p_{raw}$ features and then add columns consisting of random noise until there are a total of $n$ columns, the minimum of the out-of-sample $s_e$ curve would be expected at the model built with only the $p_{raw}$ features.
+\item If the minimum of the out-of-sample $s_e$ curve is at a $p$ much larger than $p_{raw}$, this means the additional $p - p_{raw}$ features allowed the OLS algorithm to fit non-linearities and/or interactions among the features.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{11} Consider the following four models in \texttt{R}:
+
+\begin{lstlisting}[basicstyle=\normalsize]
+> mod1 = lm(medv ~ log(tax) + poly(rm, 2) + poly(zn, 2) + poly(nox, 2), MASS::Boston)
+> mod2 = lm(medv ~ ., MASS::Boston)
+> mod3 = lm(medv ~ . * rm, MASS::Boston)
+> mod4 = lm(medv ~ . * rm + poly(rm, 2) + poly(zn, 2) + poly(nox, 2), MASS::Boston)
+\end{lstlisting}
+\vspace{-0.75cm}
+
+\noindent Recall that \texttt{medv} is the response, a continuous metric that measures average price in \$1,000's; \texttt{rm} is a continuous metric that measures the average number of rooms in the houses and it ranges between 3.56 and 8.78; and \texttt{chas} is a dummy variable indicating whether the property is on the Charles River or not.
+\benum\truefalsesubquestionwithpoints{11}
+
+\begin{enumerate}[(a)]
+\item For model 1, you can say \texttt{medv} increases by $b_1$ times a proportion change in \texttt{tax}.
+\item Model 1 can fit a non-linear monotonic relationship in \text{rm} for the input space of \text{rm}.
+\item Model 1 can fit a non-linear monotonic relationship in \text{rm} for all values in $\reals$.
+\item The model matrix for model 1 will include a column for the raw values of \text{rm} and a transformed column that takes these raw values and squares them element-wise.
+\item Model 2 has a higher $R^2$ than model 1.
+\item Model 3 has a higher $R^2$ than model 2.
+\item Model 4 has a higher $R^2$ than model 3.
+\item Model 2 has a higher oos $R^2$ than model 1.
+\item Model 3 has a higher oos $R^2$ than model 2.
+\item Model 4 has a higher oos $R^2$ than model 3.
+\item Within $\b$ in model 3, the 18th element is named \texttt{chas:rm} and has a value of -1.643. You can interpret this slope coefficient as follows: as the number of rooms increments (i.e. \texttt{rm} increases by 1), the response \texttt{medv} is predicted to decrease by \$1,643.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+
+
+\end{document}
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{7} These are conceptual questions about statistical inference in the Bayesian and Frequentist perspectives.
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{10} 
+
+\begin{enumerate}[(a)]
+\item The goal of point estimation is to find an approximation of the true value of $\theta$.
+\item The goal of theory testing is to find an approximation of the true value of $\theta$.
+\item The goal of statistical inference (in general) is to learn the true values of $\xoneton$.
+\item A parametric model $\mathcal{F}$ must be assumed to do statistical inference using the Frequentist perspective.
+\item A parametric model $\mathcal{F}$ must be assumed to do statistical inference using the Bayesian perspective.
+\item The data $\xoneton$ cannot be collected without assuming an $\mathcal{F}$.
+\item To compute the value of the likelihood for the data $\xoneton$, you must assume an $\mathcal{F}$.
+%\item The assumption of an $\mathcal{F}$ implies a set $\Theta$.
+\item In the Frequentist perspective, $\prob{\theta}$ is degenerate.
+\item In the Bayesian perspective, you can only do inference if the data is realized from $\iid$ random variables.
+\item In the Bayesian perspective, to compute the posterior, you must assume $\mathcal{F}$ and $\prob{\theta}$.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+\problem\timedsection{9} Assume $\Xoneton \iid p(x; \theta)$, a discrete rv with support $\mathcal{X}$ and parameter space $\Theta$ and $p(\theta)$ is the PMF for a rv with support $\Theta$.
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{14} 
+
+\begin{enumerate}[(a)]
+\item $p(\xoneton; \theta) = p(x_1; \theta)\cdot p(x_2; \theta) \cdot \ldots \cdot p(x_n; \theta)$
+\item $\mathcal{L}(\theta; \xoneton) = \mathcal{L}(\theta; x_1) \cdot \mathcal{L}(\theta; x_2) \cdot \ldots \cdot \mathcal{L}(\theta; x_n)$
+\item $\ell(\theta; \xoneton) = \ell(\theta; x_1) \cdot \ell(\theta; x_2) \cdot \ldots \cdot \ell(\theta; x_n)$\item You can compute the maximum likelihood estimate by setting $\sum_{i=1}^n \displaystyle \frac{d\ell(\theta;x_i) }{d\theta} = 0$ and solving for $\theta$.
+\item You can compute the maximum likelihood estimate by setting $\sum_{i=1}^n \displaystyle \frac{d\ell(\theta;x_i) }{dx_i} = 0$ and solving for $\theta$.
+\item If $n$ is large, the maximum likelihood estimator is approximately normally distributed.
+\item $\sum_{x \in \mathcal{X}} p(x; \theta) = 1$.
+\item $\sum_{x \in \mathcal{X}} p(\theta; x) = 1$.
+\item $\sum_{x \in \mathcal{X}} p(x) = 1$.
+\item $\sum_{x \in \mathcal{X}} p(\theta) = 1$.
+\item $\sum_{\theta \in \Theta} p(x; \theta) = 1$.
+\item $\sum_{\theta \in \Theta} p(\theta; x) = 1$.
+\item $\sum_{\theta \in \Theta} p(x) = 1$.
+\item $\sum_{\theta \in \Theta} p(\theta) = 1$.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{9} Consider a rv $X$ with parameter space $\Theta$. Below is an illustration of the universe of all values of $x$ and $\theta$ drawn to-scale. The values inside the boxes are values of $x \in \support{X}$ and the values in the right margin are the values of $\theta \in \Theta$.
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width = 6.5in]{x_theta_space.pdf}
+\end{figure}
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{9} 
+
+\begin{enumerate}[(a)]
+\item $X$ is a discrete rv.
+\item $\Theta$ is discrete.
+\item If you add up the areas of all the boxes above, you will get 100\%.
+\item The prior was created using the principle of indifference.
+\item $\prob{X = 1, \theta = 1} > \prob{X = 1, \theta = 3}$.
+\item $\cprob{X = 1}{\theta = 1} > \cprob{X = 1}{\theta = 3}$.
+\item $\cprob{\theta = 1}{X = 3}$ can be computed by taking the yellow area and dividing by the sum of the yellow area, purple area and green area.
+\item $\cprob{\theta = 3}{X = 1}$ can be computed by taking the blue area and dividing by the sum of the blue area, red area and green area.
+\item $\cprob{\theta = 1}{X = 1}$ can be computed by taking the green area and dividing by the sum of the green area, purple area and yellow area.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{8} Assume $X_1, X_2, X_3, X_4 \iid \text{Bernoulli}(\theta)$ and $x_1 = 0, x_2 = 0, x_3 = 0, x_4 = 0$. For inference performed from the Bayesian perspective, assume Laplace's prior of indifference.
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{7} 
+
+\begin{enumerate}[(a)]
+\item The maximum likelihood estimate of $\theta$ is $\xbar$.
+\item The maximum likelihood estimate of $\theta$ is $\half$.
+\item The maximum likelihood estimate of $\theta$ is 0.
+\item $CI_{\theta, 90\%} = \braces{0}$.
+\item $CI_{\theta, 100\%} = \reals$.
+\item A frequentist hypothesis test of $H_a: \theta \neq 0.01$ at significance level 0.01 has a retainment region of  $\braces{0}$.
+\item A frequentist hypothesis test of $H_a: \theta \neq 0.01$ at significance level 0.01 will result in a rejection of $H_0$.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{11} Assume $X_1, X_2, X_3, X_4 \iid \text{Bernoulli}(\theta)$ and $x_1 = 0, x_2 = 0, x_3 = 0, x_4 = 0$. For inference performed from the Bayesian perspective, assume Laplace's prior of indifference.
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{16} 
+
+\begin{enumerate}[(a)]
+\item The posterior after seeing only $x_1$ is $\cprob{\theta}{x} = \betanot{1}{1}$.
+\item The posterior after seeing only $x_1$ is $\cprob{\theta}{x} = \betanot{1}{2}$.
+\item The full posterior after all $n=4$ observations is $\cprob{\theta}{x} = \betanot{1}{5}$.
+\item The full posterior after all $n=4$ observations  is $\cprob{\theta}{x} = \betanot{5}{1}$.
+\item The prior predictive distribution is $\prob{x} = \betanot{1}{1}$.
+\item The prior predictive distribution is $\prob{x} = \binomial{n}{\theta}$.
+\item The maximum a posteriori estimate of $\theta$ is 0.
+\item The maximum a posteriori estimate of $\theta$ is $>0$.
+\item The minimum mean squared error estimate of $\theta$ is 0.
+\item The minimum mean squared error estimate of $\theta$ is 1/5.
+\item The minimum mean squared error estimate of $\theta$ is 1/6.
+\item The prior expectation is 1/2.
+\item The prior median is 1/2.
+\item The only prior mode is 1/2.
+\item The minimum mean squared error estimator of $\theta$ can be written as $\displaystyle\frac{2}{3}\,\thetahatmle$ + $\displaystyle\frac{1}{3}\,\expe{\theta}$.
+\item The $\thetahatmmse$ and $\thetahatmmae$ estimators for the value of $\theta$ do not have any shrinkage whatsoever.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{11} Assume $X_1, X_2, X_3, X_4 \iid \text{Bernoulli}(\theta)$ and $x_1 = 0, x_2 = 0, x_3 = 0, x_4 = 0$. For inference performed from the Bayesian perspective, assume Laplace's prior of indifference.
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{13} 
+
+\begin{enumerate}[(a)]
+\item $CR_{\theta, 90\%} = \bracks{\text{qbeta}(5\%, 1, 5), \text{qbeta}(95\%, 1, 5)}$
+\item $CR_{\theta, 90\%} = \bracks{0, \text{qbeta}(90\%, 1, 5)}$
+\item $CR_{\theta, 90\%} = \bracks{\text{qbeta}(10\%, 1, 5), 1}$
+\item One needs to declare the test's significance level in order to compute a Bayesian p-value
+\item When testing $H_a: \theta < 0.3$, the Bayesian p-value can be computed via pbeta(0.3, 1, 5).
+\item When testing $H_a: \theta < 0.3$, the Bayesian p-value can be computed via pbeta(0.7, 1, 5).
+\item When testing $H_a: \theta < 0.3$, the Bayesian p-value can be computed via 1 - pbeta(0.3, 1, 5).
+\item When testing $H_a: \theta < 0.3$, the Bayesian p-value can be computed via 1 - pbeta(0.7, 1, 5).
+\item When testing $H_a: \theta < 0.3$, the Bayesian p-value can be computed via $\int_{0.3}^1 \oneover{B(1,5)} (1-\theta)^4 d\theta$.
+\item When testing $H_a: \theta < 0.3$, the Bayesian p-value can be computed via $\int_0^{0.3} \oneover{B(1,5)} (1-\theta)^4 d\theta$.
+\item When testing $H_a: \theta < 0.3$, the Bayesian p-value can be computed via $\int_0^1 \oneover{B(1,5)} (1-\theta)^4 d\theta$.
+\item When testing $H_a: \theta \neq 0.3$, the Bayesian p-value is zero.
+\item When testing $H_a: \theta \notin [0.3 \pm \delta]$, the Bayesian p-value is zero for all $\delta > 0$.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{15} This question is independet of those that came previously. Assuming a parametric model of the binomial with fixed $n$ and a beta prior, the posterior is plotted below:
+
+%RES = 1000
+%x = seq(0, 1, length.out = RES)
+%
+%alpha = 1
+%beta = 10
+%pacman::p_load(ggplot2, latex2exp)
+%ggplot(data.frame(x = x, y = dbeta(x, alpha, beta))) + 
+%  geom_area(aes(x = x, y = y), fill = "red", color = "black", alpha = 0.3) +
+%  xlab(TeX("$\\theta$")) +
+%  ylab(TeX("$P(\\theta | x)$"))
+%
+%qbeta(0.5, alpha, beta)
+%1 - pbeta(0.3, alpha, beta)
+
+%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
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width = 6.5in]{beta.pdf}
+\end{figure}
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{11} 
+
+\begin{enumerate}[(a)]
+\item $HDR_{\theta, 90\%} = \bracks{a, b}$ where the values $a$ and $b$ satisfies $0 < a < b < 1$.
+\item $HDR_{\theta, 90\%} = \bracks{0, b}$ where the value $b$ satisfies $0 < b < 1$.
+%\item $HDR_{\theta, 90\%} = \bracks{a, 1}$ where the value $a$ satisfies  $0 < a < 1$.
+\item If the Haldane prior was chosen, then we can be certain that $x > 0$ and $x < n$.
+\item If the Haldane prior was chosen, there is no shrinkage in $\thetahatmmse$.
+\item $\thetahatmap = \thetahatmmae$.
+\item $\thetahatmmae = \thetahatmmse$.
+\item $\thetahatmmae = 1 - (1/2)^{1/10}$.
+\item $\thetahatmmae = 0.5$.
+\item When testing $H_a: \theta < 0.3$, the Bayesian p-value is 0.0282 to the nearest three significant digits.
+\item When testing $H_a: \theta < 0.3$, the Bayesian p-value is 0.282 to the nearest three significant digits.
+\end{enumerate}
+\eenum\instr\pagebreak
+
+%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+
