@@ -1,8 +1,412 @@
 ---
 title: "Practice Lecture 16 MATH 342W Queens College"
 author: "Professor Adam Kapelner"
-date: "April ??, 2021"
+date: "April 5, 2021"
 ---
+
+## The K tradeoff
+
+K determines how large the training set is relative to the test set when you're doing honest validation for an algorithm. For now, let's not use K-fold CV, but only examine one split at a time. Consider this simulated dataset with 50 observations:
+
+```{r}
+n = 50
+xmin = 0
+xmax = 4
+# set.seed(1)
+set.seed(1984)
+x = runif(n, xmin, xmax)
+y = 2 + 3 * x^2 + rnorm(n, 0, 0.8)
+Xy = data.frame(x = x, y = y)
+pacman::p_load(ggplot2)
+data_plot = ggplot(Xy) + aes(x = x, y = y) + geom_point()
+data_plot
+```
+
+Note how $f(x)$ is quadratic and there is random noise which is "ignorance error". The random noise will be part of generalization error and can never go away.
+
+If we use OLS with no derived features, then we can at most get $h*(x)$. Let's see what $h^*(x) = \beta_0 + \beta_1 x$ truly is. To do this, we imagine we see an absolute ton of data and run OLS on it.
+
+```{r}
+n_hidden = 1e6
+x_hidden = seq(from = xmin, to = xmax, length.out = n_hidden)
+y_hidden = 2 + 3 * x_hidden^2 + rnorm(n_hidden, 0, 0.8)
+h_star_mod = lm(y_hidden ~ x_hidden)
+coef(h_star_mod)
+```
+
+The fact that $\beta = [-6~12]^\top$ can actually be solved with calculus: $\int_0^4 ((2 + 3x^2) - (b_0 + b_1 x))^2 dx$ and solve for $b0$ and $b1$ explicitly by minimizing.
+
+Plotting that over $\mathbb{D}$ we obtain
+
+```{r}
+data_plot +
+  geom_abline(intercept = coef(h_star_mod)[1], slope = coef(h_star_mod)[2], color = "green")
+```
+
+That is the best we're going to get. However, $g_{final}$ falls far short of it:
+
+```{r}
+g_final_mod = lm(y ~ x)
+coef(g_final_mod)
+```
+
+
+The actual error of g_final can be estimated by imagining tons of future observations:
+
+```{r}
+y_hat_g_final = predict(g_final_mod, data.frame(x = x_hidden))
+gen_error_true = sd(y_hidden - y_hat_g_final)
+gen_error_true
+```
+
+The model $g$ can vary quite a bit as we subsample $\mathbb{D}$ which is what happens when you do train-test splits. It varies a lot because there is large misspecification error. If the model was correctly specified, the results of everything that follows will be less impressive. But in the real world - is your model ever correctly specified? is $f \in \mathcal{H}$?? NO. So this is more realistic.
+
+Now let's let K be small. Let K = 2 meaning even 50-50 split of test and train.
+
+```{r}
+K = 2
+prop_train = (K - 1) / K
+n_train = round(prop_train * n)
+set.seed(123)
+index_train = sample(1 : n, n_train, replace = FALSE)
+index_test = setdiff(1 : n, index_train)
+pacman::p_load(testthat)
+expect_equal(sort(c(index_test, index_train)), 1:n)
+
+x_train = x[index_train]
+y_train = y[index_train]
+Xytrain = data.frame(x = x_train, y = y_train)
+x_test = x[index_test]
+y_test = y[index_test]
+
+g_mod = lm(y ~ ., Xytrain)
+y_hat_g = predict(g_mod, data.frame(x = x_test))
+g_s_e_K_2 = sd(y_test - y_hat_g)
+g_s_e_K_2
+gen_error_true
+```
+
+Although I cooked the books by setting the seed, this realization makes sense. If K=2, I build the model g with half the data than the model g_final. Less data to train on => higher generalization error. How about if K is large. Let's say $K = n / 2$ meaning n_train = 48 and n_test = 2.
+
+```{r}
+K = n / 2
+prop_train = (K - 1) / K
+n_train = round(prop_train * n)
+set.seed(123)
+index_train = sample(1 : n, n_train, replace = FALSE)
+index_test = setdiff(1 : n, index_train)
+pacman::p_load(testthat)
+expect_equal(sort(c(index_test, index_train)), 1:n)
+
+x_train = x[index_train]
+y_train = y[index_train]
+Dtrain = data.frame(x = x_train, y = y_train)
+x_test = x[index_test]
+y_test = y[index_test]
+
+g_mod = lm(y ~ ., Dtrain)
+y_hat_g = predict(g_mod, data.frame(x = x_test))
+g_s_e_K_n_over_2 = sd(y_test - y_hat_g)
+g_s_e_K_2
+g_s_e_K_n_over_2
+gen_error_true
+```
+
+Although I cooked the books again by setting the seed, this also makes sense. More data to train on = less error but still more error than all the data. In reality, there is massive variance over specific splits! Let's run the simulation with these two K values many times.
+
+While we're at it, let's do all K's! Well, what are all the valid K's? If you want to keep the sizes the same, any factorization of n except the trivial 1 since n = 1 * n. A K = 1 would mean there's no split!!! How to find divisors? Of course a package for this.
+
+```{r}
+pacman::p_load(numbers)
+setdiff(divisors(n), 1)
+```
+
+But should we also include the trivial n? Yes K = n is indeed a valid divisor. And this type of CV is called the "leave one out cross validation" (LOOCV). Now we compute the errors over K:
+
+
+```{r}
+Nsim_per_K = 2000
+Kuniqs = setdiff(divisors(n), 1)
+num_Kuniqs = length(Kuniqs)
+Ks = rep(Kuniqs, Nsim_per_K)
+results = data.frame(s_e = rep(NA, Nsim_per_K * num_Kuniqs), K = rep(NA, Nsim_per_K * num_Kuniqs))
+for (i in 1 : length(Ks)){
+  K = Ks[i]
+  prop_train = (K - 1) / K
+  n_train = round(prop_train * n)
+  index_train = sample(1 : n, n_train, replace = FALSE)
+  index_test = setdiff(1 : n, index_train)
+  expect_equal(sort(c(index_test, index_train)), 1:n)
+  
+  x_train = x[index_train]
+  y_train = y[index_train]
+  Xytrain = data.frame(x = x_train, y = y_train)
+  x_test = x[index_test]
+  y_test = y[index_test]
+  
+  g_mod = lm(y ~ ., Xytrain)
+  y_hat_g = predict(g_mod, data.frame(x = x_test))
+  if (length(y_test) == 1){ #for leave one out cross validation
+    g_s_e = abs(y_test - y_hat_g)
+  } else {
+    g_s_e = sd(y_test - y_hat_g)
+  }
+  results[i, ] = c(g_s_e, K)
+}
+```
+
+What are the variabilities? Let's take the average error over each simulated split. 
+
+```{r}
+#don't worry about the following code... we will learn dplyr later...
+pacman::p_load(dplyr)
+results_summary = results %>%
+  group_by(K) %>%
+  summarize(Kavg = mean(s_e), Kse = sd(s_e))
+results_summary
+```
+
+
+Now let's see what the distributions look like to visualize the means and variances.
+
+```{r}
+sim_plot = ggplot(results) + 
+  aes(x = s_e) +
+  geom_density(aes(fill = factor(K)), alpha = 0.3) + 
+  xlim(0, NA) + 
+  geom_vline(data = results_summary, aes(xintercept = Kavg, color = factor(K)), size = 2)
+sim_plot
+```
+
+The main takeaways are
+
+(1) the std err of generalization error estimate is much lower for low K than high K
+
+With high K, the test set is small meaning the estimate has high variance; with low K, the test set is large meaning you can measure it with low variance.
+
+(2) the average of generalization error estimate is lower for high K than low K
+
+With high K, the training set is large meaning $g$ is closer to g_final and thus has higher expected accuracy; with low K, the training set is small meaning $g$ is further from g_final and thus has lower expected accuracy.
+
+Thus, the tradeoff is bias vs. variance. There are many similar tradeoffs in statistics. We will see one later when we do machine learning.
+
+Is the estimates' accuracy for what we really care about? No... the generalization error of g_final which we picture below:
+
+```{r}
+sim_plot + 
+  geom_vline(xintercept = gen_error_true, col = "white", size = 1)
+```
+
+Remember, g_final's error should be lower than both averages since it uses all the data. But we see above it's higher!
+
+So what happened? Simple... we are mixing apples and oranges. We calculated that white line by looking at one million future observations. We calculated the red and blue distributions by looking at our data only which is a random realization of many such datasets! Thus, our generalization errors are biased based on the specific n observations in D we received. We will see that K-fold helps a bit with this. But there is nothing we can do about it beyond that (besides collect more observations). If you get a weird sample, you get a weird sample!
+
+How would we be able to generate the picture we really want to see? We would run this simulation over many datasets and average. That would be a giant simulation. To show that this is the case, go back and change the seed in the first chunk and rerun. You'll see a different white bar.
+
+What is the main takeaway? K matters because it induces a tradeoff. It shouldn't be too large or too small (as we believe at the moment). And, generalization error estimation is very variable in low n. To see this, go back and increase n.
+
+## Reducing variance with Cross Validation (i.e. K-fold CV)
+
+We saw previous there was a lot of variance in generalization error estimation. We can reduce some of this variance by using a very simple trick. We can rotate the train-test split so that each observation will be in the test set once. How many times is this done? K. Now we see the reason for the definition of K as it tells you how many times you validate. Why is it called "cross"? Because the training set crosses over as it does the rotation. Each observation is inside a training set K-1 times. This point will become important later. Why is it called K-fold? Because a fold is one set of training-test and there are K unique folds during the whole procedure.
+
+How does this work? Well, let's say K=10, a typical value. This means in each "fold", 90% of the data is in the training set and 10% of the data is in the test set. As we run through the K folds, we train a model on the training set and predict on the test set and compute oos residuals We aggregate those oos residuals over the folds to result in n oos residuals. We then run our error metric on all n.
+
+Let's begin with the dataset from the previous demo. Here is that code that will create the folds by specifying the K=10 test sets by index. The training sets can then be found by the set difference function.
+
+```{r}
+K = 10
+set.seed(1984)
+temp = rnorm(n)
+observation_folds = cut(temp, breaks = quantile(temp, seq(0, 1, length.out = K + 1)), include.lowest = TRUE, labels = FALSE)
+table(observation_folds)
+```
+
+We now do our first cross validation of the linear model.
+
+```{r}
+oos_cv_residuals = array(NA, n)
+for (k in 1 : K){
+  index_test = which(observation_folds == k)
+  index_train = setdiff(1 : n, index_test)
+  
+  x_train = x[index_train]
+  y_train = y[index_train]
+  Xtrain = data.frame(x = x_train, y = y_train)
+  x_test = x[index_test]
+  y_test = y[index_test]
+  
+  g_mod = lm(y ~ ., Xtrain)
+  y_hat_g = predict(g_mod, data.frame(x = x_test))
+  oos_cv_residuals[index_test] = y_test - y_hat_g
+}
+
+sd(oos_cv_residuals)
+```
+
+How does this CV error look over K? 
+
+```{r}
+Kuniqs = setdiff(divisors(n), 1)
+results = data.frame(K = Kuniqs, s_e = NA)
+
+set.seed(1984)
+for (K in Kuniqs){
+    temp = rnorm(n)
+    observation_folds = cut(temp, breaks = quantile(temp, seq(0, 1, length.out = K + 1)), include.lowest = TRUE, labels = FALSE)
+  oos_residuals = array(NA, n)
+  for (k in 1 : K){
+    index_test = which(observation_folds == k)
+    index_train = setdiff(1 : n, index_test)
+    
+    x_train = x[index_train]
+    y_train = y[index_train]
+    Xtrain = data.frame(x = x_train, y = y_train)
+    x_test = x[index_test]
+    y_test = y[index_test]
+    
+    g_mod = lm(y ~ ., Xtrain)
+    y_hat_g = predict(g_mod, data.frame(x = x_test))
+    oos_residuals[index_test] = y_test - y_hat_g
+  }
+  
+  results[results$K == K, "s_e"] = sd(oos_residuals)
+}
+results
+```
+
+Seemingly less variable than previously since before we got 
+
+[1] 4.58069
+[1] 3.85186 
+
+where the top value was for K = 2 and the bottom value was for K = 25.
+
+There is still an effect of the one random fold. Let's do this many times and look at the distribution just like before.
+
+```{r}
+Nsim_per_K = 500
+num_Kuniqs = length(Kuniqs)
+Ks = rep(Kuniqs, Nsim_per_K)
+results = data.frame(s_e = rep(NA, Nsim_per_K * num_Kuniqs), K = rep(NA, Nsim_per_K * num_Kuniqs))
+
+
+set.seed(1984)
+for (i in 1 : length(Ks)){
+  K = Ks[i]
+  temp = rnorm(n) #this makes it a different fold each time
+  observation_folds = cut(temp, breaks = quantile(temp, seq(0, 1, length.out = K + 1)), include.lowest = TRUE, labels = FALSE)
+  oos_residuals = array(NA, n)
+  for (k in 1 : K){
+    index_test = which(observation_folds == k)
+    index_train = setdiff(1 : n, index_test)
+    
+    x_train = x[index_train]
+    y_train = y[index_train]
+    Xytrain = data.frame(x = x_train, y = y_train)
+    x_test = x[index_test]
+    y_test = y[index_test]
+    
+    g_mod = lm(y ~ ., Xytrain)
+    y_hat_g = predict(g_mod, data.frame(x = x_test))
+    oos_residuals[index_test] = y_test - y_hat_g
+  }
+  results[i, ] = c(sd(oos_residuals), K)
+}
+```
+
+What is the variability?
+
+```{r}
+results_summary = results %>%
+  group_by(K) %>%
+  summarize(Kavg = mean(s_e), Kse = sd(s_e))
+results_summary
+```
+
+This is a significant improvement in variability than before! (scroll up) There is greatly improved tightness for high K. Seemingly with K-fold CV, you can be more confident to use high K because it is decreasing the variance in the estimate. High K also reduces bias.
+
+Now we plot it:
+
+```{r}
+ggplot(results) + 
+  aes(x = s_e) +
+  geom_density(aes(fill = factor(K)), alpha = 0.3) + 
+  # xlim(0, NA) +
+  xlim(3, 4.5) +
+  geom_vline(data = results_summary, aes(xintercept = Kavg, color = factor(K)), size = 2) +
+  geom_vline(xintercept = gen_error_true, col = "white", size = 1)
+```
+
+
+Admittedly, I don't know the properties of CV estimates as well as I should. Thus, there will be only procedural questions on the next exam. I do know that selecting K "optimally" for general datasets is an open question.
+
+There is one other nice thing about having folds, you can estimate the standard error in your generalization estimate by pretending you have K iid samples and pretending the normal theory applies. For example, let's say K = 5. Instead of aggregating all residuals, we leave them separate and get K = 5 difference estimates for generalization error.
+
+```{r}
+K = 5
+set.seed(1984)
+temp = rnorm(n)
+observation_folds = cut(temp, breaks = quantile(temp, seq(0, 1, length.out = K + 1)), include.lowest = TRUE, labels = FALSE)
+
+oos_s_e_s = array(NA, K)
+for (k in 1 : K){
+  index_test = which(observation_folds == k)
+  index_train = setdiff(1 : n, index_test)
+  
+  x_train = x[index_train]
+  y_train = y[index_train]
+  Dtrain = data.frame(x = x_train, y = y_train)
+  x_test = x[index_test]
+  y_test = y[index_test]
+  
+  g_mod = lm(y ~ ., Dtrain)
+  y_hat_g = predict(g_mod, data.frame(x = x_test))
+  oos_s_e_s[k] = sd(y_test - y_hat_g)
+}
+
+avg_s_e = mean(oos_s_e_s)
+s_s_e = sd(oos_s_e_s)
+avg_s_e
+s_s_e
+#approx 95% CI
+c(avg_s_e - 2 * s_s_e, avg_s_e + 2 * s_s_e) #no divide by sqrt(K) - that was a mistake in the notes
+gen_error_true
+```
+
+Although this is technically nonsense since they're not iid samples since the training set is crossed over containing mostly the same observations, at least it's something. In the above example, we've managed to capture the true generalization error.
+
+Coverage in this confidence interval is over D. So I wouldn't gain much insight by simulating different splits with the same K.
+
+I believe confidence intervals for generalization error is an open problem or maybe proved that you can't find them in general situations.
+
+Here's a real data example with the `diamonds` dataset.
+
+```{r}
+K = 5
+
+set.seed(2000)
+temp = rnorm(nrow(diamonds))
+observation_folds = cut(temp, breaks = quantile(temp, seq(0, 1, length.out = K + 1)), include.lowest = TRUE, labels = FALSE)
+
+all_idx = 1 : nrow(diamonds)
+s_e_s = array(NA, K)
+y_hat_g = array(NA, nrow(diamonds))
+for (k in 1 : K){
+  index_test = which(observation_folds == k)
+  index_train = setdiff(1 :  nrow(diamonds), index_test)
+  mod = lm(price ~ ., diamonds[index_train, ])
+  y_hat_g[index_test] = predict(mod, diamonds[index_test, ])
+  s_e_s[k] = sd(diamonds[index_test, ]$price - y_hat_g[index_test])
+}
+s_e_s
+mean(s_e_s)
+sd(s_e_s)
+#approx 95% CI
+c(mean(s_e_s) - 2 * sd(s_e_s), mean(s_e_s) + 2 * sd(s_e_s))
+```
+
+Why is the $s_{s_e}$ so low? High $n$. Cross validation here was probably not even necessary.
+
 
 # C++ and R
 
