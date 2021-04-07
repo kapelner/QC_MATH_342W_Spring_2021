@@ -147,47 +147,7 @@ What is the "optimal model"?
 
 Can we honestly assess future performance now? No... why? Our test set was really our select set and we don't have a third test set (lab exercise). Inner and outer folding can be done too as we discussed.
 
-# R with Java
 
-Java and R can speak to each other through proper configuration of the `rJava` package. You need to have a full JDK of Java installed on your computer and have its binary executables in the proper path. This demo will be in Java JDK 8 (released in 2014 and not officially supported after 2020) since I haven't tested on the more modern Java JDK's yet. We first install `rJava` if necessary:
-
-```{r}
-if (!pacman::p_isinstalled(rJava)){
-  pacman::p_load(pkgbuild)
-  if (pkgbuild::check_build_tools()){
-    install.packages("rJava", type = "source")
-  }
-  install.packages("rJava")
-}
-```
-
-Now we load the package. Before we do, we set the JVM to have 4G of RAM. After we load it, we initialize te JVM. This should print out nothing or "0" to indicate success.
-
-```{r}
-options(java.parameters = "-Xmx4000m")
-pacman::p_load(rJava)
-.jinit() #this initializes the JVM in the background and if this runs with no issues nor output, you probably have rJava installed and connected to the JDK properly.
-```
-
-Just like the whole `Rcpp` demo, we can do a whole demo with `rJava`, but we won't. Here's just an example of creating a Java object and running a method on it:
-
-```{r}
-java_double = .jnew("java/lang/Double", 3.1415)
-java_double
-class(java_double)
-.jclass(java_double)
-#call an instance method 
-.jcall(java_double, "I", "intValue") #java_double.intValue();
-#call a static method
-J("java/lang/String", "valueOf", java_double)
-```
-
-A note on rJava vs Rcpp. 
-
-* If you're doing quick and dirty fast functions for loops and recursion, do it in Rcpp since there is lower overhead of programming. 
-* If you are programming more full-featured software, go with rJava. 
-* Also, if you need full-featured parallelized execution and threading control e.g. thread pooling and the ease of debugging, my personal opinion is that rJava is easier to get working with less dependencies. My experience is that the Rcpp threading libraries just aren't there yet and neither is openMP directives within Rcpp. 
-* Further, the JVM is fully asynchronous which means it runs completely independently of R. What this means is that you can execute something in Java, Java can "thread it off" and return you to the R prompt with a pointer to the object that houses its execution. You can then query the object. We will see dems of this.
 
 
 # Regression Trees
