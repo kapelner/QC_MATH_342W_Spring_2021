@@ -17,7 +17,7 @@ SIZE = 1e6
 v = 1 : SIZE
 ```
 
-Take examine a simple function that computes square roots on each element
+Take for example a simple function that computes square roots on each element
 
 ```{r}
 sqrt_vector = function(v){

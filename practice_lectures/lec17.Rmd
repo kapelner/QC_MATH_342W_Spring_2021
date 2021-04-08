@@ -225,7 +225,7 @@ Logistic regression is usually the default. But just because it's the default an
 rm(list = ls())
 ```
 
-Let's try a harder project... load up the adult dataset where the response is 1 if the person makes more than \$50K per year and 0 if they make less than \$50K per year.
+Let's try a harder project... load up the adult dataset where the response is 1 if the person makes more than \$50K per year and 0 if they make less than \$50K per year in 1994 dollars. That's the equivalent of almost $90K/yr today (see https://www.in2013dollars.com/us/inflation/1994?amount=50000).
 
 ```{r}
 pacman::p_load_gh("coatless/ucidata")

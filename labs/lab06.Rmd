@@ -1,0 +1,247 @@
+---
+title: "Lab 6"
+author: "Your Name Here"
+output: pdf_document
+date: "11:59PM April 15, 2021"
+---
+
+#Visualization with the package ggplot2
+
+I highly recommend using the [ggplot cheat sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) as a reference resource. You will see questions that say "Create the best-looking plot". Among other things you may choose to do, remember to label the axes using real English, provide a title, subtitle. You may want to pick a theme and color scheme that you like and keep that constant throughout this lab. The default is fine if you are running short of time.
+
+Load up the `GSSvocab` dataset in package `carData` as `X` and drop all observations with missing measurements. 
+
+```{r}
+#TO-DO
+```
+
+Briefly summarize the documentation on this dataset. What is the data type of each variable? What do you think is the response variable the collectors of this data had in mind?
+
+#TO-DO
+
+Create two different plots and identify the best-looking plot you can to examine the `age` variable. Save the best looking plot as an appropriately-named PDF.
+
+```{r}
+#TO-DO
+```
+
+Create two different plots and identify the best looking plot you can to examine the `vocab` variable. Save the best looking plot as an appropriately-named PDF.
+
+```{r}
+#TO-DO
+```
+
+Create the best-looking plot you can to examine the `ageGroup` variable by `gender`. Does there appear to be an association? There are many ways to do this.
+
+```{r}
+#TO-DO
+```
+
+Create the best-looking plot you can to examine the `vocab` variable by `age`. Does there appear to be an association?
+
+```{r}
+#TO-DO
+```
+
+Add an estimate of $f(x)$ using the smoothing geometry to the previous plot. Does there appear to be an association now?
+
+```{r}
+#TO-DO
+```
+
+Using the plot from the previous question, create the best looking overloading with variable `gender`. Does there appear to be an interaction of `gender` and `age`?
+
+```{r}
+#TO-DO
+```
+
+
+Using the plot from the previous question, create the best looking overloading with variable `nativeBorn`. Does there appear to be an interaction of `nativeBorn` and `age`?
+
+```{r}
+#TO-DO
+```
+
+Create two different plots and identify the best-looking plot you can to examine the `vocab` variable by `educGroup`. Does there appear to be an association?
+
+```{r}
+#TO-DO
+```
+
+Using the best-looking plot from the previous question, create the best looking overloading with variable `gender`. Does there appear to be an interaction of `gender` and `educGroup`?
+
+```{r}
+#TO-DO
+```
+
+Using facets, examine the relationship between `vocab` and `ageGroup`. You can drop year level `(Other)`. Are we getting dumber?
+
+```{r}
+#TO-DO
+```
+
+# Probability Estimation and Model Selection
+
+Load up the `adult` in the package `ucidata` dataset and remove missingness and the variable `fnlwgt`:
+
+```{r}
+pacman::p_load_gh("coatless/ucidata")
+data(adult)
+adult = na.omit(adult) #kill any observations with missingness
+adult$fnlwgt = NULL
+```
+
+Cast income to binary where 1 is the `>50K` level.
+
+```{r}
+adult$income = #TO-DO
+```
+
+
+We are going to do some dataset cleanup now. But in every cleanup job, there's always more to clean! So don't expect this cleanup to be perfect. 
+
+
+Firstly, a couple of small things. In variable `marital_status` collapse the levels `Married-AF-spouse` (armed force marriage) and `Married-civ-spouse` (civilian marriage) together into one level called `Married`. Then in variable `education` collapse the levels `1st-4th` and `Preschool` together into a level called `<=4th`.
+
+```{r}
+#TO-DO
+```
+
+Create a model matrix `Xmm` (for this prediction task) and show that it is *not* full rank (i.e. the result of `ncol` is greater than the result of `Matrix::rankMatrix`).
+
+```{r}
+#TO-DO
+```
+
+There is definitely one regressor in class we decided was perfectly collinear with another. Drop the continuous metric version of this variable from the dataset.
+
+```{r}
+#TO-DO
+```
+
+Now tabulate and sort the variable `native_country`.
+
+```{r}
+#TO-DO
+```
+
+Do you see rare levels in this variable? Explain why this may be a problem.
+
+#TO-DO
+
+Collapse all levels that have less than 50 observations into a new level called `other`. This is a very common data science trick that will make your life much easier. If you can't hope to model rare levels, just give up and do something practical! I would recommend first casting the variable to type "character" and then do the level reduction and then recasting back to type `factor`. Tabulate and sort the variable `native_country` to make sure you did it right.
+
+```{r}
+#TO-DO
+```
+
+We're still not done getting this data down to full rank. Take a look at the model matrix just for `workclass` and `occupation`. Is it full rank?
+
+
+```{r}
+#TO-DO
+```
+
+These variables are similar and they probably should be interacted anyway eventually. Let's combine them into one factor. Create a character variable named `worktype` that is the result of concatenating `occupation` and `workclass` togetther with a ":" in between. Use the `paste` function with the `sep` argument (this casts automatically to type `character`). Then tabulate its levels and sort. 
+
+```{r}
+#TO-DO
+```
+
+Like the `native_country` exercise, there are a lot of rare levels. Collapse levels with less than 100 observations to type `other` and then cast this variable `worktype` as type `factor`. Recheck the tabulation to ensure you did this correct.
+
+```{r}
+#TO-DO
+```
+
+
+To do at home: merge the two variables `relationship` and `marital_status` together in a similar way to what we did here.
+
+```{r}
+#TO-DO
+```
+
+We are finally ready to fit some probability estimation models for `income`! In lecture 16 we spoke about model selection using a cross-validation procedure. Let's build this up step by step. First, split the dataset into `Xtrain`, `ytrain`, `Xtest`, `ytest` using K=5.
+
+```{r}
+#TO-DO
+```
+
+Create the following four models on the training data in a `list` objected named `prob_est_mods`: logit, probit, cloglog and cauchit (which we didn't do in class but might as well). For the linear component within the link function, just use the vanilla raw features using the `formula` object `vanilla`. Each model's key in the list is its link function name + "-vanilla". One for loop should do the trick here.
+
+```{r}
+link_functions = c("logit", "probit", "cloglog", "cauchit")
+vanilla = class ~ .
+prob_est_mods = list()
+
+#TO-DO
+```
+
+Now let's get fancier. Let's do some variable transforms. Add `log_capital_loss` derived from `capital_loss` and `log_capital_gain` derived from `capital_gain`. Since there are zeroes here, use log_x = log(1 + x) instead of log_x = log(x). That's always a neat trick. Just add them directly to the data frame so they'll be picked up with the `.` inside of a formula.
+
+```{r}
+#TO-DO
+```
+
+Create a density plot that shows the age distribution by `income`.
+
+```{r}
+#TO-DO
+```
+
+What do you see? Is this expected using common sense?
+
+#TO-DO
+
+Now let's fit the same models with all link functions on a formula called `age_interactions` that uses interactions for `age` with all of the variables. Add all these models to the `prob_est_mods` list.
+
+```{r}
+age_interactions = class ~ #TO-DO
+
+#TO-DO
+```
+
+Create a function called `brier_score` that takes in a probability estimation model, a dataframe `X` and its responses `y` and then calculates the brier score.
+
+```{r}
+brier_score = function(prob_est_mod, X, y){
+  #TO-DO
+}
+```
+
+Now, calculate the in-sample Brier scores for all models. You can use the function `lapply` to iterate over the list and pass in in the function `brier_score`.
+
+```{r}
+lapply(prob_est_mods, #TO-DO)
+```
+
+Now, calculate the out-of-sample Brier scores for all models. You can use the function `lapply` to iterate over the list and pass in the function `brier_score`.
+
+```{r}
+lapply(prob_est_mods, #TO-DO)
+```
+
+Which model wins in sample and which wins out of sample? Do you expect these results? Explain.
+
+#TO-DO
+
+What is wrong with this model selection procedure? There are a few things wrong.
+
+#TO-DO
+
+Run all the models again. This time do three splits: subtrain, select and test. After selecting the best model, provide a true oos Brier score for the winning model.
+
+```{r}
+#TO-DO
+```
+
+
+
+
+
+
+
+
+
+
+
