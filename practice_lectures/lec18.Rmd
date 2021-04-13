@@ -43,7 +43,7 @@ Does the apply function help?
 
 ```{r}
 microbenchmark(
-  apply(v, MARGIN = 1, FUN = sqrt), 
+  apply(v, 1, FUN = sqrt), 
   times = 10
 )
 ```
@@ -165,7 +165,7 @@ sourceCpp("distance_matrix.cpp")
 
 Here are a list of the data structures in Rcpp: https://teuder.github.io/rcpp4everyone_en/070_data_types.html#vector-and-matrix
 
-Another place where C++ pays the rent is recursion. Here is a quicksort implementation in R taken from 
+Another place where C++ pays the rent is recursion. Here is a quicksort implementation in R taken from somewhere on the internet.
 
 ```{r}
 quicksort_R <- function(arr) {
@@ -202,7 +202,7 @@ quicksort_R <- function(arr) {
 Let's create a random array to test these sorts on:
 
 ```{r}
-n = 5e5
+n = 10000
 x = rnorm(n)
 ```
 
@@ -210,22 +210,26 @@ x = rnorm(n)
 Let's profile the pure R sort function:
 
 ```{r}
-system.time({
-  x_sorted_pure_R = quicksort_R(x)
-})
+microbenchmark(
+  x_sorted_pure_R = quicksort_R(x),
+  times = 10
+)
 ```
 
 Let's profile R's `sort` function.
 
 ```{r}
-system.time({
-  x_sorted_base_R = sort(x)
-})
+microbenchmark(
+  x_sorted_base_R = sort(x),
+  times = 10
+)
 ```
 
 Let's just ensure our method worked...
 
 ```{r}
+x_sorted_pure_R = quicksort_R(x)
+x_sorted_base_R = sort(x)
 pacman::p_load(testthat)
 expect_equal(x_sorted_pure_R, x_sorted_base_R)
 ```
@@ -239,9 +243,10 @@ sourceCpp("quicksort.cpp")
 and profile it:
 
 ```{r}
-system.time({
-  x_sorted_cpp = quicksort_cpp(x)
-})
+microbenchmark(
+  x_sorted_cpp = quicksort_cpp(x),
+  times = 10
+)
 ```
 
 Let's just ensure this method worked...
@@ -273,6 +278,7 @@ A few math functions are implemented for you already:
 
 ```{r}
 evalCpp('R::qnorm(0.5, 0, 1, 1, 0)')
+evalCpp('R::qnorm(0.5, 0, 1)') #BOOM
 ```
 
 Further, there are many common functions that are already wrapped for you via "Rcpp-sugar" which was the Rcpp's author's attempt to make Rcpp a whole lot easier, see [here](http://dirk.eddelbuettel.com/code/rcpp/Rcpp-sugar.pdf).
@@ -284,7 +290,7 @@ evalCpp('rnorm(10, 100, 3)')
 If you want blazing fast linear algebra, check out package `RcppArmadillo` which is a wrapper around Apache's Armadillo (namespace is "arma" in the code), an optimized linear algebra package in C++. Here is an example taken from [here](https://scholar.princeton.edu/sites/default/files/q-aps/files/slides_day4_am.pdf). It involves solving for b-vec in a standard OLS.
 
 ```{r}
-pacman::p_load(RcppArmadillo, testthat)
+pacman::p_load(RcppArmadillo)
 
 cppFunction('
   arma::mat ols_cpp(arma::mat X, arma::mat y){
@@ -389,6 +395,20 @@ Here is a nice [translation guide](https://atrebas.github.io/post/2019-03-03-dat
 ```{r}
 pacman::p_load(tidyverse, magrittr) #tidyverse is shorthard for dplyr, ggplot2, tidyr, readr and a bunch of other packages recommended for the "full" dplyr experience. I'm using magrittr for special pipe operations later.
 pacman::p_load(data.table)
+```
+
+First, recall what pipe format means! We're going to need to know this well for what's coming next...
+
+```{r}
+set.seed(1984)
+mean(head(round(sample(rnorm(1000), 100), digits = 2)))
+
+set.seed(1984)
+rnorm(1000) %>% #the pipe operator
+  sample(100) %>% 
+  round(digits = 2) %>% #the first argument is passed in automatically.
+  head %>%
+  mean
 ```
 
 Note that `data.table` is automatically multithreaded. Read [here](https://www.rdocumentation.org/packages/data.table/versions/1.12.8/topics/setDTthreads).
@@ -709,7 +729,7 @@ Sometimes you want to do fancier things like actually run operations on the whol
 ```{r}
 diamonds_tbl %>%
   group_by(color) %>%
-  mutate(avg_price_for_color = mean(price)) 
+  mutate(avg_price_for_color = mean(price))
 #creates a new feature based on running the feature only within group
 
 diamonds_dt2 = copy(diamonds_dt)
@@ -876,3 +896,4 @@ microbenchmark(
 ```
 
 We still have to learn how to reshape tables and join multiple tables together. We will do that later.
+

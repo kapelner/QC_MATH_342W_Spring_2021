@@ -7,9 +7,9 @@ date: "11:59PM April 15, 2021"
 
 #Visualization with the package ggplot2
 
-I highly recommend using the [ggplot cheat sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) as a reference resource. You will see questions that say "Create the best-looking plot". Among other things you may choose to do, remember to label the axes using real English, provide a title, subtitle. You may want to pick a theme and color scheme that you like and keep that constant throughout this lab. The default is fine if you are running short of time.
+I highly recommend using the [ggplot cheat sheet](https://rstudio.com/wp-content/uploads/2015/03/ggplot2-cheatsheet.pdf) as a reference resource. You will see questions that say "Create the best-looking plot". Among other things you may choose to do, remember to label the axes using real English, provide a title and subtitle. You may want to pick a theme and color scheme that you like and keep that constant throughout this lab. The default is fine if you are running short of time.
 
-Load up the `GSSvocab` dataset in package `carData` as `X` and drop all observations with missing measurements. 
+Load up the `GSSvocab` dataset in package `carData` as `X` and drop all observations with missing measurements. This will be a very hard visualization exercise since there is not a good model for vocab.
 
 ```{r}
 #TO-DO
@@ -49,14 +49,14 @@ Add an estimate of $f(x)$ using the smoothing geometry to the previous plot. Doe
 #TO-DO
 ```
 
-Using the plot from the previous question, create the best looking overloading with variable `gender`. Does there appear to be an interaction of `gender` and `age`?
+Using the plot from the previous question, create the best looking plot overloading with variable `gender`. Does there appear to be an interaction of `gender` and `age`?
 
 ```{r}
 #TO-DO
 ```
 
 
-Using the plot from the previous question, create the best looking overloading with variable `nativeBorn`. Does there appear to be an interaction of `nativeBorn` and `age`?
+Using the plot from the previous question, create the best looking plot overloading with variable `nativeBorn`. Does there appear to be an interaction of `nativeBorn` and `age`?
 
 ```{r}
 #TO-DO
@@ -107,17 +107,12 @@ Firstly, a couple of small things. In variable `marital_status` collapse the lev
 #TO-DO
 ```
 
-Create a model matrix `Xmm` (for this prediction task) and show that it is *not* full rank (i.e. the result of `ncol` is greater than the result of `Matrix::rankMatrix`).
+Create a model matrix `Xmm` (for this prediction task on just the raw features) and show that it is *not* full rank (i.e. the result of `ncol` is greater than the result of `Matrix::rankMatrix`).
 
 ```{r}
 #TO-DO
 ```
 
-There is definitely one regressor in class we decided was perfectly collinear with another. Drop the continuous metric version of this variable from the dataset.
-
-```{r}
-#TO-DO
-```
 
 Now tabulate and sort the variable `native_country`.
 
@@ -171,7 +166,7 @@ Create the following four models on the training data in a `list` objected named
 
 ```{r}
 link_functions = c("logit", "probit", "cloglog", "cauchit")
-vanilla = class ~ .
+vanilla = income ~ .
 prob_est_mods = list()
 
 #TO-DO
