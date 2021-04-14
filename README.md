@@ -10,7 +10,7 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec18.Rmd)
 * Lecture 17 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec17.Rmd)
-  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec17kap.pdf)
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec17kap.pdf) [(Kennly Weerasinghe)](https://github.com/wskennly/QC_MATH_342W_Spring_2021/blob/master/lectures/lec17weerasinghe.pdf)
 * Lecture 16 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec16.Rmd)
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec16kap.pdf) [(Kennly Weerasinghe)](https://github.com/wskennly/QC_MATH_342W_Spring_2021/blob/master/lectures/lec16weerasinghe.pdf)
