@@ -8,7 +8,7 @@ date: "April 14, 2021"
 
 This unit is split into three use cases (1) Selection among M explicit models (2) Hyperparameter Selection within one algorithm (3) Stepwise Model Construction
 
-## Use Case (I) Selecting one of M Models
+## Use Case (I) Selecting one of M Explicit Models
 
 We have now covered non-linearities (e.g. polynomial terms) and interactions. A new complication now clearly emerges. If I have $p$ predictors, there are many linear least squares models I can build (considering non-linear least squares models makes the space of models even larger!!)
 
@@ -292,10 +292,11 @@ repeat {
   #get all predictors left to try
   all_ses = array(NA, p_plus_one) #record all possibilities
   for (j_try in 1 : p_plus_one){
-    if (!(j_try %in% predictor_by_iteration)){
-      Xmm_sub = Xmm_train[, c(predictor_by_iteration, j_try), drop = FALSE]
-      all_ses[j_try] = sd(lm.fit(Xmm_sub, y_train)$residuals) #lm.fit so much faster than lm! 
+    if (j_try %in% predictor_by_iteration){
+      next 
     }
+    Xmm_sub = Xmm_train[, c(predictor_by_iteration, j_try), drop = FALSE]
+    all_ses[j_try] = sd(lm.fit(Xmm_sub, y_train)$residuals) #lm.fit so much faster than lm! 
   }
   j_star = which.min(all_ses)
   predictor_by_iteration = c(predictor_by_iteration, j_star)
@@ -321,7 +322,7 @@ repeat {
 Now let's look at our complexity curve:
 
 ```{r}
-# load("stepwise.RData") #I actually ran the simulation all night and found...
+load("stepwise.RData") #I actually ran the simulation all night and found...
 simulation_results = data.frame(
   iteration = 1 : length(in_sample_ses_by_iteration),
   in_sample_ses_by_iteration = in_sample_ses_by_iteration,
@@ -332,6 +333,7 @@ pacman::p_load(latex2exp)
 ggplot(simulation_results) + 
   geom_line(aes(x = iteration, y = in_sample_ses_by_iteration), col = "red") +
   geom_line(aes(x = iteration, y = oos_ses_by_iteration), col = "blue") + 
+  ylim(0, max(c(simulation_results$in_sample_ses_by_iteration, simulation_results$oos_ses_by_iteration)))
   ylab(TeX("$s_e$"))
 ```
 
@@ -408,3 +410,4 @@ rr$score()
 rr$aggregate()
 rr$prediction()$confusion
 ```
+
