@@ -2,8 +2,10 @@
 title: "Lab 7"
 author: "Your Name Here"
 output: pdf_document
-date: "11:59PM April 22, 2021"
+date: "11:59PM April 15, 2021"
 ---
+
+#Rcpp 
 
 We will get some experience with speeding up R code using C++ via the `Rcpp` package.
 
@@ -31,19 +33,19 @@ Plot the density of these angles.
 #TO-DO
 ```
 
-Write an Rcpp function `all_angles_cpp` that does the same thing. Use an IDE if ou want, but write it below in-line.
+Write an Rcpp function `all_angles_cpp` that does the same thing. Use an IDE if you want, but write it below in-line.
 
 ```{r}
 #TO-DO
 ```
 
-Test the time difference between these functions for `n = 1000` and `Nvec = 100, 500, 1000, 5000`.  Store the results in a matrix.
+Test the time difference between these functions for `n = 1000` and `Nvec = 100, 500, 1000, 5000` using the package `microbenchmark`.  Store the results in a matrix with rows representing `Nvec` and two columns for base R and Rcpp.
 
 ```{r}
 #TO-DO
 ```
 
-Plot the divergence of performance (in log seconds) over n using a line geometry. Use two different colors for the R and CPP functions. Make sure there's a color legend on your plot.
+Plot the divergence of performance (in log seconds) over n using a line geometry. Use two different colors for the R and CPP functions. Make sure there's a color legend on your plot. We wil see later how to create "long" matrices that make such plots easier.
 
 ```{r}
 #TO-DO
@@ -79,3 +81,303 @@ Plot the divergence of performance (in log seconds) over n using a line geometry
 #TO-DO
 ```
 
+# Data Wrangling / Munging / Carpentry
+
+Throughout this assignment you can use either the `tidyverse` package suite or `data.table` to answer but not base R. You can mix `data.table` with `magrittr` piping if you wish but don't go back and forth between `tbl_df`'s and `data.table` objects.
+
+```{r}
+pacman::p_load(tidyverse, magrittr, data.table)
+```
+
+Load the `storms` dataset from the `dplyr` package and investigate it using `str` and `summary` and `head`. Which two columns should be converted to type factor? Do so below.
+
+```{r}
+#TO-DO
+```
+
+Reorder the columns so name is first, status is second, category is third and the rest are the same.
+
+```{r}
+#TO-DO
+```
+
+Find a subset of the data of storms only in the 1970's.
+
+```{r}
+#TO-DO
+```
+
+Find a subset of the data of storm observations only with category 4 and above and wind speed 100MPH and above.
+
+```{r}
+#TO-DO
+```
+
+Create a new feature `wind_speed_per_unit_pressure`.
+
+```{r}
+#TO-DO
+```
+
+Create a new feature: `average_diameter` which averages the two diameter metrics. If one is missing, then use the value of the one that is present. If both are missing, leave missing.
+
+```{r}
+#TO-DO
+```
+
+
+For each storm, summarize the maximum wind speed. "Summarize" means create a new dataframe with only the summary metrics you care about.
+
+```{r}
+#TO-DO
+```
+
+Order your dataset by maximum wind speed storm but within the rows of storm show the observations in time order from early to late.
+
+```{r}
+#TO-DO
+```
+
+Find the strongest storm by wind speed per year.
+
+```{r}
+#TO-DO
+```
+
+For each named storm, find its maximum category, wind speed, pressure and diameters. Do not allow the max to be NA (unless all the measurements for that storm were NA).
+
+```{r}
+#TO-DO
+```
+
+
+For each year in the dataset, tally the number of storms. "Tally" is a fancy word for "count the number of". Plot the number of storms by year. Any pattern?
+
+```{r}
+#TO-DO
+```
+
+For each year in the dataset, tally the storms by category.
+
+```{r}
+#TO-DO
+```
+
+For each year in the dataset, find the maximum wind speed per status level.
+
+```{r}
+#TO-DO
+```
+
+For each storm, summarize its average location in latitude / longitude coordinates.
+
+```{r}
+#TO-DO
+```
+
+For each storm, summarize its duration in number of hours (to the nearest 6hr increment).
+
+```{r}
+#TO-DO
+```
+
+For storm in a category, create a variable `storm_number` that enumerates the storms 1, 2, ... (in date order).
+
+```{r}
+#TO-DO
+```
+
+Convert year, month, day, hour into the variable `timestamp` using the `lubridate` package. Although the new package `clock` just came out, `lubridate` still seems to be standard. Next year I'll probably switch the class to be using `clock`.
+
+```{r}
+#TO-DO
+```
+
+Using the `lubridate` package, create new variables `day_of_week` which is a factor with levels "Sunday", "Monday", ... "Saturday" and `week_of_year` which is integer 1, 2, ..., 52.
+
+```{r}
+#TO-DO
+```
+
+For each storm, summarize the day in which is started in the following format "Friday, June 27, 1975".
+
+```{r}
+#TO-DO
+```
+
+Create a new factor variable `decile_windspeed` by binning wind speed into 10 bins.
+
+```{r}
+#TO-DO
+```
+
+Create a new data frame `serious_storms` which are category 3 and above hurricanes.
+
+```{r}
+#TO-DO
+```
+
+In `serious_storms`, merge the variables lat and long together into `lat_long` with values `lat / long` as a string.
+
+```{r}
+#TO-DO
+```
+
+Let's return now to the original storms data frame. For each category, find the average wind speed, pressure and diameters (do not count the NA's in your averaging).
+
+```{r}
+#TO-DO
+```
+
+For each named storm, find its maximum category, wind speed, pressure and diameters (do not allow the max to be NA) and the number of readings (i.e. observations).
+
+```{r}
+#TO-DO
+```
+
+Calculate the distance from each storm observation to Miami in a new variable `distance_to_miami`. This is very challenging. You will need a function that computes distances from two sets of latitude / longitude coordinates. 
+
+```{r}
+MIAMI_LAT_LONG_COORDS = c(25.7617, -80.1918)
+#TO-DO
+```
+
+For each storm observation, use the function from the previous question to calculate the distance it moved since the previous observation.
+
+```{r}
+#TO-DO
+```
+
+For each storm, find the total distance it moved over its observations and its total displacement. "Distance" is a scalar quantity that refers to "how much ground an object has covered" during its motion. "Displacement" is a vector quantity that refers to "how far out of place an object is"; it is the object's overall change in position.
+
+```{r}
+#TO-DO
+```
+
+For each storm observation, calculate the average speed the storm moved in location.
+
+```{r}
+#TO-DO
+```
+
+For each storm, calculate its average ground speed (how fast its eye is moving which is different from windspeed around the eye).
+
+```{r}
+#TO-DO
+```
+
+Is there a relationship between average ground speed and maximum category attained? Use a dataframe summary (not a regression).
+
+```{r}
+#TO-DO
+```
+
+Now we want to transition to building real design matrices for prediction. This is more in tune with what happens in the real world. Large data dump and you convert it into $X$ and $y$ how you see fit.
+
+Suppose we wish to predict the following: given the first three readings of a storm, can you predict its maximum wind speed? Identify the `y` and identify which features you need $x_1, ... x_p$ and build that matrix with `dplyr` functions. This is not easy, but it is what it's all about. Feel free to "featurize" as creatively as you would like. You aren't going to overfit if you only build a few features relative to the total 198 storms.
+
+```{r}
+#TO-DO
+```
+
+Fit your model. Validate it. 
+ 
+```{r}
+#TO-DO
+```
+
+Assess your level of success at this endeavor.
+
+#TO-DO
+
+# The Forward Stepwise Procedure for Probability Estimation Models
+
+
+Set a seed and load the `adult` dataset and remove missingness and randomize the order.
+
+```{r}
+set.seed(1)
+pacman::p_load_gh("coatless/ucidata")
+data(adult)
+adult = na.omit(adult)
+adult = adult[sample(1 : nrow(adult)), ]
+```
+
+Copy from the previous lab all cleanups you did to this dataset.
+
+```{r}
+#TO-DO
+```
+
+
+We will be doing model selection. We will split the dataset into 3 distinct subsets. Set the size of our splits here. For simplicitiy, all three splits will be identically sized. We are making it small so the stepwise algorithm can compute quickly. If you have a faster machine, feel free to increase this.
+
+```{r}
+Nsplitsize = 1000
+```
+
+Now create the following variables: `Xtrain`, `ytrain`, `Xselect`, `yselect`, `Xtest`, `ytest` with `Nsplitsize` observations. Binarize the y values. 
+
+```{r}
+Xtrain = adult[1 : Nsplitsize, ]
+Xtrain$income = NULL
+ytrain = ifelse(adult[1 : Nsplitsize, "income"] == ">50K", 1, 0)
+Xselect = adult[(Nsplitsize + 1) : (2 * Nsplitsize), ]
+Xselect$income = NULL
+yselect = ifelse(adult[(Nsplitsize + 1) : (2 * Nsplitsize), "income"] ==">50K", 1, 0)
+Xtest = adult[(2 * Nsplitsize + 1) : (3 * Nsplitsize), ]
+Xtest$income = NULL
+ytest = ifelse(adult[(2 * Nsplitsize + 1) : (3 * Nsplitsize), "income"] == ">50K", 1, 0)
+```
+
+Fit a vanilla logistic regression on the training set.
+
+```{r}
+logistic_mod = glm(ytrain ~ ., Xtrain, family = "binomial")
+```
+
+and report the log scoring rule, the Brier scoring rule.
+
+```{r}
+#TO-DO
+```
+
+We will be doing model selection using a basis of linear features consisting of all first-order interactions of the 14 raw features (this will include square terms as squares are interactions with oneself). 
+
+Create a model matrix from the training data containing all these features. Make sure it has an intercept column too (the one vector is usually an important feature). Cast it as a data frame so we can use it more easily for modeling later on. We're going to need those model matrices (as data frames) for both the select and test sets. So make them here too (copy-paste). Make sure their dimensions are sensible.
+
+```{r}
+#TO-DO
+dim(Xmm_train)
+dim(Xmm_select)
+dim(Xmm_test)
+```
+
+Write code that will fit a model stepwise. You can refer to the chunk in the practice lecture. Use the negative Brier score to do the selection. The negative of the Brier score is always positive and lower means better making this metric kind of like s_e so the picture will be the same as the canonical U-shape for oos performance. 
+
+Run the code and hit "stop" when you begin to the see the Brier score degrade appreciably oos. Be patient as it will wobble.
+
+```{r}
+pacman::p_load(Matrix)
+p_plus_one = ncol(Xmm_train)
+predictor_by_iteration = c() #keep a growing list of predictors by iteration
+in_sample_brier_by_iteration = c() #keep a growing list of briers by iteration
+oos_brier_by_iteration = c() #keep a growing list of briers by iteration
+i = 1
+
+repeat {
+
+  #TO-DO 
+  #wrap glm and predict calls with use suppressWarnings() so the console is clean during run
+  
+  if (i > Nsplitsize || i > p_plus_one){
+    break
+  }
+}
+```
+
+Plot the in-sample and oos (select set) Brier score by $p$. Does this look like what's expected?
+
+```{r}
+#TO-DO
+```

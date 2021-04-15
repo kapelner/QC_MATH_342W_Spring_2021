@@ -322,7 +322,6 @@ repeat {
 Now let's look at our complexity curve:
 
 ```{r}
-load("stepwise.RData") #I actually ran the simulation all night and found...
 simulation_results = data.frame(
   iteration = 1 : length(in_sample_ses_by_iteration),
   in_sample_ses_by_iteration = in_sample_ses_by_iteration,
