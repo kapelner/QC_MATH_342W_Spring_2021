@@ -410,3 +410,42 @@ rr$aggregate()
 rr$prediction()$confusion
 ```
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+```{r}
+nstar = 17
+xstars = 0 : nstar
+alpha = 41.5
+beta = 63.5
+
+pacman::p_load(ggplot2,VGAM)
+
+ggplot(data.frame(x = factor(xstars), y = dbetabinom.ab(xstars, nstar, alpha, beta))) + geom_point(aes(x=x,y = y))
+```
+
