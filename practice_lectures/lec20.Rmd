@@ -14,6 +14,7 @@ if (!pacman::p_isinstalled(YARF)){
   pacman::p_install_gh("kapelner/YARF/YARFJARs", ref = "dev")
   pacman::p_install_gh("kapelner/YARF/YARF", ref = "dev")
 }
+options(java.parameters = "-Xmx4000m")
 pacman::p_load(YARF)
 ```
 
@@ -94,7 +95,7 @@ Let's try this using oos validation and trace out a performance curve to find th
 
 ```{r}
 prop_test = 0.2
-set.seed(1984)
+set.seed(1983)
 select_idx = sample(1 : n, round(prop_test * n))
 x_select = x[select_idx]
 y_select = x[select_idx]
@@ -103,7 +104,7 @@ x_train = x[train_idx]
 y_train = x[train_idx]
 n_train = length(train_idx)
 
-nodesizes_to_try = 50 : 1 #50 is obviously overfit so no need to go higher
+nodesizes_to_try = 70 : 1 #70 is obviously underfit so no need to go higher
 in_sample_errors = array(NA, length(nodesizes_to_try))
 oos_errors = array(NA, length(nodesizes_to_try))
 for (i in 1 : length(nodesizes_to_try)){
@@ -128,6 +129,7 @@ For some reason, we do not see serious overfitting.
 Now let's look at a regression tree model predicting medv in the Boston Housing data. We first load the data and do a training-test split:
 
 ```{r}
+set.seed(1984)
 pacman::p_load(MASS)
 data(Boston)
 test_prop = 0.1
@@ -161,7 +163,7 @@ Recall the linear model:
 
 ```{r}
 linear_mod = lm(medv ~ ., Boston_train)
-summary(linear_mod)$sigma
+sd(y_train - linear_mod$fitted.values)
 summary(linear_mod)$r.squared
 ```
 
@@ -172,7 +174,7 @@ Is this a "fair" comparison?
 Before we address this, let's illustrate the tree. 
 
 ```{r}
-illustrate_trees(tree_mod, max_depth = 3, open_file = TRUE)
+illustrate_trees(tree_mod, max_depth = 4, open_file = TRUE)
 get_tree_num_nodes_leaves_max_depths(tree_mod)
 ```
 
@@ -368,6 +370,7 @@ adult = na.omit(adult) #kill any observations with missingness
 Let's use samples of 2,000 to run experiments:
 
 ```{r}
+set.seed(1984)
 test_size = 2000
 train_indices = sample(1 : nrow(adult), test_size)
 adult_train = adult[train_indices, ]
@@ -452,9 +455,9 @@ Let's first create a few variables that are of interest:
 ```{r}
 storms %<>% 
   mutate(wind_pct_avg = wind / mean(wind, na.rm = TRUE) * 100) %>%
-  mutate(pressure_pct_avg = wind / mean(pressure, na.rm = TRUE) * 100) %>%
-  mutate(ts_diameter_pct_avg = wind / mean(ts_diameter, na.rm = TRUE) * 100) %>%
-  mutate(hu_diameter_pct_avg = wind / mean(hu_diameter, na.rm = TRUE) * 100)
+  mutate(pressure_pct_avg = pressure / mean(pressure, na.rm = TRUE) * 100) %>%
+  mutate(ts_diameter_pct_avg = ts_diameter / mean(ts_diameter, na.rm = TRUE) * 100) %>%
+  mutate(hu_diameter_pct_avg = hu_diameter / mean(hu_diameter, na.rm = TRUE) * 100)
 ggplot(storms) + 
   aes(wind_pct_avg) + 
   geom_histogram()
@@ -483,6 +486,7 @@ ggplot(sandy_wide_tbl) +
   geom_line(aes(y = pressure_pct_avg), col = "green") + 
   geom_line(aes(y = ts_diameter_pct_avg), col = "blue") + 
   geom_line(aes(y = hu_diameter_pct_avg), col = "grey") +
+  #make legend code
   ylab("% over average")
 ```
 
@@ -582,83 +586,3 @@ microbenchmark(
 ```
 
 Looks like ``data.table::melt`` is 60x faster than tidyverse's pivot and ``data.tabe::dcast` is 2x faster than tidyverse's pivot.
-
-# Joins
-
-Another one of the core data munging skills is joining data frames together. In the real world, databases consist of multiple dataframes called "tables" and design matrices are built by gathering data from among many tables. To illustrate this, we load two datasets from the package `nycflights13`, one dataset about weather and one about airports:
-
-```{r}
-pacman::p_load(nycflights13, data.table, tidyverse, magrittr)
-data(weather)
-summary(weather)
-data(airports)
-summary(airports)
-```
-
-Note how the weather and airports datasets contain a common feature: name of airport. It is called `FAA` in airports and `origin` in weather.
-
-First we rename the column in weather to match the column in airports:
-
-```{r}
-weather %<>% 
-  rename(faa = origin)
-```
-
-We also pare down the datasets so we can see the joins more clearly:
-
-```{r}
-airports %<>% 
-  select(faa, lat, lon)
-weather %<>% 
-  select(faa, time_hour, temp, humid, wind_speed, pressure, wind_gust)
-head(airports)
-head(weather)
-airports_dt = data.table(airports)
-weather_dt = data.table(weather)
-```
-
-Some features just aren't measured that often e.g. `wind_gust`.
-
-Let's do some joins. First "left". This is likely the most common because it's usually how we conceptualize what we're doing in our heads.
-
-```{r}
-airports_and_weather = left_join(airports, weather, by = "faa")
-airports_and_weather %>% sample_n(500)
-airports_and_weather_dt = merge(airports_dt, weather_dt, by = "faa", all.x = TRUE)
-airports_and_weather_dt = merge(airports_dt, weather_dt, all.x = TRUE) #note this works too since it knows faa is the only column in common but not recommended since specifying "by" is more clear
-airports_and_weather_dt[sample(1 : .N, 500)]
-```
-
-Now "right"
-
-```{r}
-airports_and_weather = right_join(airports, weather, by = "faa")
-airports_and_weather %>% sample_n(500)
-airports_and_weather_dt = merge(airports_dt, weather_dt, by = "faa", all.y = TRUE)
-airports_and_weather_dt = merge(airports_dt, weather_dt, all.y = TRUE)
-airports_and_weather_dt[sample(1 : .N, 500)]
-```
-
-
-```{r}
-airports_and_weather = inner_join(airports, weather, by = "faa")
-airports_and_weather %>% sample_n(500)
-airports_and_weather_dt = merge(airports_dt, weather_dt, by = "faa")
-airports_and_weather_dt = merge(airports_dt, weather_dt)
-airports_and_weather_dt[sample(1 : .N, 500)]
-```
-
-And full, keeping all the rows. We use a subset to show how this works:
-
-```{r}
-airports_without_EWR = airports %>%
-  filter(faa != "EWR")
-airports_without_EWR_dt = data.table(airports_without_EWR)
-airports_without_EWR_and_weather = full_join(airports_without_EWR, weather, by = "faa")
-airports_without_EWR_and_weather %>% sample_n(500)
-airports_without_EWR_and_weather_dt = merge(airports_without_EWR_dt, weather_dt, by = "faa", all = TRUE)
-airports_without_EWR_and_weather_dt = merge(airports_without_EWR_dt, weather_dt, all = TRUE)
-airports_without_EWR_and_weather_dt[sample(.N, 500)]
-```
-
-There is also `semi_join` and `anti_join` that do the opposite of joining. In my experience, these use cases are limited.
