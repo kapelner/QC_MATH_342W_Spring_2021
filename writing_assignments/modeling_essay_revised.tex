@@ -1,0 +1,106 @@
+\documentclass[12pt]{article}
+
+\include{preamble}
+
+\newtoggle{professormode}
+\toggletrue{professormode} %STUDENTS: DELETE or COMMENT this line
+
+
+
+\title{MATH 342W / 650.4 Spring \the\year \\ Philosophy of Modeling Draft and Final Paper}
+
+\author{Professor Adam Kapelner} %STUDENTS: write your name here
+
+\iftoggle{professormode}{
+\date{Draft Due 11:59PM Sunday by email, Mar 21, 2021 \\ \vspace{0.5cm} \small (this document last updated \currenttime~on \today)}
+}
+
+
+\begin{document}
+\maketitle
+
+\noindent Pick one of the prompts below or email me if you have your own topic of interest so I can approve it prior to you beginning the project. Instructions on titling your paper is given after the prompts.
+
+\begin{enumerate}[(a)]
+\item The laws of physics are absolutely true / \\
+The laws of physics are \textit{not} absolutely true / \\
+The laws of physics are \textit{perhaps} absolutely true.
+\item People who smoke contract lung cancer / \\
+People who smoke do \textit{not} contract lung cancer / \\
+People who smoke \textit{perhaps} contract lung cancer.
+\item Credit scores like those given by Experian, TransUnion and Equifax are useful / \\
+Credit scores like those given by Experian, etc. are \textit{useless} / \\
+Credit scores like those given by Experian, etc. are \textit{perhaps} useful.
+\item Autonomous vehicles will navigate perfectly / \\
+Autonomous vehicles will \textit{not} navigate perfectly / \\
+Autonomous vehicles will \textit{perhaps} navigate perfectly.
+\item The optimal human diet for health is [insert a diet here] / \\
+The optimal human diet for health is \textit{not} [insert a diet here] / \\
+The optimal human diet for health is \textit{perhaps} [insert a diet here].
+\item The medical establishment understands the human body / \\
+The medical establishment does \textit{not} understand the human body / \\
+The medical establishment \textit{perhaps} understands the human body.
+\item What makes a virus a dangerous pandemic is understood / \\
+What makes a virus a dangerous pandemic is \emph{not} understood / \\
+What makes a virus a dangerous pandemic is \emph{somewhat} understood.
+\item Global warming is real / \\
+Global warming is \textit{not} real / \\
+Global warming is \textit{perhaps} real.
+\item The government understands the optimal level of taxation / \\
+The government does \textit{not} understand the optimal level of taxation / \\
+The government \textit{perhaps} understands the optimal level of taxation.
+\item What makes a marriage successful is understood / \\
+What makes a marriage successful is \emph{not} understood / \\
+What makes a marriage successful is \emph{somewhat} understood.
+\end{enumerate}
+
+The common theme among the prompts are the existence of some natural phenomenon which is then modeled by humans. Sometimes it is difficult to separate the phenomenon from the model since the model is so common and we are so brainwashed to think it is same as the phenomenon (it is not). Before you begin, ensure you understand what the phenomenon is you are modeling. If this is not straight, then your entire essay will be a failure.
+
+The following must be written in your essay
+
+\begin{itemize}
+\item A title that sums what the phenomenon is and how accurately you believe you can model it e.g. \qu{The [phenomenon] can be Modeled Well} or \qu{The [phenomenon] Remains Poorly Understood} or \qu{The [such-and-such model] for [phenomenon] a [good/bad] Model}.
+\item An introduction of no more than 1.5 pages that talks about the phenomenon, how important it is to humans and history of attempts to model it.
+\item Definition of a model. Definition of a mathematical model.
+\item Description of what a model means in the context of your phenomenon.
+\item Description of your phenomenon and how it is measured exactly. Do you believe this measurement can be made accurately?
+\item Definition of supervised learning and what it would mean in the context of your phenomenon.
+\item Description of your independent variables and how they are measured exactly. Do you believe your measurements can be made accurately?
+\item Definition of historical data observations (training data). How would you obtain a dataset in your context?
+\item Definition of the three sources of error and what they are in the context of your modeling effort. Which of these sources would be large and why? Which are small and why?
+\item Definition of prediction. What prediction means in the context of your model. Who will be predicting and for what purpose?
+\item Definition of an error metric for predictions. What error metric would you use and what is the threshold for \qu{usefulness} in your context?
+\item Definition of what stationarity means and what it means in the context of your phenomenon.
+\item Definition of interpolation and extrapolation and what they mean in the context of your phenomenon.
+\item What is an algorithm and candidate set? What is machine learning? What are some algorithm choices would be to build this model. Which choice would you choose in your context? Do you have enough sample in your historical data to do so?
+\item Define underfitting. Could your model be underfit? 
+\item Define overfitting. Could your model be overfit? 
+\item Define validation, in-sample and out of sample. How would you validate your model?
+\item Throughout the essay you must use all the following notation where appropriate:
+
+\beqn
+t ,f, g, g_0, h^*, \delta, \mathcal{E}, e, \mathbb{D}, \mathcal{H}, \mathcal{A}, t, z_1, \ldots, z_t, n, p, X, x_{\cdot 1}, \ldots, x_{\cdot p}, x_{1 \cdot}, \ldots, x_{n \cdot}, \mathcal{X}, y, \mathcal{Y}
+\eeqn
+
+and explain these concepts in the context of your model and phenomenon.
+
+\item Conclude: is the title of your essay correct and why? Tie the answer to what you believe will be your  model's predictive performance.
+\end{itemize}
+%It is your job to interpret the above prompts and redefine what the phenomenon is.
+%
+%
+%, i.e. you must \textit{limit}, \textit{scope} and \textit{concretize} the above which are \textit{deliberately open-ended} and nebulous. To argue your point, you will need to formulate a mathematical model with phenomenon(s) that can be measured (and you must explain how you measure / sample in the real world) and characteristics of the units under consideration. You will need to clearly define what \qu{models} are, how it could be \textbf{useful} in your context, how your model is mathematical and discuss the limitations of the modeling enterprise in general. 
+%
+%In context of your prompt and modeling choice, you must appropriately explain the concepts we learned / will learn in class, including but not limited to $t ,f, g, g_0, h^*, \delta, \mathcal{E}, e, \mathbb{D}, \mathcal{H}, \mathcal{A}$, $t, z_1, \ldots, z_t, n, p$, $X$, $x_{\cdot 1}, \ldots, x_{\cdot p}$, $x_{1 \cdot}, \ldots, x_{n \cdot}, \mathcal{X}, y, \mathcal{Y}$, supervised learning, the three sources of error, the fidelity of the measurement process, extrapolation, interpolation, stationarity, overfitting, validation (in-sample vs. out-of-sample), generalization error, model selection, machine learning, etc. 
+
+You are welcome to bring outside sources about philosophy of modeling as well as sources which help make your arguments in support of a prompt. Please cite them appropriately using natural text citations e.g. \qu{The measurement device is accurate (Johnson et al., 1999)} or \qu{Johnson et al. (1999) demonstrate the measurement device is accurate} and enter them into a bibilography in APA style where the reference elements are formatted in APA style.\\
+~\\
+\textbf{Specs}: Your essay must be typed and must be at least 10 pages double-spaced with one inch margin, 12pt Times (or Computer Modern if using \LaTeX) and be appropriately organized. You choose a title which will be atop the first page. No need for a title page. Sectioning is at your preference. But, one of the choices in one of the prompts must be a powerful sentence in either the beginning or the end of the essay. The bibliography does not count towards the page limit. Keep footnotes to a minimum and do not use endnotes. You must email me a  \inred{PDF} of your paper (Microsoft Word allows saving as PDF).
+
+\subsection*{Revision is Due 10d after draft is graded (as a PDF by email))}
+
+You will receive comments on your draft after your submission. You will have the opportunity to revise your draft once and resubmit as a PDF. Resubmit by responding to my email with your completed PDF. You will receive a grade for this assignment assessed by the performance on your revision (not your initial submission).
+
+\pagenumbering{gobble}
+
+\end{document}
