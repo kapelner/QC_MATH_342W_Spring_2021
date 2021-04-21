@@ -29,11 +29,10 @@ y = sin(x) + rnorm(n, 0, 0.3)
 ggplot(data.frame(x = x, y = y), aes(x, y)) + geom_point(lwd = 0.6) 
 ```
 
-Now we fit a regression tree to this model. Nevermind the `bootstrap_indices` and `calculate_oob_error` arguments. This will be clear why they are not defaults later in the semester.
+Now we fit a regression tree to this model. Nevermind the `calculate_oob_error` argument for now. This will be clear why FALSE is NOT the default in a few classes.
 
 ```{r}
-tree_mod = YARFCART(data.frame(x = x), y, 
-            bootstrap_indices = list(1 : n), calculate_oob_error = FALSE)
+tree_mod = YARFCART(data.frame(x = x), y, calculate_oob_error = FALSE)
 ```
 
 How "big" is this tree model?
@@ -62,8 +61,7 @@ ggplot(data.frame(x = x, y = y), aes(x, y)) +
 Obviously overfit - but not that bad... let's try lowering the complexity by stopping the tree construction at a higher node size.
 
 ```{r}
-tree_mod = YARFCART(data.frame(x = x), y, nodesize = 50, 
-            bootstrap_indices = list(1 : n), calculate_oob_error = FALSE)
+tree_mod = YARFCART(data.frame(x = x), y, nodesize = 50, calculate_oob_error = FALSE)
 yhat = predict(tree_mod, x_predict)
 ggplot(data.frame(x = x, y = y), aes(x, y)) + 
   geom_point(lwd = 0.6) +
@@ -73,8 +71,7 @@ ggplot(data.frame(x = x, y = y), aes(x, y)) +
 Less overfitting now but now it's clearly underfit! We can play with the nodesize. Or we can use the model selection algorithm to pick the model (the nodesize). Let's ensure nodesize = 1 gives us perfect overfitting.
 
 ```{r}
-tree_mod = YARFCART(data.frame(x = x), y, nodesize = 1, 
-            bootstrap_indices = list(1 : n), calculate_oob_error = FALSE)
+tree_mod = YARFCART(data.frame(x = x), y, nodesize = 1, calculate_oob_error = FALSE)
 yhat = predict(tree_mod, data.frame(x = x))
 ggplot(data.frame(x = x, y = y), aes(x, y)) + 
   geom_point(lwd = 0.6) +
@@ -108,8 +105,7 @@ nodesizes_to_try = 70 : 1 #70 is obviously underfit so no need to go higher
 in_sample_errors = array(NA, length(nodesizes_to_try))
 oos_errors = array(NA, length(nodesizes_to_try))
 for (i in 1 : length(nodesizes_to_try)){
-  tree_mod = YARFCART(data.frame(x = x_train), y_train, nodesize = nodesizes_to_try[i], 
-            bootstrap_indices = list(1 : n_train), calculate_oob_error = FALSE)
+  tree_mod = YARFCART(data.frame(x = x_train), y_train, nodesize = nodesizes_to_try[i], calculate_oob_error = FALSE)
   yhat = predict(tree_mod, data.frame(x = x_train))
   in_sample_errors[i] = sd(y_train - yhat)
   yhat = predict(tree_mod, data.frame(x = x_select))
@@ -146,8 +142,7 @@ And fit a tree model. The default hyperparameter, the node size is $N_0 = 5$.
 ```{r}
 options(java.parameters = "-Xmx4000m")
 pacman::p_load(YARF)
-tree_mod = YARFCART(X_train, y_train, 
-            bootstrap_indices = list(1 : n_train), calculate_oob_error = FALSE)
+tree_mod = YARFCART(X_train, y_train, calculate_oob_error = FALSE)
 ```
 
 What does the in-sample fit look like?
@@ -225,8 +220,7 @@ That's a very flexible model.
 Let's see overfitting in action. Let's set nodesize to be one.
 
 ```{r}
-tree_mod = YARFCART(X_train, y_train, nodesize = 1, 
-            bootstrap_indices = list(1 : n_train), calculate_oob_error = FALSE)
+tree_mod = YARFCART(X_train, y_train, nodesize = 1, calculate_oob_error = FALSE)
 get_tree_num_nodes_leaves_max_depths(tree_mod)
 nrow(Boston_train) / get_tree_num_nodes_leaves_max_depths(tree_mod)$num_leaves
 ```
@@ -302,8 +296,7 @@ X_test$class = NULL
 Let's fit a tree:
 
 ```{r}
-tree_mod = YARFCART(X_train, y_train, 
-            bootstrap_indices = list(1 : n_train), calculate_oob_error = FALSE)
+tree_mod = YARFCART(X_train, y_train, calculate_oob_error = FALSE)
 get_tree_num_nodes_leaves_max_depths(tree_mod)
 nrow(biopsy_train) / get_tree_num_nodes_leaves_max_depths(tree_mod)$num_leaves
 ```
@@ -388,8 +381,7 @@ X_test$income = NULL
 Make a tree:
 
 ```{r}
-tree_mod = YARFCART(X_train, y_train, 
-            bootstrap_indices = list(1 : n_train), calculate_oob_error = FALSE)
+tree_mod = YARFCART(X_train, y_train, calculate_oob_error = FALSE)
 get_tree_num_nodes_leaves_max_depths(tree_mod)
 nrow(adult_train) / get_tree_num_nodes_leaves_max_depths(tree_mod)$num_leaves
 illustrate_trees(tree_mod, max_depth = 5, length_in_px_per_half_split = 30, open_file = TRUE)
