@@ -42,7 +42,23 @@ Write an Rcpp function `all_angles_cpp` that does the same thing. Use an IDE if 
 Test the time difference between these functions for `n = 1000` and `Nvec = 100, 500, 1000, 5000` using the package `microbenchmark`.  Store the results in a matrix with rows representing `Nvec` and two columns for base R and Rcpp.
 
 ```{r}
-#TO-DO
+
+Nvecs = c(100, 500, 1000, 5000)
+
+results_for_time = data.frame(
+  Nvec = Nvecs,
+  time_for_base_R = numeric(),
+  time_for_cpp = numeric()
+)
+for (i in 1 : length(Nvecs)){
+  X = matrix(rnorm(n * Nvecs[i]), nrow = Nvec)
+  results_for_time$time_for_base_R[i] = all_angles(X)
+  results_for_time$time_for_cpp[i] = all_angles_cpp(X)
+}
+
+ggplot(results_for_time) + 
+  geom_line(aes(x = Nvec, y = time_for_base_R), col = "red") +
+  geom_line(aes(x = Nvec, y = time_for_cpp), col = "blue")
 ```
 
 Plot the divergence of performance (in log seconds) over n using a line geometry. Use two different colors for the R and CPP functions. Make sure there's a color legend on your plot. We wil see later how to create "long" matrices that make such plots easier.
@@ -154,7 +170,11 @@ For each named storm, find its maximum category, wind speed, pressure and diamet
 For each year in the dataset, tally the number of storms. "Tally" is a fancy word for "count the number of". Plot the number of storms by year. Any pattern?
 
 ```{r}
-#TO-DO
+data(storms)
+storms %>% 
+  group_by(year) %>% 
+  summarize(num_storms = n_distinct(name))
+
 ```
 
 For each year in the dataset, tally the storms by category.
