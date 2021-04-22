@@ -1,0 +1,195 @@
+---
+title: "Lab 8"
+author: "Your Name Here"
+output: pdf_document
+date: "11:59PM April 29, 2021"
+---
+
+I want to make some use of my CART package. Everyone please try to run the following:
+
+```{r}
+if (!pacman::p_isinstalled(YARF)){
+  pacman::p_install_gh("kapelner/YARF/YARFJARs", ref = "dev")
+  pacman::p_install_gh("kapelner/YARF/YARF", ref = "dev", force = TRUE)
+}
+options(java.parameters = "-Xmx4000m")
+pacman::p_load(YARF)
+```
+
+For many of you it will not work. That's okay.
+
+Throughout this part of this assignment you can use either the `tidyverse` package suite or `data.table` to answer but not base R. You can mix `data.table` with `magrittr` piping if you wish but don't go back and forth between `tbl_df`'s and `data.table` objects.
+
+```{r}
+pacman::p_load(tidyverse, magrittr, data.table)
+```
+
+We will be using the `storms` dataset from the `dplyr` package. Filter this dataset on all storms that have no missing measurements for the two diameter variables, "ts_diameter" and "hu_diameter".
+
+```{r}
+#TO-DO
+```
+
+From this subset, create a data frame that only has storm, observation period number for each storm (i.e., 1, 2, ..., T) and the "ts_diameter" and "hu_diameter" metrics.
+
+```{r}
+#TO-DO
+```
+
+Create a data frame in long format with columns "diameter" for the measurement and "diameter_type" which will be categorical taking on the values "hu" or "ts".
+
+```{r}
+#TO-DO
+```
+
+Using this long-formatted data frame, use a line plot to illustrate both "ts_diameter" and "hu_diameter" metrics by observation period for four random storms using a 2x2 faceting. The two diameters should appear in two different colors and there should be an appropriate legend.
+
+```{r}
+#TO-DO
+```
+
+In this next first part of this lab, we will be joining three datasets in an effort to make a design matrix that predicts if a bill will be paid on time. Clean up and load up the three files. Then I'll rename a few features and then we can examine the data frames:
+
+```{r}
+rm(list = ls())
+pacman::p_load(tidyverse, magrittr, data.table, R.utils)
+bills = fread("https://github.com/kapelner/QC_MATH_342W_Spring_2021/raw/master/labs/bills_dataset/bills.csv.bz2")
+payments = fread("https://github.com/kapelner/QC_MATH_342W_Spring_2021/raw/master/labs/bills_dataset/payments.csv.bz2")
+discounts = fread("https://github.com/kapelner/QC_MATH_342W_Spring_2021/raw/master/labs/bills_dataset/discounts.csv.bz2")
+setnames(bills, "amount", "tot_amount")
+setnames(payments, "amount", "paid_amount")
+head(bills)
+head(payments)
+head(discounts)
+```
+
+The unit we care about is the bill. The y metric we care about will be "paid in full" which is 1 if the company paid their total amount (we will generate this y metric later).
+
+Since this is the response, we would like to construct the very best design matrix in order to predict y.
+
+I will create the basic steps for you guys. First, join the three datasets in an intelligent way. You will need to examine the datasets beforehand.
+
+```{r}
+bills_with_payments = #TO-DO
+bills_with_payments_with_discounts = #TO-DO
+```
+
+Now create the binary response metric `paid_in_full` as the last column and create the beginnings of a design matrix `bills_data`. Ensure the unit / observation is bill i.e. each row should be one bill! 
+
+```{r}
+#TO-DO
+table(bills_data$paid_in_full, useNA = "always") 
+```
+
+How should you add features from transformations (called "featurization")? What data type(s) should they be? Make some features below if you think of any useful ones. Name the columns appropriately so another data scientist can easily understand what information is in your variables.
+
+```{r}
+#TO-DO
+```
+
+Now let's do this exercise. Let's retain 25% of our data for test.
+
+```{r}
+K = 4
+test_indices = sample(1 : nrow(bills_data), round(nrow(bills_data) / K))
+train_indices = setdiff(1 : nrow(bills_data), test_indices)
+bills_data_test = bills_data[test_indices, ]
+bills_data_train = bills_data[train_indices, ]
+```
+
+Now try to build a classification tree model for `paid_in_full` with the features (use the `Xy` parameter in `YARF`). If you cannot get `YARF` to install, use the package `rpart` (the standard R tree package) instead. You will need to install it and read through some documentation to find the correct syntax.
+
+Warning: this data is highly anonymized and there is likely zero signal! So don't expect to get predictive accuracy. The value of the exercise is in the practice. I think this exercise (with the joining exercise above) may be one of the most useful exercises in the entire semester.
+
+```{r}
+#TO-DO
+```
+
+For those of you who installed `YARF`, what are the number of nodes and depth of the tree? 
+
+```{r}
+#TO-DO
+```
+
+For those of you who installed `YARF`, print out an image of the tree.
+
+```{r}
+#TO-DO
+```
+
+Predict on the test set and compute a confusion matrix.
+
+```{r}
+#TO-DO
+```
+
+Report the following error metrics: misclassifcation error, precision, recall, F1, FDR, FOR.
+
+```{r}
+#TO-DO
+```
+
+Is this a good model? (yes/no and explain).
+
+#TO-DO
+
+There are probability asymmetric costs to the two types of errors. Assign the costs below and calculate oos total cost.
+
+```{r}
+#TO-DO
+```
+
+We now wish to do asymmetric cost classification. Fit a logistic regression model to this data.
+
+```{r}
+#TO-DO
+```
+
+Use the function from class to calculate all the error metrics for the values of the probability threshold being 0.001, 0.002, ..., 0.999 in a data frame.
+
+```{r}
+#TO-DO
+```
+
+Calculate the column `total_cost` and append it to this data frame.
+
+```{r}
+#TO-DO
+```
+
+Which is the winning probability threshold value and the total cost at that threshold?
+
+```{r}
+#TO-DO
+```
+
+Plot an ROC curve and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
+Calculate AUC and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
+Plot a DET curve and interpret.
+
+```{r}
+#TO-DO
+```
+
+#TO-DO interpretation
+
+
+
+
+
+
+

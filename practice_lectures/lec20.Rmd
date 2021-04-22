@@ -12,7 +12,7 @@ Let's fit a regression tree. We will use the development package `YARF` which I'
 ```{r}
 if (!pacman::p_isinstalled(YARF)){
   pacman::p_install_gh("kapelner/YARF/YARFJARs", ref = "dev")
-  pacman::p_install_gh("kapelner/YARF/YARF", ref = "dev")
+  pacman::p_install_gh("kapelner/YARF/YARF", ref = "dev", force = TRUE)
 }
 options(java.parameters = "-Xmx4000m")
 pacman::p_load(YARF)

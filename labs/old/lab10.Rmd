@@ -6,42 +6,7 @@ date: "11:59PM May 11, 2020"
 ---
 
 
-In the first part of this lab, we will be joining three datasets in an effort to make a design matrix that predicts if a bill will be paid on time. Load up the three files:
 
-```{r}
-pacman::p_load(tidyverse, magrittr, data.table, R.utils)
-bills = fread("https://github.com/kapelner/QC_Math_390.4_Spring_2020/raw/master/labs/bills_dataset/bills.csv.bz2")
-payments = fread("https://github.com/kapelner/QC_Math_390.4_Spring_2020/raw/master/labs/bills_dataset/payments.csv.bz2")
-discounts = fread("https://github.com/kapelner/QC_Math_390.4_Spring_2020/raw/master/labs/bills_dataset/discounts.csv.bz2")
-```
-
-The unit we care about is the bill. The metric we care about is "paid in full" and it's binary. We would like to build the best design matrix we can and of course generate the y. Warning: this data is highly anonymized and there is likely zero signal! So don't expect to get predictive accuracy. The value of the exercise is in the practice. I think this may be one of the most useful exercises in the entire semester.
-
-I will create the basic steps for you guys. First, join the three datasets in an intelligent way. You will need to examine the datasets beforehand.
-
-```{r}
-head(bills)
-setnames(bills, "amount", "tot_amount")
-setnames(payments, "amount", "paid_amount")
-head(payments)
-head(discounts)
-bills_with_payments = merge(bills, payments, by.x ="id", by.y = "bill_id", all.x = TRUE)
-bills_with_payments[, id.y := NULL]
-bills_with_payments
-
-bills_payments_discounts = merge(bills_with_payments, discounts, by.x = "discount_id", by.y = "id", all.x = TRUE)
-bills_payments_discounts
-```
-
-Now create the response metric "paid_in_full" and create the design matrix by ensuring the unit is bill. How should you featurize? Should you create some features? What type(s) should they be? 
-
-```{r}
-bills_data = bills_payments_discounts %>% 
-  group_by(id) %>% 
-  summarise(total_paid_amount = sum(paid_amount), customer_id = first(customer_id), discount_id = first(discount_id), total_amount = first(tot_amount)) %>%
-  mutate(total_paid_amount = ifelse(is.na(total_paid_amount), 0, total_paid_amount), paid_in_full = ifelse(total_paid_amount >= total_amount, 1, 0))
-table(bills_data$paid_in_full, useNA = "always") 
-```
 
 Fit a tree to this data. Try to use `YARF` if you have it. If not, use the package `rpart`. Below is a guide to installing `YARF` and ensuring it works.
 
