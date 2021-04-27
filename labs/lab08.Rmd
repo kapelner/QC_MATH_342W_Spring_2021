@@ -24,13 +24,13 @@ Throughout this part of this assignment you can use either the `tidyverse` packa
 pacman::p_load(tidyverse, magrittr, data.table)
 ```
 
-We will be using the `storms` dataset from the `dplyr` package. Filter this dataset on all storms that have no missing measurements for the two diameter variables, "ts_diameter" and "hu_diameter".
+We will be using the `storms` dataset from the `dplyr` package. Filter this dataset on all storms that have no missing measurements for the two diameter variables, "ts_diameter" and "hu_diameter". Zeroes count as missing as well.
 
 ```{r}
 #TO-DO
 ```
 
-From this subset, create a data frame that only has storm, observation period number for each storm (i.e., 1, 2, ..., T) and the "ts_diameter" and "hu_diameter" metrics.
+From this subset, create a data frame that only has storm name, observation period number for each storm (i.e., 1, 2, ..., T) and the "ts_diameter" and "hu_diameter" metrics.
 
 ```{r}
 #TO-DO

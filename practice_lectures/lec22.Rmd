@@ -252,6 +252,8 @@ Not bad at all - only a tad worse! In the real world it's usually a lot worse. W
 # Detection Error Tradeoff curve
 
 ```{r}
+table(y_test) / length(y_test)
+table(y_train) / length(y_train)
 ggplot(performance_metrics_in_and_oos) +
   geom_line(aes(x = FDR, y = miss_rate, col = sample)) +
   coord_fixed() + xlim(0, 1) + ylim(0, 1)
@@ -360,7 +362,8 @@ Let's plot average reward (reward per person) by threshold:
 
 ```{r}
 ggplot(performance_metrics_oos_full_mod) +
-  geom_line(aes(x = p_th, y = avg_cost))
+  geom_line(aes(x = p_th, y = avg_cost)) #+
+  # xlim(0, 0.05) + ylim(-5,0)
 ```
 
 Obviously, the best decision is $p_{th} \approx 0$ which means you classifiy almost everything as a positive. This makes sense because the mailing is so cheap. What are the performance characteristics of the optimal model?
@@ -368,6 +371,8 @@ Obviously, the best decision is $p_{th} \approx 0$ which means you classifiy alm
 ```{r}
 i_star = which.max(performance_metrics_oos_full_mod$avg_cost)
 performance_metrics_oos_full_mod[i_star, ]
+
+# performance_metrics_oos_full_mod[, .(p_th, avg_cost)]
 ```
 
 The more interesting problem is where the cost of advertising is higher:
@@ -397,5 +402,5 @@ If $g_{pr}$ is closer to $f_{pr}$, what happens?
 
 All the threshold-derived classification models get better and you are guaranteed to make more money since you have a better discriminating eye.
 
-There is also a way to make asymmetric models with trees. We will do this later to give you time for this to sink in. But first...
+There is also a way to make asymmetric models with trees. We will do this later to give you time for the general concept to sink in.
 

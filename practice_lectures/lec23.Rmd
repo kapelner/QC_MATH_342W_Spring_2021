@@ -1,0 +1,752 @@
+---
+title: "Practice Lecture 23 MATH 342W Queens College"
+author: "Professor Adam Kapelner"
+date: "April 28, 2021"
+---
+
+# Bias-Variance Decomposition of Generalization Error
+
+Let's try to fit a quadratic $f$ with a linear model and examine bias-variance tradeoff.
+
+```{r}
+rm(list = ls())
+xmin = 0
+xmax = 5
+n_train = 20
+n_test = 1000
+sigma = 1
+
+Nsim = 1000
+
+training_gs = matrix(NA, nrow = Nsim, ncol = 2)
+x_trains = matrix(NA, nrow = Nsim, ncol = n_train)
+y_trains = matrix(NA, nrow = Nsim, ncol = n_train)
+all_oos_residuals = matrix(NA, nrow = Nsim, ncol = n_test)
+for (nsim in 1 : Nsim){
+  #simulate dataset $\mathbb{D}$
+  x_train = runif(n_train, xmin, xmax)
+  delta_train = rnorm(n_train, 0, sigma) #Assumption I: mean zero and Assumption II: homoskedastic
+  y_train = x_train^2 + delta_train
+  x_trains[nsim, ] = x_train
+  y_trains[nsim, ] = y_train
+  
+  #fit a model g | x's, delta's and save it
+  g_model = lm(y_train ~ ., data.frame(x = x_train))
+  training_gs[nsim, ] = coef(g_model)
+  
+  #generate oos dataset according to the same data generating process (DGP) 
+  x_test = runif(n_test, xmin, xmax)
+  delta_test = rnorm(n_test, 0, sigma)
+  y_test = x_test^2 + delta_test
+  #predict oos using the model and save the oos residuals
+  y_hat_test = predict(g_model, data.frame(x = x_test))
+  all_oos_residuals[nsim, ] = y_test - y_hat_test
+}
+```
+
+Graph a few:
+
+```{r}
+pacman::p_load(ggplot2)
+ggplot() + 
+  geom_point(aes(x, y), data = data.frame(x = x_trains[1, ], y = y_trains[1, ]), col = "blue") +
+  geom_point(aes(x, y), data = data.frame(x = x_trains[2, ], y = y_trains[2, ]), col = "darkgreen") +
+  geom_point(aes(x, y), data = data.frame(x = x_trains[3, ], y = y_trains[3, ]), col = "red")
+```
+
+The blue dataset is one possible $\mathbb{D}$, the green dataset is another possible $\mathbb{D}$ and the red dataset is another possible $\mathbb{D}$. This illustrated "dataset-dataset variability".
+
+Take a look at the mse:
+
+```{r}
+mse = mean(c(all_oos_residuals)^2)
+mse
+```
+
+This should be irreducible error plus bias-squared plus variance.
+
+Let's visualize the bias
+
+```{r}
+resolution = 10000
+g_average = colMeans(training_gs)
+f = function(x){x^2}
+x = seq(xmin, xmax, length.out = resolution)
+f_x_df = data.frame(x = x, f = f(x))
+ggplot(f_x_df, aes(x, f)) + 
+  geom_line(col = "green") + 
+  geom_abline(intercept = g_average[1], slope = g_average[2], col = "red")
+```
+
+What is the average bias of $g$?
+
+```{r}
+x = seq(xmin, xmax, length.out = resolution)
+g_avg_x = g_average[1] + g_average[2] * x
+f_x = x^2
+biases = f_x - g_avg_x
+expe_bias_g_sq = mean(biases^2)
+expe_bias_g_sq
+```
+
+What is the variance? Let's look at all lines:
+
+```{r}
+plot_obj = ggplot() + 
+  xlim(xmin, xmax) + ylim(xmin^2, xmax^2)
+
+for (nsim in 1 : min(Nsim, 100)){ #otherwise takes too long
+  plot_obj = plot_obj + geom_abline(intercept = training_gs[nsim, 1], slope = training_gs[nsim, 2], col = "blue")
+}
+
+plot_obj +
+  geom_abline(intercept = g_average[1], slope = g_average[2], col = "red", lwd = 2) + 
+  geom_line(data = f_x_df, aes(x, f), col = "green", size = 2)
+```
+
+Now calculate this average variance:
+
+```{r}
+x = seq(xmin, xmax, length.out = resolution)
+
+expe_g_x = g_average[1] + g_average[2] * x
+
+var_x_s = array(NA, Nsim)
+for (nsim in 1 : Nsim){
+  g_x = training_gs[nsim, 1] + training_gs[nsim, 2] * x
+  var_x_s[nsim] = mean((g_x - expe_g_x)^2)
+}
+
+expe_var_g = mean(var_x_s)
+expe_var_g
+```
+
+Now check the equivalence
+
+```{r}
+mse
+sigma^2
+expe_bias_g_sq
+expe_var_g
+sigma^2 + expe_bias_g_sq + expe_var_g
+```
+
+This is not exactly equal due to numerical error.
+
+Let's try the whole thing again using a quadratic regression!
+
+```{r}
+training_gs = matrix(NA, nrow = Nsim, ncol = 3)
+all_residuals = matrix(NA, nrow = Nsim, ncol = n_test)
+
+for (nsim in 1 : Nsim){
+  #simulate dataset $\mathbb{D}$
+  x_train = runif(n_train, xmin, xmax)
+  delta_train = rnorm(n_train, 0, sigma)
+  y_train = x_train^2 + delta_train
+  
+  #fit a model g | x's, delta's and save it
+  g_model = lm(y_train ~ poly(x, 2, raw = TRUE), data.frame(x = x_train))
+  training_gs[nsim, ] = coef(g_model)
+  
+  #generate oos dataset and save residuals on oos data
+  x_test = runif(n_test, xmin, xmax)
+  delta_test = rnorm(n_test, 0, sigma)
+  y_test = x_test^2 + delta_test
+  y_hat_test = predict(g_model, data.frame(x = x_test))
+  all_residuals[nsim, ] = y_test - y_hat_test
+}
+```
+
+Take a look at the mse:
+
+```{r}
+mse = mean(c(all_residuals)^2)
+mse
+```
+
+Much lower! Why? Bias went down. 
+
+Let's visualize the bias
+
+```{r}
+g_average = colMeans(training_gs)
+f = function(x){x^2}
+x = seq(xmin, xmax, length.out = resolution)
+ggplot(f_x_df, aes(x, f)) + 
+  geom_line(col = "green") + 
+  stat_function(fun = function(x){g_average[1] + g_average[2] * x + g_average[3] * x^2}, col = "red")
+```
+
+Not much! What is the average bias of $g$?
+
+```{r}
+x = seq(xmin, xmax, length.out = resolution)
+g_avg_x = g_average[1] + g_average[2] * x + g_average[3] * x^2
+f_x = x^2
+biases = f_x - g_avg_x
+expe_bias_g_sq = mean(biases^2)
+expe_bias_g_sq
+```
+
+What is the variance? Let's look at all lines:
+
+```{r}
+plot_obj = ggplot(data.frame(x = x)) + 
+  xlim(xmin, xmax) + ylim(xmin^2, xmax^2)
+
+for (nsim in 1 : min(Nsim, 50)){ #otherwise takes too long
+  plot_obj = plot_obj + geom_line(data = data.frame(x = x, y = training_gs[nsim, 1] + training_gs[nsim, 2] * x + training_gs[nsim, 3] * x^2), mapping = aes(x, y), col = "blue")
+}
+
+plot_obj +
+  stat_function(fun = function(x){g_average[1] + g_average[2] * x + g_average[3] * x^2}, col = "red", lwd = 2) + 
+  geom_line(data = f_x_df, aes(x, f), col = "green", size = 2)
+```
+
+Now calculate this average variance:
+
+```{r}
+x = seq(xmin, xmax, length.out = resolution)
+
+expe_g_x = g_average[1] + g_average[2] * x + g_average[3] * x^2
+
+var_x_s = array(NA, Nsim)
+for (nsim in 1 : Nsim){
+  g_x = training_gs[nsim, 1] + training_gs[nsim, 2] * x + training_gs[nsim, 3] * x^2
+  var_x_s[nsim] = mean((g_x - expe_g_x)^2)
+}
+
+expe_var_g = mean(var_x_s)
+expe_var_g
+```
+
+Now check the equivalence
+
+```{r}
+mse
+sigma^2 
+expe_bias_g_sq
+expe_var_g
+sigma^2 + expe_bias_g_sq + expe_var_g
+```
+
+
+Try it again with quintic polynomials!
+
+```{r}
+training_gs = matrix(NA, nrow = Nsim, ncol = 6)
+all_residuals = matrix(NA, nrow = Nsim, ncol = n_test)
+
+for (nsim in 1 : Nsim){
+  #simulate dataset $\mathbb{D}$
+  x_train = runif(n_train, xmin, xmax)
+  delta_train = rnorm(n_train, 0, sigma)
+  y_train = x_train^2 + delta_train
+  
+  #fit a model g | x's, delta's and save it
+  g_model = lm(y_train ~ poly(x, 5, raw = TRUE), data.frame(x = x_train))
+  training_gs[nsim, ] = coef(g_model)
+  
+  #generate oos dataset and save residuals on oos data
+  x_test = runif(n_test, xmin, xmax)
+  delta_test = rnorm(n_test, 0, sigma)
+  y_test = x_test^2 + delta_test
+  y_hat_test = predict(g_model, data.frame(x = x_test))
+  all_residuals[nsim, ] = y_test - y_hat_test
+}
+```
+
+Take a look at the mse:
+
+```{r}
+mse = mean(c(all_residuals)^2)
+mse
+```
+
+Much higher! Why? Variance went up!
+
+Let's visualize the bias
+
+```{r}
+g_average = colMeans(training_gs)
+f = function(x){x^2}
+x = seq(xmin, xmax, length.out = resolution)
+ggplot(f_x_df, aes(x, f)) + 
+  geom_line(col = "darkgreen") + 
+  stat_function(fun = function(x){g_average[1] + g_average[2] * x + g_average[3] * x^2 + g_average[4] * x^3 + g_average[5] * x^4 + g_average[6] * x^5}, col = "red")
+```
+
+Not much! Now acutllay compute the average bias squared of $g$:
+
+```{r}
+x = seq(xmin, xmax, length.out = resolution)
+g_avg_x = g_average[1] + g_average[2] * x + g_average[3] * x^2 + g_average[4] * x^3 + g_average[5] * x^4 + g_average[6] * x^5
+f_x = x^2
+biases = f_x - g_avg_x
+expe_bias_g_sq = mean(biases^2)
+expe_bias_g_sq
+```
+
+This appears to have increased over last time by a nominal amount ... but it's only because we're not running the regression infinite times. Remember this "expectation" is only an average.
+
+What is the variance? Let's look at all lines:
+
+```{r}
+plot_obj = ggplot(data.frame(x = x)) + 
+  xlim(xmin, xmax) + ylim(xmin^2, xmax^2)
+
+for (nsim in 1 : min(Nsim, 30)){ #otherwise takes too long
+  plot_obj = plot_obj + geom_line(data = data.frame(x = x, y = training_gs[nsim, 1] + training_gs[nsim, 2] * x + training_gs[nsim, 3] * x^2 + training_gs[nsim, 4] * x^3 + training_gs[nsim, 5] * x^4 + training_gs[nsim, 6] * x^5), mapping = aes(x, y), col = "blue")
+}
+
+plot_obj +
+  stat_function(fun = function(x){g_average[1] + g_average[2] * x + g_average[3] * x^2 + g_average[4] * x^3 + g_average[5] * x^4 + g_average[6] * x^5}, col = "red", lwd = 2) + 
+  ylim(-10, 50) +
+  geom_line(data = f_x_df, aes(x, f), col = "green", size = 2)
+```
+
+It looks awful!!!
+
+Now actually compute the average variance numerically:
+
+```{r}
+x = seq(xmin, xmax, length.out = resolution)
+
+expe_g_x = g_average[1] + g_average[2] * x + g_average[3] * x^2 + g_average[4] * x^3 + g_average[5] * x^4 + g_average[6] * x^5
+
+var_x_s = array(NA, Nsim)
+for (nsim in 1 : Nsim){
+  g_x = training_gs[nsim, 1] + training_gs[nsim, 2] * x + training_gs[nsim, 3] * x^2 + training_gs[nsim, 4] * x^3 + training_gs[nsim, 5] * x^4 + training_gs[nsim, 6] * x^5
+  var_x_s[nsim] = mean((g_x - expe_g_x)^2)
+}
+
+expe_var_g = mean(var_x_s)
+expe_var_g
+```
+
+Any more complexity than you need allows for overfitting!
+
+Now check the equivalence
+
+```{r}
+mse
+sigma^2
+expe_bias_g_sq
+expe_var_g
+sigma^2 + expe_bias_g_sq + expe_var_g
+```
+
+# Bias - Variance Decomposition of MSE in Regression Trees
+
+Let's return to the simulated sine curve data which we used to introduce regression trees.
+
+```{r}
+rm(list = ls())
+n_train = 100
+n_test = 500
+xmin = 0
+xmax = 10
+sigma = 0.2
+Nsim = 250
+```
+
+And load the tree package:
+
+```{r}
+options(java.parameters = "-Xmx4000m")
+pacman::p_load(YARF, tidyverse, magrittr)
+```
+
+Now let's generate lots of different datasets and fit many tree models. Note there's a new argument `calculate_oob_error = FALSE`. This is here for speed only. Ignore this for now as we will go over what this means later in detail.
+
+```{r}
+training_gs = list() #storing entire objects - need a hash
+all_residuals = matrix(NA, nrow = Nsim, ncol = n_test)
+
+for (nsim in 1 : Nsim){
+  #simulate dataset $\mathbb{D}$
+  x_train = runif(n_train, xmin, xmax)
+  delta_train = rnorm(n_train, 0, sigma)
+  y_train = sin(x_train) + delta_train #f(x) = sin(x)
+  # ggplot(data.frame(x = x, y = y), aes(x, y)) + geom_point(lwd=0.6) 
+  
+  #fit a model g | x's, delta's and save it
+  g_model = YARFCART(data.frame(x = x_train), y_train, 
+                     bootstrap_indices = 1 : n_train, calculate_oob_error = FALSE)
+  training_gs[[nsim]] = g_model
+  
+  #generate oos dataset and save residuals on oos data
+  x_test = runif(n_test, xmin, xmax)
+  delta_test = rnorm(n_test, 0, sigma) #mean zero, variance sigsq always (not dependent on value of x)
+  y_test = sin(x_test) + delta_test
+  y_hat_test = predict(g_model, data.frame(x = x_test))
+  all_residuals[nsim, ] = y_test - y_hat_test
+}
+```
+
+Let's look at the last data set to remind ourselves of the problem setting:
+
+```{r}
+ggplot(data.frame(x = x_train, y = y_train)) + 
+  geom_point(aes(x, y))
+```
+
+
+What does the storage of all the models look like?
+
+```{r}
+head(training_gs, 2)
+```
+
+Take a look at the mse:
+
+```{r}
+mse = mean(c(all_residuals)^2)
+mse
+```
+
+Let's visualize the bias
+
+```{r}
+resolution = 1000
+#generate x and the truth
+x = seq(xmin, xmax, length.out = resolution)
+f_x = sin(x)
+
+#now estimate the expectation of g by averaging all the different models
+g_avg_x = array(0, resolution)
+for (nsim in 1 : Nsim){
+  g_nsim = training_gs[[nsim]]
+  g_avg_x = g_avg_x + predict(g_nsim, data.frame(x = x))
+}
+g_avg_x = g_avg_x / Nsim #average of all models
+
+#now plot
+ggplot(data.frame(x = x, f = f_x, expe_g = g_avg_x)) + 
+  geom_line(aes(x, f), col = "darkgreen") + 
+  geom_line(aes(x, expe_g), col = "red")
+```
+
+Not much! Now actually compute the average bias squared of $g$:
+
+```{r}
+biases = f_x - g_avg_x
+expe_bias_g_sq = mean(biases^2)
+expe_bias_g_sq
+```
+
+This is small - why??
+
+It's because trees are so expressive and have such model complexity that they can nail almost any true $f$ function!
+
+That means the MSE save the irreducible noise is coming from the variance. Let's look at the variance vs f(x):
+
+```{r}
+plot_obj = ggplot(data.frame(x = x)) + 
+  xlim(xmin, xmax) #+ ylim(xmin^2, xmax^2)
+
+num_trees_to_visualize = 30
+for (nsim in 1 : min(Nsim, num_trees_to_visualize)){
+  g_nsim = training_gs[[nsim]]
+  g_x = predict(g_nsim, data.frame(x = x))
+  plot_obj = plot_obj + geom_line(data = data.frame(x = x, y = g_x), aes(x = x, y = y), col = "blue")
+}
+
+plot_obj +
+  geom_line(data = data.frame(x = x, expe_g = g_avg_x), mapping = aes(x, expe_g), col = "red", lwd = 1) #note: expe_g = f(x) since no bias.... but technically I should be using a separate f(x) data frame
+```
+
+It looks awful!!!
+
+Now actually compute the average variance numerically:
+
+```{r}
+x = seq(xmin, xmax, length.out = resolution)
+
+var_x_s = array(NA, min(Nsim, 50))
+for (nsim in 1 : min(Nsim, 50)){ #otherwise takes too long
+  g_nsim = training_gs[[nsim]]
+  g_x = predict(g_nsim, data.frame(x = x))
+  var_x_s[nsim] = mean((g_x - g_avg_x)^2)
+}
+
+expe_var_g = mean(var_x_s)
+expe_var_g
+```
+
+Any more complexity than you need allows for overfitting!
+
+Now check the equivalence
+
+```{r}
+mse
+sigma^2
+expe_bias_g_sq
+expe_var_g
+sigma^2 + expe_bias_g_sq + expe_var_g
+```
+
+# Model Averaging via Bootstrap Aggregation ("Bagging")
+
+Now let's generate one dataset (only ONE)!
+
+```{r}
+x_train = runif(n_train, xmin, xmax)
+delta_train = rnorm(n_train, 0, sigma)
+y_train = sin(x_train) + delta_train
+ggplot(data.frame(x = x_train, y = y_train)) + geom_point(aes(x, y))
+```
+
+Spend a moment to appreciate that this is all we're going to have. There is a lot of irreducible noise that is going to prevent us from finding the sine curve.
+
+Now we create many bootstrap samples to create similiar but different datasets and fit many tree models:
+
+```{r}
+bootstrapped_gs = list() #storing entire objects - need a hash
+
+num_trees = 250
+for (t in 1 : num_trees){ #M = num_trees
+  #fit a model g | x's, delta's and save it
+  bootstrap_indices_t = sample(1 : n_train, replace = TRUE)
+  g_model = YARFCART(data.frame(x = x_train[bootstrap_indices_t]), y_train[bootstrap_indices_t], 
+                     calculate_oob_error = FALSE, bootstrap_indices = 1 : n_train) #this is confusing! But will become clear later...
+  bootstrapped_gs[[t]] = g_model
+}
+```
+
+Now let's aggregate all models constructed with bootstrap samples together by averaging and see what it looks like relative to real $f$:
+
+```{r}
+#generate x and the truth
+x = seq(xmin, xmax, length.out = resolution)
+f_x = sin(x)
+
+#create the bagged model predictions
+g_bagged = array(0, resolution)
+for (t in 1 : num_trees){
+  g_t = bootstrapped_gs[[t]]
+  g_bagged = g_bagged + predict(g_t, data.frame(x = x))
+}
+g_bagged = g_bagged / num_trees #average of all models
+
+#now plot
+ggplot(data.frame(x = x, f = f_x, g_bagged = g_bagged)) + 
+  geom_line(aes(x, f), col = "green") + 
+  geom_line(aes(x, g_bagged), col = "blue")
+```
+  
+That's pretty good considering the plot of the raw data from above.
+
+We just compared one tree to a bagged-tree (i.e. average of many trees where each tree was fit on a bootstrap sample of the original data). Let's see if the bagged tree is truly better than one tree. The way to do this is generate lots of datasets and try to estimate mse (with bias and variance).
+
+We fit the bag of trees before manually with a for loop. But of course there is a convenience to do this, the function `YARFBAG`. And then we run the same simulation as we did above with one tree.
+
+```{r}
+Nsim = 250
+training_gs = list() #storing entire objects - need a hash
+all_residuals = matrix(NA, nrow = Nsim, ncol = n_test)
+
+for (nsim in 1 : Nsim){
+  #simulate dataset $\mathbb{D}$
+  x_train = runif(n_train, xmin, xmax)
+  delta_train = rnorm(n_train, 0, sigma)
+  y_train = sin(x_train) + delta_train
+  # ggplot(data.frame(x = x, y = y), aes(x, y)) + geom_point(lwd=0.6) 
+  
+  #fit a model bagged tree g | x's, delta's and save it
+  g_model = YARFBAG(data.frame(x = x_train), y_train, num_trees = num_trees, calculate_oob_error = FALSE) #automatically does the bootstrap internally
+  training_gs[[nsim]] = g_model
+  
+  #generate oos dataset and save residuals on oos data
+  x_test = runif(n_test, xmin, xmax)
+  delta_test = rnorm(n_test, 0, sigma) #mean zero, variance sigsq always (not dependent on value of x)
+  y_test = sin(x_test) + delta_test
+  y_hat_test = predict(g_model, data.frame(x = x_test))
+  all_residuals[nsim, ] = y_test - y_hat_test
+}
+```
+
+What do all the the bagged models look like?
+
+```{r}
+head(training_gs, 2)
+```
+
+Take a look at the mse:
+
+```{r}
+mse = mean(c(all_residuals)^2)
+mse
+```
+
+Let's visualize the bias
+
+```{r}
+resolution = 1000
+#generate x and the truth
+x = seq(xmin, xmax, length.out = resolution)
+f_x = sin(x)
+
+#now estimate the expectation of g by averaging all the different models
+g_avg_x = array(0, resolution)
+for (nsim in 1 : Nsim){
+  g_nsim = training_gs[[nsim]]
+  g_avg_x = g_avg_x + predict(g_nsim, data.frame(x = x))
+}
+g_avg_x = g_avg_x / Nsim #average of all models
+
+#now plot
+ggplot(data.frame(x = x, f = f_x, expe_g = g_avg_x)) + 
+  geom_line(aes(x, f), col = "darkgreen") + 
+  geom_line(aes(x, expe_g), col = "red")
+```
+
+If a single tree was unbiased then an average of trees will be unbiased.
+
+Now actually compute the average bias squared of $g$:
+
+```{r}
+biases = f_x - g_avg_x
+expe_bias_g_sq = mean(biases^2)
+expe_bias_g_sq
+```
+
+Almost zilch.
+
+Now... variance?
+
+```{r}
+plot_obj = ggplot(data.frame(x = x)) + 
+  xlim(xmin, xmax) #+ ylim(xmin^2, xmax^2)
+
+for (nsim in 1 : min(Nsim, 30)){ #otherwise takes too long
+  g_nsim = training_gs[[nsim]]
+  g_x = predict(g_nsim, data.frame(x = x))
+  plot_obj = plot_obj + geom_line(data = data.frame(x = x, y = g_x), aes(x = x, y = y), col = "blue")
+}
+
+plot_obj +
+  geom_line(data = data.frame(x = x, expe_g = g_avg_x), mapping = aes(x, expe_g), col = "red", lwd = 1.5)
+```
+
+There is variance, but less than previously when only one tree was used.
+
+Now actually compute the average variance numerically:
+
+```{r}
+x = seq(xmin, xmax, length.out = resolution)
+
+var_x_s = array(NA, min(Nsim, 50))
+for (nsim in 1 : min(Nsim, 50)){ #otherwise takes too long
+  g_nsim = training_gs[[nsim]]
+  g_x = predict(g_nsim, data.frame(x = x))
+  var_x_s[nsim] = mean((g_x - g_avg_x)^2)
+}
+
+expe_var_g_bagged = mean(var_x_s)
+expe_var_g_bagged
+```
+
+Any more complexity than you need allows for overfitting!
+
+Now check the equivalence
+
+```{r}
+mse
+sigma^2
+expe_bias_g_sq
+expe_var_g_bagged
+sigma^2 + expe_bias_g_sq + expe_var_g_bagged
+```
+
+We have a better algorithm! Why? Because there is reduction of correlation between the bootstrapped models:
+
+```{r}
+rho = expe_var_g_bagged / expe_var_g
+rho
+```
+
+That's a gain of almost 50% in the MSE component that we have control over! And... it's for FREEEEEE.
+
+# Bagged Trees vs. a Linear Model: Behold the power of machine learning!!
+
+Let's look at the boston housing data first.
+
+```{r}
+boston = MASS::Boston
+
+prop_test = 0.1
+test_indices = sample(1 : nrow(boston), round(prop_test * nrow(boston)))
+boston_test = boston[test_indices, ]
+y_test = boston_test$medv
+X_test = boston_test
+X_test$medv = NULL
+train_indices = setdiff(1 : nrow(boston), test_indices)
+boston_train = boston[train_indices, ]
+y_train = boston_train$medv
+X_train = boston_train
+X_train$medv = NULL
+
+mod_lin = lm(y_train ~ ., X_train)
+y_hat_test_lin = predict(mod_lin, X_test)
+s_e_lin = sd(y_test - y_hat_test_lin)
+s_e_lin
+
+num_trees = 500
+mod_bag = YARFBAG(X_train, y_train, num_trees = num_trees, calculate_oob_error = FALSE)
+y_hat_test_bag = predict(mod_bag, X_test)
+s_e_bag = sd(y_test - y_hat_test_bag)
+s_e_bag
+
+cat("oos standard error reduction:", (1 - s_e_bag / s_e_lin) * 100, "%\n")
+```
+
+
+Whole lot of room to improve! That extra 26% or so of unexplained variance is split between bias and irreducible error due to unknown information. The bagged trees can get rid of the bias and minimize variance while doing so. And it did a great job!
+
+Now the diamonds data:
+
+```{r}
+n_train = 1000
+
+training_indices = sample(1 : nrow(diamonds), n_train)
+diamonds_train = diamonds[training_indices, ]
+y_train = diamonds_train$price
+X_train = diamonds_train
+X_train$price = NULL
+
+
+test_indices = setdiff(1 : nrow(diamonds), training_indices)
+diamonds_test = diamonds[test_indices, ]
+y_test = diamonds_test$price
+X_test = diamonds_test
+X_test$price = NULL
+
+
+mod_lin = lm(y_train ~ ., X_train)
+y_hat_test_lin = predict(mod_lin, X_test)
+s_e_lin = sd(y_test - y_hat_test_lin)
+s_e_lin
+
+mod_bag = YARFBAG(X_train, y_train, num_trees = num_trees, calculate_oob_error = FALSE)
+y_hat_test_bag = predict(mod_bag, X_test)
+s_e_bag = sd(y_test - y_hat_test_bag)
+s_e_bag
+
+cat("oos standard error reduction:", (1 - s_e_bag / s_e_lin) * 100, "%\n")
+```
+
+```{r}
+summary(mod_lin)$r.squared
+```
+
+Seemingly not a whole lot of room to improve! But there is when you measure error in RMSE. That extra 8% of unexplained variance means a whole lot of RMSE and it is split between bias and irreducible error due to unknown information. But it did the best it can. It is likely what's remaining is due to information we don't measure.
+
+
+
+
+
+
+
+
