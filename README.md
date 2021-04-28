@@ -6,6 +6,9 @@ This is the course homepage for Math 342W (and Masters level 650.4) at Queens Co
 
 My lectures can be listened to as youtube tracks and lecture notes are also scanned in as PDF files contributed by students and myself.
 
+* Lecture 23 video on slack
+  - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec23.Rmd)
+  - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec23kap.pdf)
 * Lecture 22 video on slack
   - [Practice Notes](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/practice_lectures/lec22.Rmd)
   - Theory Notes [(Prof)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/lectures/lec22kap.pdf)
@@ -73,8 +76,8 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 ## Labs
 
 <!--
-* [(Lab 10, due 5/15)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab10.Rmd)
-* [(Lab 9, due 5/6)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab09.Rmd)-->
+* [(Lab 10, *not* due)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab10.Rmd)-->
+* [(Lab 9, due 5/6)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab09.Rmd)
 * [(Lab 8, due 4/29)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab08.Rmd)
 * [(Lab 7, due 4/22)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab07.Rmd)
 * [(Lab 6, due 4/15)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab06.Rmd)
@@ -88,8 +91,8 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 ## Theory Homeworks
 
 <!--
-* Homework 5 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw05/hw05t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw05/hw05t.pdf) (due 5/18)
-* Homework 4 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw04/hw04t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw04/hw04t.pdf) (due 4/20)-->
+* Homework 5 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw05/hw05t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw05/hw05t.pdf) (*not* due)
+* Homework 4 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw04/hw04t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw04/hw04t.pdf) (*not* due)-->
 * Homework 3 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw03/hw03t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw03/hw03t.pdf) (due 4/7)
 * Homework 2 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw02/hw02t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw02/hw02t.pdf) (due 3/7)
 * Homework 1 [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw01/hw01t.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/homeworks/hw01/hw01t.pdf) (due 2/11) 
