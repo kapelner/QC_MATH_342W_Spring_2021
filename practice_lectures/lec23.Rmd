@@ -211,8 +211,8 @@ for (nsim in 1 : min(Nsim, 50)){ #otherwise takes too long
 }
 
 plot_obj +
-  geom_line(data = f_x_df, aes(x, f), col = "green", size = 2)
-  stat_function(fun = function(x){g_average[1] + g_average[2] * x + g_average[3] * x^2}, col = "red", lwd = 2) + 
+  # geom_line(data = f_x_df, aes(x, f), col = "green", size = 2) +
+  stat_function(fun = function(x){g_average[1] + g_average[2] * x + g_average[3] * x^2}, col = "red", lwd = 2) 
 ```
 
 Now calculate this average variance:
@@ -463,8 +463,9 @@ for (nsim in 1 : min(Nsim, num_trees_to_visualize)){
   plot_obj = plot_obj + geom_line(data = data.frame(x = x, y = g_x), aes(x = x, y = y), col = "blue")
 }
 
-plot_obj +
-  geom_line(data = data.frame(x = x, expe_g = g_avg_x), mapping = aes(x, expe_g), col = "red", lwd = 1) #note: expe_g = f(x) since no bias.... but technically I should be using a separate f(x) data frame
+plot_obj + 
+  geom_line(aes(x, f_x), col = "green", lwd = 2) +
+  geom_line(data = data.frame(x = x, expe_g = g_avg_x), mapping = aes(x, expe_g), col = "red", lwd = 1)
 ```
 
 It looks awful!!!

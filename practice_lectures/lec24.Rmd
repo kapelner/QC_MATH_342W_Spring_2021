@@ -27,7 +27,7 @@ for (t in 1 : num_trees){ #M = num_trees
   #fit a model g | x's, delta's and save it
   bootstrap_indices_t = sample(1 : n_train, replace = TRUE)
   g_model = YARFCART(data.frame(x = x_train[bootstrap_indices_t]), y_train[bootstrap_indices_t], 
-                     calculate_oob_error = FALSE, bootstrap_indices = 1 : n_train) #this is confusing! But will become clear later...
+                     calculate_oob_error = FALSE) #this is confusing! But will become clear later...
   bootstrapped_gs[[t]] = g_model
 }
 ```
@@ -191,6 +191,7 @@ That's a gain of almost 50% in the MSE component that we have control over! And.
 Let's look at the boston housing data first.
 
 ```{r}
+rm(list = ls())
 boston = MASS::Boston
 
 prop_test = 0.1
@@ -304,6 +305,8 @@ bagged_tree_mod$y_oob
 
 n_oob = sapply(1 : n_train, function(i){sum(unlist(lapply(bagged_tree_mod$bootstrap_indices, function(set){!(i %in% set)})))})
 round(n_oob / num_trees, 2)
+mean(n_oob / num_trees, 2)
+1 / exp(1)
 ```
 
 It took predictions on each tree on the oob set, averaged by observation across trees and then averaged across observation averages.
@@ -311,11 +314,12 @@ It took predictions on each tree on the oob set, averaged by observation across 
 Let's compare this to training-test manual splits. Let's look at the boston housing data first.
 
 ```{r}
+pacman::p_load(data.table)
 boston = MASS::Boston %>% data.table
 
 seed = 1
 set.seed(seed)
-prop_test = 0.2
+prop_test = 0.5
 test_indices = sample(1 : nrow(boston), round(prop_test * nrow(boston)))
 boston_test = boston[test_indices, ]
 y_test = boston_test$medv
@@ -353,7 +357,7 @@ Quick demo with the diamonds and oob validation:
 ```{r}
 rm(list = ls())
 
-seed = 1
+seed = 1984
 set.seed(seed)
 n_samp = 2000
 diamonds_samp = diamonds %>% sample_n(n_samp)
@@ -364,6 +368,10 @@ num_trees = 1000
 mod_bag = YARFBAG(X, y, num_trees = num_trees, seed = seed)
 mod_bag
 mod_rf = YARF(X, y, num_trees = num_trees, seed = seed)
+mod_rf
+
+pacman::p_load(randomForest)
+mod_rf = randomForest(X, y, num_trees = num_trees)
 mod_rf
 ```
 
@@ -567,7 +575,7 @@ oos_confusion_table
 Hard to read. Let's make it easier to read by blanking out the diagonal and looking at entried only >= 5:
 
 ```{r}
-oos_confusion_table[oos_confusion_table < 5] = ""
+oos_confusion_table[oos_confusion_table < 2] = ""
 diag(oos_confusion_table) = "."
 oos_confusion_table
 mean(y_test != y_hat_test)
