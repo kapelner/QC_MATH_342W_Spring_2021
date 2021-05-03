@@ -79,8 +79,8 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 ## Labs
 
 <!--
-* [(Lab 10, *not* due)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab10.Rmd)
-* [(Lab 9, due 5/10)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab09.Rmd)-->
+* [(Lab 10, *not* due)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab10.Rmd)-->
+* [(Lab 9, due 5/10)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab09.Rmd)
 * [(Lab 8, due 4/29)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab08.Rmd)
 * [(Lab 7, due 4/22)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab07.Rmd)
 * [(Lab 6, due 4/15)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/labs/lab06.Rmd)
