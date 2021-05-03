@@ -34,13 +34,13 @@ Create a test set of size 500 as well
 #TO-DO
 ```
 
-Locate the optimal node size hyperparameter for the regression tree model. I believe you can use `randomForest` here by setting `ntree = 1`, `replace = FALSE`, `sampsize = n` (`mtry` is already set to be 1 because there is only one feature) and then you can set `nodesize`.
+Locate the optimal node size hyperparameter for the regression tree model. I believe you can use `randomForest` here by setting `ntree = 1`, `replace = FALSE`, `sampsize = n` (`mtry` is already set to be 1 because there is only one feature) and then you can set `nodesize`. Plot nodesize by out of sample s_e. Plot.
 
 ```{r}
 #TO-DO
 ```
 
-Plot the regression tree model with the optimal node size.
+Plot the regression tree model g(x) with the optimal node size.
 
 ```{r}
 #TO-DO
@@ -63,13 +63,13 @@ Take a sample of n = 2000 observations from the diamonds data.
 #TO-DO
 ```
 
-find the bootstrap s_e for a RF model using 1, 2, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000 trees. If you are using the `randomForest` package, you can calculate oob residuals via `e_oob = y_train - rf_mod$predicted`.
+find the bootstrap s_e for a RF model using 1, 2, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000 trees. If you are using the `randomForest` package, you can calculate oob residuals via `e_oob = y_train - rf_mod$predicted`. Plot.
 
 ```{r}
 #TO-DO
 ```
 
-Using the diamonds data, find the bootstrap s_e for a bagged-tree model using 1, 2, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000 trees. If you are using the `randomForest` package, you can create the bagged tree model via setting an argument within the RF constructor function. 
+Using the diamonds data, find the oob s_e for a bagged-tree model using 1, 2, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000 trees. If you are using the `randomForest` package, you can create the bagged tree model via setting an argument within the RF constructor function. Plot.
 
 ```{r}
 #TO-DO
@@ -83,19 +83,19 @@ What is the percentage gain / loss in performance of the RF model vs bagged tree
 ```
 
 
-Plot bootstrap s_e by number of trees for both RF and bagged trees.
+Plot oob s_e by number of trees for both RF and bagged trees using a long data frame.
 
 ```{r}
 #TO-DO
 ```
 
-Build RF models for 500 trees using different `mtry` values: 1, 2, ... the maximum. That maximum will be the number of features assuming that we do not binarize categorical features if you are using `randomForest` or the number of features assuming binarization of the categorical features if you are using `YARF`. Calculate bootstrap s_e for all mtry values.
+Build RF models for 500 trees using different `mtry` values: 1, 2, ... the maximum. That maximum will be the number of features assuming that we do not binarize categorical features if you are using `randomForest` or the number of features assuming binarization of the categorical features if you are using `YARF`. Calculate oob s_e for all mtry values. Plot.
 
 ```{r}
 #TO-DO
 ```
 
-Plot bootstrap s_e by mtry.
+Plot oob s_e by mtry.
 
 ```{r}
 #TO-DO
@@ -118,7 +118,7 @@ Using the adult data, find the bootstrap misclassification error for an RF model
 #TO-DO
 ```
 
-Using the adult data, find the bootstrap misclassification error for a bagged-tree model using 1, 2, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000 trees.
+Using the adult data, find the bootstrap misclassification error for a bagged-tree model using 1, 2, 5, 10, 20, 30, 40, 50, 100, 200, 300, 400, 500, 1000 trees. Plot.
 
 ```{r}
 #TO-DO
@@ -131,13 +131,13 @@ What is the percentage gain / loss in performance of the RF model vs bagged tree
 ```
 
 
-Plot bootstrap misclassification error by number of trees for both RF and bagged trees.
+Plot bootstrap misclassification error by number of trees for both RF and bagged trees using a long data frame.
 
 ```{r}
 #TO-DO
 ```
 
-Build RF models for 500 trees using different `mtry` values: 1, 2, ... the maximum (see above as maximum is defined by the specific RF algorithm implementation).
+Build RF models for 500 trees using different `mtry` values: 1, 2, ... the maximum (see above as maximum is defined by the specific RF algorithm implementation). Plot.
 
 ```{r}
 #TO-DO
@@ -185,25 +185,3 @@ Use a random forest modeling procedure to iteratively fill in the `NA`'s by pred
 ```{r}
 #TO-DO
 ```
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
