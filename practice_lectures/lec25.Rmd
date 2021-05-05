@@ -1,0 +1,173 @@
+---
+title: "Practice Lecture 25 MATH 342W Queens College"
+author: "Professor Adam Kapelner"
+date: "May 5, 2021"
+---
+
+
+# Missingness
+
+Take a look at an housing dataset from Australia:
+
+https://www.kaggle.com/dansbecker/melbourne-housing-snapshot/home?select=melb_data.csv#
+
+
+```{r}
+pacman::p_load(tidyverse, magrittr, data.table, skimr)
+apts = fread("melb_data.csv.bz2")
+skim(apts)
+```
+
+We drop all character variables first just for expedience in the demo. If you were building a prediction model, you would scour them carefully to see if there is any signal in them you can use, and then mathematize them to metrics if so.
+
+```{r}
+apts %<>%
+  select_if(is.numeric) %>%
+  select(Price, everything())
+```
+
+Imagine we were trying to predict `Price`. So let's section our dataset:
+
+```{r}
+y = apts$Price
+X = apts %>% 
+  select(-Price)
+rm(apts)
+```
+
+Let's first create a matrix with $p$ columns that represents missingness
+
+```{r}
+M = tbl_df(apply(is.na(X), 2, as.numeric))
+colnames(M) = paste("is_missing_", colnames(X), sep = "")
+M %<>% 
+  select_if(function(x){sum(x) > 0})
+head(M)
+skim(M)
+```
+
+Some of these missing indicators might be collinear because they share all the rows they are missing on. Let's filter those out if they exist:
+
+```{r}
+M = tbl_df(t(unique(t(M))))
+skim(M)
+```
+
+Without imputing and without using missingness as a predictor in its own right, let's see what we get with a basic linear model now:
+
+```{r}
+lin_mod_listwise_deletion = lm(y ~ ., X)
+summary(lin_mod_listwise_deletion)
+```
+
+Not bad at all.
+
+Now let's impute using the package. we cannot fit RF models to the entire dataset (it's 13,580 observations) so we will sample 2,000 observations for each of the trees. This is a typical strategy when fitting RF. It definitely reduces variance but increases bias. But we don't have a choice since we don't want to wait forever.
+
+```{r}
+pacman::p_load(missForest)
+Ximp = missForest(data.frame(X), sampsize = rep(2000, ncol(X)))$ximp
+skim(Ximp)
+```
+
+
+Now we consider our imputed dataset as the design matrix.
+
+```{r}
+linear_mod_impute = lm(y ~ ., Ximp)
+summary(linear_mod_impute)
+```
+We do substantially better. We can do even better if we use all the information.
+
+Now we take our imputed dataset, combine it with our missingness indicators for a new design matrix.
+
+```{r}
+Ximp_and_missing_dummies = data.frame(cbind(Ximp, M))
+linear_mod_impute_and_missing_dummies = lm(y ~ ., Ximp_and_missing_dummies)
+summary(linear_mod_impute_and_missing_dummies)
+```
+
+Not much gain, but there seems to be something.
+
+Are these two better models than the original model that was built with listwise deletion of observations with missingness?? 
+
+Are they even comparable? It is hard to compare the two models since the first model was built with only non-missing observations which may be easy to predict on and the second was built with the observations that contained missingness. Those extra 6,750 are likely more difficult to predict on. So this is complicated...
+
+Maybe one apples-to-apples comparison is you can replace all the missingness in the original dataset with something naive e.g. the average and then see who does better. This at least keeps the same observations.
+
+```{r}
+Xnaive = X %>%
+ replace_na(as.list(colMeans(X, na.rm = TRUE)))
+linear_mod_naive_without_missing_dummies = lm(y ~ ., Xnaive)
+summary(linear_mod_naive_without_missing_dummies)
+```
+
+There is a clear gain to imputing and using is_missing dummy features to reduce delta (55.3% vs 52.4% Rsqs).
+
+Note: this is just an illustration of best practice. It didn't necessarily have to "work".
+
+
+# Spurious Correlation
+
+Take a look at the following real data:
+
+```{r}
+rm(list = ls())
+pacman::p_load(tidyverse, magrittr, data.table)
+
+spurious = data.frame(
+  yearly_divorce_rate_maine_per_1000 = c(5,4.7,4.6,4.4,4.3,4.1,4.2,4.2,4.2,4.1),
+  yearly_US_consumption_margarine_per_capita = c(8.2,7,6.5,5.3,5.2,4,4.6,4.5,4.2,3.7)
+)
+
+with(spurious, 
+     cor(yearly_divorce_rate_maine_per_1000, yearly_US_consumption_margarine_per_capita))
+```
+
+And visually,
+
+```{r}
+ggplot(spurious, aes(x = yearly_divorce_rate_maine_per_1000, y = yearly_US_consumption_margarine_per_capita)) +
+  geom_point() + geom_smooth()
+```
+
+How did this happen? 
+
+I looked at many, many different datasets until I found something impressive!
+
+Well, we can imagine doing the same thing. Let's look at a million datasets and find the dataset most correlated with the yearly consumption of margarine per capita:
+
+
+```{r}
+y = spurious$yearly_US_consumption_margarine_per_capita
+n = length(y)
+
+n_sim = 1e6
+best_abs_corr = 0
+best_random_xs = NULL
+for (i in 1 : n_sim){
+  x = rnorm(n)
+  
+  random_abs_corr = abs(cor(x, y))
+  if (random_abs_corr > best_abs_corr){
+    best_abs_corr = random_abs_corr
+    best_random_xs = x
+  }
+}
+spurious$best_random_xs = best_random_xs
+
+best_abs_corr
+```
+
+And visually,
+
+```{r}
+ggplot(spurious, aes(x = best_random_xs, y = yearly_US_consumption_margarine_per_capita)) +
+  geom_point() + geom_smooth() + ggtitle(paste("Spurious Correlation has |r| = ", round(best_abs_corr, 3)))
+```
+
+So what's the narrative here? If you look through a gajillion random features that have no causal connection with the phenomenon $y$, you will eventually find something that "clicks". Here are a whole bunch of them:
+
+https://www.tylervigen.com/spurious-correlations
+
+However, these will all vanish if you keep collecting data. Anything that is built upon falsehood will crumble!

@@ -371,7 +371,7 @@ mean(
 )
 ```
 
-But it doesn't make it much easier to read. And it probably makes it harder to write.
+But it doesn't make it much easier to read. And it probably makes it harder to write. 
 
 Enter an idea taken from unix / linux. Output of one function is input to next function. It is the inverse of the usual "order of operations". Let's see how this works.
 
@@ -394,7 +394,9 @@ rnorm(1000) %>% #the pipe operator
   mean
 ```
 
-That's it! There's nothing more to it other than a gain in readability.
+That's it! There's nothing more to it other than a gain in readability. Here's a cute joke based on this idea:
+
+https://www.mzes.uni-mannheim.de/socialsciencedatalab/article/efficient-data-r/figures/basertidyverse.png
 
 What if we wanted to do something like `mean(rnorm(1000) + 1)`? This `rnorm(1000) %>% +1 %>% mean` doesn't work because I imagine because the basic arithmetic operators couldn't be parsed like normal while there was a pipe. So they invented special pipe functions for this:
 
