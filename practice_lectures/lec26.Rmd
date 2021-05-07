@@ -9,7 +9,7 @@ date: "May 6, 2021"
 
 When does correlation really not imply causation? We now mean real correlation, not spurious correlation. This correlation will persist as the sample size increases. 
 
-From class, we spoke about the phenomenon $y$ = "num car accidents" with observed feature "x" = "num umbrellas sold" but common cause $z$ = "rain amount". It is clear the umbrella sales has *no causal* relationship with car accidents. But they *are correlated* because they are linked by a common cause. Here's the data example that makes this clear.
+From class, we spoke about the phenomenon y = "num car accidents" with observed feature x = "num umbrellas sold" but common cause z = "rain amount". It is clear the umbrella sales has *no causal* relationship with car accidents. But they *are correlated* because they are linked by a common cause. Here's the data example that makes this clear.
 
 The data generating process as specified by the causal diagram looks as follows:
 
@@ -59,11 +59,11 @@ The effect of $x$ is gone!! Why? If you keep $z$ constant, the sole true causal 
 Why is this? Well, you can look at how x affects y in local areas of z for instance.
 
 ```{r}
-b = 0.8; a = 0.7
+z_max = 0.2; z_min = 0.1
 z_small_indices = umbrella_example_data$z_rainfall < 
-  quantile(umbrella_example_data$z_rainfall, b) &
+  quantile(umbrella_example_data$z_rainfall, z_max) &
   umbrella_example_data$z_rainfall >
-  quantile(umbrella_example_data$z_rainfall, a)
+  quantile(umbrella_example_data$z_rainfall, z_min)
 
 local_plot = ggplot(umbrella_example_data[z_small_indices, ]) +
   aes(x = x_umbrella_sales, y = y_car_accidents) +
@@ -101,7 +101,7 @@ Clearly $p + 1 > n$ so OLS will not work. Let's try ridge with $\lambda = 0.01$.
 ```{r}
 X = cbind(1, as.matrix(boston[, !"medv"]))
 y = boston[, medv]
-lambda = 0.1
+lambda = 10
 b_ridge = solve(t(X) %*% X + lambda * diag(ncol(X))) %*% t(X) %*% y
 head(b_ridge, 30)
 ```
@@ -226,7 +226,7 @@ It's amazing that it really deleted ALL the junk and left the most predictive va
 We can use `mlr` to CV over alpha, but here we can't. So let's let $\alpha = 0.5$ meaning "half lasso and half ridge" penalty:
 
 ```{r}
-elastic_net_mod_optimal_lambda = cv.glmnet(X_train, y_train, alpha = 0.5, lambda = 10^seq(-3, 3, by = 0.1))
+elastic_net_mod_optimal_lambda = cv.glmnet(X_train, y_train, alpha = 0.2, lambda = 10^seq(-3, 3, by = 0.1))
 y_hat_optimal_elastic_net = predict(elastic_net_mod_optimal_lambda, X_test)
 rmse_optimal_elastic_net = sd(y_test - y_hat_optimal_elastic_net)
 rmse_optimal_elastic_net
@@ -238,6 +238,7 @@ Slightly better than lasso. I imagine if we optimized $\alpha$ we can do even be
 
 ```{r}
 head(coef(elastic_net_mod_optimal_lambda), 30)
+
 ```
 
 Here we "found" one more variable. That makes sense - as alpha decreases, the ridge penalty becomes more pronounced and it's harder to shrink exactly to zero. Unsure about the $\alpha$ value that stops the hard shrinkage to zero. Good project to think about!
