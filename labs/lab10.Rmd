@@ -1,0 +1,196 @@
+---
+title: "Lab 10"
+author: "Your Name Here"
+output: pdf_document
+date: "NOT DUE"
+---
+
+
+
+Load up the Boston Housing Data and separate into `X` and `y`.
+
+```{r}
+#TO-DO
+```
+
+
+Similar to lab 1, write a function that takes a matrix and punches holes (i.e. sets entries equal to `NA`) randomly with an argument `prob_missing`.
+
+```{r}
+#TO-DO
+```
+
+Create a matrix `Xmiss` which is `X` but has missingness with probability of 10%.
+
+```{r}
+#TO-DO
+```
+
+What type of missing data mechanism created the missingness in `Xmiss`?
+
+#TO-DO
+
+Impute using the feature averages to create a matrix `Ximpnaive`.
+
+```{r}
+#TO-DO
+```
+
+Use `missForest` to impute the missing entries to create a matrix `XimpMF`.
+
+```{r}
+#TO-DO
+```
+
+What is the s_e of the error for both the naive imputation with feature averages and the intelligence imputation with missForest?
+
+```{r}
+#TO-DO
+```
+
+Create a function that creates missingness in the feature `rm` that is a MAR missing data mechanism.
+
+```{r}
+#TO-DO
+```
+
+
+Create a function that creates missingness in the feature `rm` that is a NMAR missing data mechanism.
+
+```{r}
+#TO-DO
+```
+
+Run an OLS model on the diamonds dataset using only the features `carat` and `table`. Print out the coefficients.
+
+
+```{r}
+#TO-DO
+```
+
+Interpret the coefficient for `carat`
+
+#TO-DO
+
+Run a logistic regression probability estimation model on the adult dataset using only the features `age` and `education_num`. Print out the coefficients.
+
+
+```{r}
+pacman::p_load_gh("coatless/ucidata")
+data(adult)
+adult = na.omit(adult) #kill any observations with missingness
+#TO-DO
+```
+
+
+Interpret the coefficient for `education_num`
+
+#TO-DO
+
+Let y = the binary category which is 1 if the income is >50L and 0 if not and x = education_num. Let z = one of the causal variables that influences y directly. Is this an example of causal scenario A, B or C. Explain.
+
+#TO-DO
+
+In a matrix X, generate n = 200 observations each with p = 2,000 features which are all realizations from an iid N(0, 1) r.v. Then generate responses y, a vector of length n also from an iid N(0, 1) r.v.
+
+```{r}
+#TO-DO
+```
+
+Scan through each of the 2,000 features looking for the maximum R^2 between x_j and y among only the first 100 observations. Plot the x_j and y that has the highest R^2 for the first 100 observations.
+
+```{r}
+pacman::p_load(ggplot2)
+#TO-DO
+```
+
+Now plot this x_j and y for all 200 observations.
+
+```{r}
+#TO-DO
+```
+
+Is this an example of a "spurious correlation"? Yes/no and explain.
+
+#TO-DO
+
+Run the following code to create dataset but don't read it:
+
+```{r}
+rm(list = ls())
+set.seed(1)
+n = 200
+salary_data = rbind(
+  data.frame(
+    is_male = rep(1, n / 2),
+    height_in_inches = rnorm(n / 2, 70, 3),
+    salary_in_thou = rnorm(n / 2, 60, 15)
+  ),
+  data.frame(
+    is_male = rep(0, n / 2),
+    height_in_inches = rnorm(n / 2, 64, 3),
+    salary_in_thou = rnorm(n / 2, 50, 15)
+  )
+)
+```
+
+Using the `salary_data` data frame, run an OLS model predicting `salary_in_thou` using `height_in_inches`.
+
+```{r}
+summary(lm(salary_in_thou ~ height_in_inches, salary_data))
+```
+
+Interpret the coefficient of `height_in_inches`.
+ 
+#TO-DO
+
+Plot `salary_in_thou` vs `height_in_inches`.
+
+```{r}
+#TO-DO
+```
+
+Now run an OLS model predicting `salary_in_thou` using both `height_in_inches` and `is_male`.
+
+```{r}
+summary(lm(salary_in_thou ~ height_in_inches + is_male, salary_data))
+```
+
+Interpret the coefficient of `height_in_inches`.
+ 
+#TO-DO
+
+Although we didn't discuss this in class, the *'s in the summary of a linear model indicates there is evidence that this OLS slope coefficient is nonzero. In the first model, there was evidence that the OLS slope coefficient for `height_in_inches` was nonzero but in the second model there is no longer any evidence that the OLS slope coefficient for `height_in_inches`is nonzero. This may indicate that `is_male` is what type of variable? 
+ 
+#TO-DO
+
+Of the three causal scenarios we discussed in class (A, B and C), what is the likely scenario here?
+ 
+#TO-DO
+
+Are we sure that `is_male` is a causal variable with respect to the phenomenon `salary_in_thou`? Yes/no and explain.
+
+#TO-DO
+
+In the `diamonds` data, consider the OLS model where the features are all second-order interactions. Use a cross-validated lasso (via the `glmnet.cv` function in the `glmnet` package) to select variables that are useful in predicting the dimaonds' prices. Print out a list of the selected variables. If this takes too long, subsample the data so there is n=2000 observations.
+
+```{r}
+rm(list = ls())
+pacman::p_load(glmnet)
+#TO-DO
+```
+
+In the `adult` data, consider the logistic regression model of all second-order interactions. Use a cross-validated lasso (via the `glmnet.cv` function in the `glmnet` package) to select variables that are useful in predicting the binary income level. We never discussed lasso for logistic regression, but it is the same as regular logistic regression where you minimize the likelihood but now add the regularization penalty to the optimization problem. This is all handled for us by merely passing the `family = "binomial"` argument into the `glmnet.cv` function. Print out a list of the selected variables. If this takes too long, subsample the data so there is n=2000 observations.
+
+```{r}
+rm(list = ls())
+#TO-DO
+```
+
+Returning to the diamonds dataset, leave a 10% holdout and compare the oos performance of the linear model of all second-order interactions among the following three algorithms: a cross-validated ridge, a cross-validated lasso and a cross-validated elastic net (where alpha = 1/2).
+
+```{r}
+rm(list = ls())
+#TO-DO
+```
+
