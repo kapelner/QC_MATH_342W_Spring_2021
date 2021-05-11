@@ -20,7 +20,7 @@ Similar to lab 1, write a function that takes a matrix and punches holes (i.e. s
 #TO-DO
 ```
 
-Create a matrix `Xmiss` which is `X` but has missingness with probability of 10%.
+Create a matrix `Xmiss` which is `X` but has missingness with probability of 10% using the function you just wrote.
 
 ```{r}
 #TO-DO
@@ -42,7 +42,7 @@ Use `missForest` to impute the missing entries to create a matrix `XimpMF`.
 #TO-DO
 ```
 
-What is the s_e of the error for both the naive imputation with feature averages and the intelligence imputation with missForest?
+What is the s_e of the error for both the naive imputation with feature averages and the intelligent imputation with missForest?
 
 ```{r}
 #TO-DO

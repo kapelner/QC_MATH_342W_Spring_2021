@@ -158,6 +158,7 @@ Write a function `random_bagged_ols` which takes as its arguments `X` and `y` wi
 
 ```{r}
 #TO-DO
+
 ```
 
 
@@ -183,5 +184,18 @@ Create a matrix `Xmiss` which is `X` but has missingness with probability of 10%
 Use a random forest modeling procedure to iteratively fill in the `NA`'s by predicting each feature of X using every other feature of X. You need to start by filling in the holes to use RF. So fill them in with the average of the feature.
 
 ```{r}
-#TO-DO
+Ximps = list()
+
+
+t = 1
+repeat {
+  for (j in 1 : p){
+    Ximps[[t]][, j] = randomForest(X = Ximps[[j - 1]] %>% select(-j), y = Ximps[[j - 1]][, j])
+  }
+  t = t + 1
+  #stop condition if Ximps[[t]] - Ximps[[t - 1]] is close together
+  if (stop){
+    break
+  }
+}
 ```
