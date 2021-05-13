@@ -1,0 +1,456 @@
+%\documentclass[12pt]{article}
+\documentclass[12pt,landscape]{article}
+
+
+\include{preamble}
+
+\newcommand{\instr}{\small Your answer will consist of a lowercase string (e.g. \texttt{aebgd}) where the order of the letters does not matter. \normalsize}
+
+\title{Math 342W / 650 Fall \the\year{} \\ Midterm Examination Two}
+\author{Professor Adam Kapelner}
+
+\date{Thursday, May 13, \the\year{}}
+
+\begin{document}
+\maketitle
+
+%\noindent Full Name \line(1,0){410}
+
+\thispagestyle{empty}
+
+\section*{Code of Academic Integrity}
+
+\footnotesize
+Since the college is an academic community, its fundamental purpose is the pursuit of knowledge. Essential to the success of this educational mission is a commitment to the principles of academic integrity. Every member of the college community is responsible for upholding the highest standards of honesty at all times. Students, as members of the community, are also responsible for adhering to the principles and spirit of the following Code of Academic Integrity.
+
+Activities that have the effect or intention of interfering with education, pursuit of knowledge, or fair evaluation of a student's performance are prohibited. Examples of such activities include but are not limited to the following definitions:
+
+\paragraph{Cheating} Using or attempting to use unauthorized assistance, material, or study aids in examinations or other academic work or preventing, or attempting to prevent, another from using authorized assistance, material, or study aids. Example: using an unauthorized cheat sheet in a quiz or exam, altering a graded exam and resubmitting it for a better grade, etc.
+\\
+
+\noindent By taking this exam, you acknowledge and agree to uphold this Code of Academic Integrity. \\
+
+%\begin{center}
+%\line(1,0){250} ~~~ \line(1,0){100}\\
+%~~~~~~~~~~~~~~~~~~~~~signature~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~ date
+%\end{center}
+
+\normalsize
+
+\section*{Instructions}
+This exam is 100 minutes (variable time per question) and closed-book. You are allowed \textbf{two} 8.5 $\times$ 11'' pages (front and back) of a \qu{cheat sheet}, blank scrap paper and a graphing calculator. Please read the questions carefully. No food is allowed, only drinks. %If the question reads \qu{compute,} this means the solution will be a number otherwise you can leave the answer in \textit{any} widely accepted mathematical notation which could be resolved to an exact or approximate number with the use of a computer. I advise you to skip problems marked \qu{[Extra Credit]} until you have finished the other questions on the exam, then loop back and plug in all the holes. I also advise you to use pencil. The exam is 100 points total plus extra credit. Partial credit will be granted for incomplete answers on most of the questions. \fbox{Box} in your final answers. Good luck!
+
+\pagebreak
+
+
+\problem\timedsection{11} Consider the following causal diagrams where all events have other causes that are not displayed. It is assumed that the timing of events is known and to scale. Assume you have a training set $\mathbb{D}$ with a large sample size $n$ with columns x, y, z (and w if included).
+
+
+\vspace{-.3cm}
+\begin{figure}[htp]
+\centering
+\includegraphics[width=7in]{basic_causal_diagrams}
+\end{figure}
+
+\vspace{-.4cm}
+
+\vspace{-0.3cm}\benum\truefalsesubquestionwithpoints{11} 
+
+\begin{enumerate}[(a)]
+%\item In diagram A, x and z could be spuriously correlated.
+%\item In diagram D, w and y could be spuriously correlated.
+%\item In diagram E, w and y could be spuriously correlated.
+%\item Assume the data generating process that $\mathbb{D}$ is sampled from is diagram A. When running the OLS model y $\sim$ x you find a strong correlation. This correlation is spurious.
+\item Assume  diagram A is the data generating process that $\mathbb{D}$ is sampled from. When running the OLS model y $\sim$ x you find a strong correlation. In out-of-sample data there would likely be a near-zero correlation betweeen y and x.
+\item In diagram A, z is a lurking variable when analyzing the causal effect of x on y.
+\item In diagram B, z is a lurking variable when analyzing the causal effect of x on y.
+\item In diagram D, w is a lurking variable when analyzing the causal effect of x on y.
+\item In diagram E, w is a lurking variable when analyzing the causal effect of x on y.
+\item In diagram C, x causes y (according to our in-class definition of causality).
+\item In diagram B, an OLS model of y $\sim$ x demonstrates that x and y are correlated but this correlation disappears if you run an OLS model of y $\sim$ x + z
+\item In diagram D, an OLS model of y $\sim$ x demonstrates that x and y are correlated but this correlation disappears if you run an OLS model of y $\sim$ x + w
+\item In diagram D, x can be used to predict y better than $g_0$ (out of sample)
+\item In diagram D, w can be used to predict y better than $g_0$ (out of sample)
+\item In diagram E, an OLS model of y $\sim$ x demonstrates that x and y are correlated but this correlation disappears if you run an OLS model of y $\sim$ x + w
+
+\end{enumerate}
+\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+%\problem\timedsection{7} \ingray{Consider the following causal diagrams where all events have other causes that are not displayed. It is assumed that the timing of events is known and to scale.} Assume now you have a training set $\mathbb{D}$ with a large sample size $n$ with columns x, y, z (and w if included).
+%
+%
+%\begin{figure}[htp]
+%\centering
+%\includegraphics[width=7in]{basic_causal_diagrams}
+%\end{figure}
+%
+%\vspace{-.5cm}
+%
+%\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{14} 
+%
+%\begin{enumerate}[(a)]
+%\item Assume the data generating process that $\mathbb{D}$ is sampled from is diagram A. When running the OLS model y $\sim$ x you find a strong correlation. This correlation is spurious.
+%\item Assume the data generating process that $\mathbb{D}$ is sampled from is diagram A. When running the OLS model y $\sim$ x you find a strong correlation. In out-of-sample data there would likely be a near-zero correlation betweeen y and x.
+%\item Assume the data generating process that $\mathbb{D}$ is sampled from is diagram E. When running the OLS model y $\sim$ x you find a strong correlation. This correlation is spurious.
+%\item Assume the data generating process that $\mathbb{D}$ is sampled from is diagram E. When running the OLS model y $\sim$ x you find a strong correlation. In out-of-sample data there would likely be a near-zero correlation betweeen y and x.
+%\end{enumerate}
+%\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\problem\timedsection{7} Consider the \texttt{iris} data frame, a famous dataset of four measurements on $n = 150$ iris flowers where the response is \texttt{Species}, a categorical variable with three levels: versicolor, viriginica and setosa (where each species has 50 observations). Below is a sample:
+
+\lstset{
+  basicstyle=\footnotesize,
+  xleftmargin=.2\textwidth, xrightmargin=.2\textwidth
+}
+\begin{lstlisting}
+   Sepal.Length Sepal.Width Petal.Length Petal.Width   Species
+          5.5         4.2          1.4         0.2     setosa
+          7.6         3.0          6.6         2.1     virginica
+          7.2         3.2          6.0         1.8     virginica
+          5.6         3.0          4.1         1.3     versicolor
+          5.2         4.1          1.5         0.1     setosa
+...
+\end{lstlisting}
+
+\vspace{-0.7cm}
+
+\noindent And also consider the \texttt{common\_name} data frame which provides the common names:
+
+\lstset{
+  basicstyle=\footnotesize,
+  xleftmargin=.3\textwidth, xrightmargin=.3\textwidth
+}
+\begin{lstlisting}
+Species         English_Name
+aphylla	        table iris
+setosa 		      bristle-pointed iris
+reichenbachii   rock iris
+versicolor      blue flag iris 
+flavescens      lemonyellow iris
+\end{lstlisting}
+\vspace{-1cm}
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{8} 
+
+%\begin{changemargin}{-0.8cm}{0cm} 
+Joining the two data frames on the \texttt{Species} column via a ...
+\begin{enumerate}[(a)]
+%\item These two data frames can be joined by either a left join, a right join, an inner join and a full join.\\
+\item ... left join (where \texttt{iris} was on the left) would yield a new data frame with 150 rows.
+\item ... right join (where \texttt{iris} was on the right) would yield a new data frame with 150 rows.
+\item ... left join (where \texttt{common\_name} was on the left) would yield a new data frame with 150 rows.
+\item ... right join (where \texttt{common\_name} was on the right) would yield a new data frame with 150 rows.
+\item ... inner join would yield a new data frame with 150 rows.
+\item ... full join would yield a new data frame with 150 rows.
+\item ... inner join would yield a new data frame with 100 rows.
+\item ... full join would yield a new data frame with 100 rows.
+\end{enumerate}
+%\end{changemargin}
+\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\problem\timedsection{6} \ingray{Consider the \texttt{iris} data frame, a famous dataset of four measurements on $n = 150$ iris flowers where the response is \texttt{Species}, a categorical variable with three levels: versicolor, viriginica and setosa (where each species has 50 observations).} Consider the subset of the observations for only y = setosa. Below is a sample:
+
+\lstset{
+  basicstyle=\footnotesize,
+  xleftmargin=.25\textwidth, xrightmargin=.25\textwidth
+}
+\begin{lstlisting}
+  Sepal.Length Sepal.Width Petal.Length Petal.Width
+          5.2         4.1          1.5         0.1
+          5.4         3.4          1.7         0.2
+          5.3         3.7          1.5         0.2
+          4.5         2.3          1.3         0.3
+          4.8         3.0          1.4         0.3
+...
+\end{lstlisting}
+\vspace{-1cm}
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{7} 
+
+If you were to convert this dataset from wide format to long format ...
+
+\begin{enumerate}[(a)]
+\item ... there would be two columns
+\item ... there would be four columns
+\item ... all columns would have continuous features
+\item ... all columns would have categorical features
+\item ... there would be 50 rows
+\item ... there would be 200 rows
+\item ... the resulting data frame would be easier to manipulate using a visualization library such as \texttt{ggplot2}
+\end{enumerate}
+\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\problem\timedsection{9} \ingray{Consider the \texttt{iris} data frame, a famous dataset of four measurements on $n = 150$ iris flowers where the response is \texttt{Species}, a categorical variable with three levels: versicolor, viriginica and setosa (where each species has 50 observations).} We fit a CART model with \texttt{Nodesize} = 1 to this dataset. The result is a model with 17 internal nodes and 9 leaf nodes with $\hat{y}$ values of 1 (= setosa), 2 (= virginica) and 3 (= versicolor). Below is an abridged illustration of the tree. Ignore the ``M$\rightarrow$'' and \qu{$\leftarrow$M} notation. Numbers in parentheses indicate number of observation in a node. The left direction means the split condition is true.
+
+\vspace{-0.2cm}
+\begin{figure}[htp]
+\centering
+\includegraphics[width=5.3in]{classification_tree.png}
+\end{figure}
+\vspace{-0.3cm}
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{14}
+\vspace{-0.2cm}
+\begin{enumerate}[(a)]
+\item This is a regression tree model
+\item This model can be written as a linear model of the form $g(\x) = b_0 + b_1 x_1 + b_2 x_2 + b_3 x_3 + b_4 x_4$ where $x_1, x_2, x_3, x_4$ are the four measurements \texttt{Sepal.Length}, \texttt{Sepal.Width}, \texttt{Petal.Length} and \texttt{Petal.Width}
+\item This model is overfit
+\item If the stump is considered depth zero, then this tree has a depth of 3
+\item For all $\mathbb{D}$, a binary split on \texttt{Petal.Length} is the best overall split to reduce heterogeneity in the response
+\item For future data, this model will likely predict setosa correctly with high probability
+\item If \texttt{Petal.Length} $> 2.45$, there exists a second binary split that is able to isolate all virginica observations in one leaf and all versicolor observations in the other leaf
+\item If \texttt{Petal.Length} $> 4.95$, $\hat{y}$ will always be the same
+\end{enumerate}
+\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\problem\timedsection{6} Consider the following data frame displayed in random order, where missingess is visualized in red. The last column is the response $y$ and there is no missingness in the response. The feature that has the most missingness is $x_{34}$ and the observation with the most missingness is row \#10.
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=7in]{missingness.png}
+\end{figure}
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{7}
+
+\begin{enumerate}[(a)]
+\item Dropping all observations with missingness (listwise deletion) will seriously impact future performance of any model fit with the data
+\item The dataset exhibits one MCAR missingness mechanism and this mechanism is the same for all entries
+\item The dataset may exhibit a different independent NMAR missingness mechanism for each feature
+\item When building a predictive model, the most prudent thing to do is to drop the feature $x_{34}$ and to drop observation \#10 
+\item Imputing missing values using the columns' sample averages will result in a data frame with no missingness
+\item The recommended procedure is to impute with the \texttt{missForest} and then use only the imputed matrix $\X$ to construct your model ignoring the original $\X$ matrix
+\end{enumerate}
+\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\problem\timedsection{6} \ingray{Consider the following data frame, where missigness is visualized in red. The last column is the response $y$ and there is no missingness in the response. The feature that has the most missingness is $x_{34}$ and the observation with the most missingness is row \#10.}
+
+\begin{figure}[htp]
+\centering
+\includegraphics[width=7in]{missingness.png}
+\end{figure}
+
+\noindent Now assume that $x_{34}$ and observation \#10 were dropped and the remaining missing values were imputed via the \texttt{missForest} algorithm.
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{6}
+
+\begin{enumerate}[(a)]
+\item An OLS model cannot be fit on the imputed data frame
+\item A ridge model with $\lambda = 10^{-6}$ cannot be fit on the imputed data frame
+\item A lasso model with $\lambda = 10^{-6}$ cannot be fit on the imputed data frame
+\item An elastic net model with $\lambda = 10^{-6}$ and $\alpha = 0.1$ cannot be fit on the imputed data frame
+\item After using the model selection procedure to select $\lambda$ for the lasso based on oos $s_e$, the number of nonzero linear coefficients in the resulting model will likely be small relative to $p$
+\item After using the model selection procedure to select $\lambda$ for the ridge based on oos $s_e$, the number of nonzero linear coefficients in the resulting model will likely be small relative to $p$
+\end{enumerate}
+\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+%\problem\timedsection{7} Consider the \texttt{diamonds} data frame, which has $n = 53940$ diamonds with 9 measurements each and the response variable \texttt{price} measured in USD. Below is a sample of five observations:
+%
+%\lstset{
+%  basicstyle=\footnotesize,
+%  xleftmargin=.2\textwidth, xrightmargin=.2\textwidth
+%}
+%\begin{lstlisting}
+%  carat       cut color clarity depth table price    x    y    z
+%  0.41 Very Good     D     SI2  62.3    61   638 4.72 4.75 2.95
+%  0.50 Very Good     F     VS2  62.8    57  1402 5.05 5.08 3.18
+%  1.03      Fair     I     SI2  65.2    56  3530 6.42 6.35 4.16
+%  1.10     Ideal     I     SI1  62.1    57  5037 6.60 6.64 4.11
+%  1.51 Very Good     E     VS2  63.3    61 13757 7.24 7.17 4.56
+%...
+%\end{lstlisting}
+%\vspace{-.5cm}
+%
+%\noindent We wish to fit many models to this dataset: (1) OLS with the formula $y \sim .$ (2) OLS with the formula $y \sim . * .$ (3) OLS with the formula $y \sim . * . * .$ (4) a regression tree with \texttt{nodesize} = 10 (5) a Random Forest (RF) with 500 trees. The dataset is sampled into a distinct training set of size $n=3,000$, a distinct select set of $n=3,000$ and a distinct test set of $n=3,000$ and these three subsets are used in accordance with the modeling selection procedure we learned about in class.
+%
+%\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{14}
+%
+%\begin{enumerate}[(a)]
+%\item The training set is fit to each of the five models above
+%\item The select set is fit to each of the five models above
+%\item Predicting on the training set is \qu{out of sample}
+%\item Predicting on the select set is \qu{out of sample}
+%\item Each of the five models above predict on the select set
+%\item Each of the five models above predict on the test set
+%\item The model that predicts on the test set was fit on $n=6000$ observations
+%\item The final model was fit on $n=6000$ observations
+%\item For the RF model, there is no need to use a separate out-of-sample set as you can assess the oos performance using the oob error estimate
+%\end{enumerate}
+%\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{14} Consider the \texttt{diamonds} data frame, which has $n = 53940$ diamonds with 9 measurements each and the response variable \texttt{price} measured in USD. We wish to fit many models to this dataset: (1) OLS with the formula $y \sim .$ (2) OLS with the formula $y \sim . * .$ (3) OLS with the formula $y \sim . * . * .$ (4) a regression tree with \texttt{nodesize} = 10 (5) a Random Forest (RF) with 500 trees. Consider two model selection procedures:
+\vspace{-0.1cm}
+\begin{enumerate}[A.]
+\item The three-split dataset model selection procedure where the original dataset is sampled into a distinct training set of size $n=3,000$, a distinct select set of $n=3,000$ and a distinct test set of $n=3,000$.
+\item The \textit{nested resampling procedure} for model selection where $K_{select} = 3$ and $K_{test} = 5$ on a subset of $n=9,000$ observations from the original data frame.
+\end{enumerate}
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{16}
+
+\begin{enumerate}[(a)]
+\item In procedure [A], the training set is fit to each of the five models above
+\item In procedure [A], the the select set is fit to each of the five models above
+\item In procedure [A], predicting on the training set is \qu{out of sample}
+\item In procedure [A], predicting on the select set is \qu{out of sample}
+\item In procedure [A], each of the five models above predict on the test set
+\item In procedure [A], the model that predicts on the test set was fit on $n=6000$ observations
+\item In procedure [A], the final model was fit on $n=6000$ observations
+%\item For the RF model, there is no need to use a separate out-of-sample set as you can assess the oos performance using the oob error estimate
+\item Procedure [B] is more computationally costly than procedure [A]
+\item Procedure [B] has lower variance in its estimate of future performance
+\item Procedure [B] is likely to select a model with better future performance than procedure [A]
+\item There are a total of 16 models fit during procedure [B] including the final model
+\item There are a total of 26 models fit during procedure [B] including the final model
+\item There are a total of 65 models fit during procedure [B] including the final model
+\item There are a total of 76 models fit during procedure [B] including the final model
+\item During procedure [B], for each of the $K_{test}$ outer resamplings, there could be a different model that predicts on the test set
+\item In procedure [B], the final model will be the modal model out of the $K_{test}$ models selected
+\end{enumerate}
+\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\problem\timedsection{8} \ingray{Consider the \texttt{diamonds} data frame, which has $n = 53940$ diamonds with 9 measurements each and the response variable \texttt{price} measured in USD.} Beginning with the design matrix $\tilde{\X}$ created by the OLS model of $y \sim . * . * .$ we consider the \emph{greedy forward stepwise} linear model algorithm. The dataset is sampled into a distinct training set of size $n=3,000$, a distinct select set of $n=3,000$ and a distinct test set of $n=3,000$ and these three subsets are used in accordance with the modeling selection procedure we learned about in class.
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{7}
+
+\begin{enumerate}[(a)]
+\item This algorithm at most has $p+1$ iterations where $p+1$ is the number of columns in $\tilde{\X}$ and in each iteration, it fits a different linear model
+\item This algorithm likely has less than $p+1$ iterations
+\item The prediction error in the training set is monotonically decreasing
+\item The prediction error in the select set is monotonically decreasing
+\item The prediction error in the test set is monotonically decreasing
+\item When predicting on the test set, the model will definitely have the same number of degrees of freedom as the final model
+\item The future performance of the model selected by the \emph{greedy forward stepwise} linear model algorithm will be better than the future performance of the OLS model of  $y \sim .$ based on your knowledge of this dataset from class
+\end{enumerate}
+\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\problem\timedsection{7} \ingray{Consider the \texttt{diamonds} data frame, which has $n = 53,940$ diamonds with 9 measurements each and the response variable \texttt{price} measured in USD. Beginning with the design matrix $\tilde{\X}$ created by the OLS model of $y \sim . * . * .$ we consider the \emph{greedy forward stepwise} linear model algorithm. The dataset is sampled into a distinct training set of size $n=3,000$, a distinct select set of $n=3,000$ and a distinct test set of $n=3,000$ and these three subsets are used in accordance with the modeling selection procedure we learned about in class.} The design matrix $\tilde{\X}$ has $p+1 = 1477$ number of columns. Consider the case where we run through all of the $t = 1, 2, \ldots, 1477$ iterations of this stepwise algorithm.
+
+\vspace{-0.2cm}\benum\truefalsesubquestionwithpoints{7}
+
+Let $g_t$ denote the model fit at every iteration $t$.
+
+\begin{enumerate}[(a)]
+\item As $t$ increases the bias of $g_t$ increases monotonically
+\item As $t$ increases the variance of $g_t$ increases monotonically
+\item As $t$ increases the MSE of $g_t$ increases monotonically 
+\item $g_1, g_2, \ldots, g_{1477}$ are independent models\\
+
+Consider the model $g_{avg}$ that averages models $g_1, g_2, \ldots, g_{1477}$.
+
+\item $g_{avg}$ is called a \qu{bagged} model
+\item $g_{avg}$ has lower bias than $g_{1477}$
+\item $g_{avg}$ always has lower MSE than the model that was selected by the greedy forward stepwise linear model algorithm
+\end{enumerate}
+\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+\problem\timedsection{12} Consider the \texttt{adult} data frame, which has data on $n = 32,560$ people with 14 measurements each and the response variable \texttt{income} which is binary (1 = the person has an income $>$50K and 0 = the person has an income  $\leq$50K). Consider the following model fit to \texttt{adult\_train}, a training set of $n=10,000$ leaving the remainder of the data as a holdout set. The $\b$ vector for the fitted model is displayed below on the last line.
+
+\lstset{
+  basicstyle=\footnotesize,
+  xleftmargin=.0\textwidth, xrightmargin=.0\textwidth
+}
+\begin{lstlisting}
+> lmod = glm(income ~ age + hours_per_week + capital_gain + education_num, adult_train, family = "binomial")
+Warning message:
+glm.fit: fitted probabilities numerically 0 or 1 occurred 
+> coef(lmod)
+   (Intercept)            age hours_per_week   capital_gain  education_num 
+       -8.1582         0.0454         0.0380         0.0003         0.3200
+\end{lstlisting}
+
+\vspace{-0.8cm}\benum\truefalsesubquestionwithpoints{12}
+
+\begin{enumerate}[(a)]
+\item The vector $\b$ was computed solely using linear algebra calculations
+\item For a future person $\x_*$, the quantity $\x_*\b$ can be used to produce probability predictions in the set (0, 1)
+\item For a future person $\x_*$, if $\x_*\b < 0$, this model is predicting that it is impossible for this person's income to be $>$50K
+\item The Brier score for this model's predictions in-sample will likely be closer to zero than the Brier score for predictions out-of-sample.
+\item The probability predictions of this model will be the same predictions as a probit model fit to the same data
+\item \qu{For a future person $\x_*$, the probability that this person's income $>$50K will increase by 0.044 if the person becomes one year older}.
+\item \qu{For a future person $\x_*$, the probability that this person's income $>$50K will increase by 0.044 if the person becomes one year older as long as the three other measurements for this person do not change}.
+\item If \texttt{age} increases and the three other variables remain the same, the predicted probability will increase for any $\x$
+\item The warning message means there was numerical underflow and/or overflow during the computation of $\b$
+\item For a 20yr-old with no job, capital gains or education, the probability he has an income of $>$50K is 0.9993 to the nearest four significant digits
+\item For a 20yr-old with no job, capital gains or education, the probability he has an income of $>$50K is 0.0007095 to the nearest four significant digits
+\item You have all the information necessary in this problem statement to trace out a DET curve
+\end{enumerate}
+\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\problem\timedsection{14} \ingray{Consider the \texttt{adult} data frame, which has data on $n = 32,560$ people with 14 measurements each and the response variable \texttt{income} which is binary (1 = the person has an income $>$50K and 0 = the person has an income  $\leq$50K).} Considering the model from the previous quesiton fit to \texttt{adult\_train}, a training set of $n=10,000$ leaving the remainder of the data as a holdout set, we now predict on \texttt{adult\_test} and perform binary classification:
+
+\lstset{
+  basicstyle=\footnotesize,
+  xleftmargin=.15\textwidth, xrightmargin=.15\textwidth
+}
+\begin{lstlisting}
+> yhat = as.numeric(predict(lmod, adult_test, type = "response") > 0.9)
+> table(y_test, yhat)
+             yhat
+y_test     0     1
+     0 15107    30
+     1  4439   585
+\end{lstlisting}
+
+\vspace{-0.8cm}\benum\truefalsesubquestionwithpoints{9}
+
+\begin{enumerate}[(a)]
+\item This is likely an asymmetric cost classification model
+\item The FDR, FOR, FPR calculated using the above table are honest estimates of future performance
+\item This model makes mistakes 22.2\% of the time to the nearest three significant digits
+\item This classification model is absolutely the best classification model you could build from \texttt{lmod} to minimize costs when the cost of a FP is \$9 and the cost of a FN is \$9
+\item This model implies the point (0.00198, 0.116) on an ROC curve to the nearest three significant digits
+\item When predicting in the future using this classification model, if $\hat{y} = 1$, then the probability of making an error is 4.88\% to the nearest three signification digits
+\item If the cost of a false positive is \$100 and the cost of false negatives was negligible and there is no reward for classifying correctly, then you expect to lose \$0.15 per prediction to the nearest two signification digits
+\item If the probability threshold was increased within the binary classification model, then the number of FP's would decrease
+\item You have all the information necessary in this problem statement to compute the AUC for \texttt{lmod}
+\end{enumerate}
+\eenum\instr\pagebreak
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\end{document}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
