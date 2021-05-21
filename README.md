@@ -106,7 +106,7 @@ My lectures can be listened to as youtube tracks and lecture notes are also scan
 
 ## Writing Assignments
 
-* Final Project [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/final_project.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/final_project.pdf) (due 5/24 by email)
+* Final Project [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/final_project.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/final_project.pdf) (due 5/25 by email)
 * Modeling Essay [(download)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/modeling_essay_revised.pdf?raw=true) [(view)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/modeling_essay_revised.pdf) (draft due 3/21, revision due 10d after draft is graded) [(example essay)](https://github.com/kapelner/QC_Math_342W_Spring_2021/blob/master/writing_assignments/modeling_essay_example.pdf)
 
 
